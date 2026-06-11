@@ -1,0 +1,32 @@
+# Pitboss v4 - Koifortune Brand Profile
+# Overrides _defaults.yaml for Koifortune-specific configuration.
+#
+# Inheritance: This config deep-merges on top of _defaults.yaml
+# - Nested dicts merge (e.g., headings.capitalization is added to headings)
+# - Lists replace (not extend)
+# - Brand values override defaults
+
+schema_version: "1.0"
+
+# Brand identity
+brand_name: "Koifortune"
+
+# Market/locale - Canada
+market: "CA"
+locale: "en-CA"
+
+# Headings: Koifortune uses sentence case (observed from corpus analysis)
+headings:
+  capitalization: "sentence_case"
+
+# Currency: Canadian dollar
+currency:
+  symbol: "C$"
+
+# Brand name normalization rules
+brand_normalization:
+  "koifortune": "Koifortune"
+  "KoiFortune": "Koifortune"
+  "KOIFORTUNE": "Koifortune"
+  "Koi Fortune": "Koifortune"
+  "koi fortune": "Koifortune"

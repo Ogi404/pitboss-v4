@@ -1,0 +1,189 @@
+{
+  "layer": "type",
+  "layer_name": "sports_market",
+  "fingerprint": {
+    "sentence_length_mean": 14.29,
+    "sentence_length_median": 14,
+    "sentence_length_stdev": 6.64,
+    "sentence_length_p10": 6,
+    "sentence_length_p90": 23,
+    "para_sentences_mean": 2.21,
+    "para_sentences_stdev": 0.94,
+    "para_words_mean": 31.53,
+    "para_words_stdev": 14.43,
+    "second_person_count": 451,
+    "reader_ref_count": 18,
+    "generic_noun_count": 28,
+    "unclear_person_count": 56,
+    "third_person_count": 102,
+    "person_ratio": 25.06,
+    "heading_capitalization": "title_case",
+    "title_case_ratio": 0.91,
+    "common_openers": [
+      [
+        "18+ | play",
+        1.6789087093389297
+      ],
+      [
+        "you don\u2019t need",
+        0.5246589716684155
+      ],
+      [
+        "the more you",
+        0.4197271773347324
+      ],
+      [
+        "yes.",
+        0.3147953830010493
+      ],
+      [
+        "as for the",
+        0.3147953830010493
+      ],
+      [
+        "ivibet has a",
+        0.3147953830010493
+      ],
+      [
+        "here are the",
+        0.3147953830010493
+      ],
+      [
+        "here are some",
+        0.3147953830010493
+      ],
+      [
+        "live betting odds",
+        0.3147953830010493
+      ],
+      [
+        "you can still",
+        0.2098635886673662
+      ],
+      [
+        "if you want",
+        0.2098635886673662
+      ],
+      [
+        "just tap the",
+        0.2098635886673662
+      ],
+      [
+        "you can choose",
+        0.2098635886673662
+      ],
+      [
+        "the platform is",
+        0.2098635886673662
+      ],
+      [
+        "at ivibet, you",
+        0.2098635886673662
+      ],
+      [
+        "popular options include",
+        0.2098635886673662
+      ],
+      [
+        "you can place",
+        0.2098635886673662
+      ],
+      [
+        "here is a",
+        0.2098635886673662
+      ],
+      [
+        "you can watch",
+        0.2098635886673662
+      ],
+      [
+        "for example, you",
+        0.2098635886673662
+      ]
+    ],
+    "transitions_used": {
+      "additionally": 0.1049317943336831,
+      "also": 5.456453305351522,
+      "and": 40.71353620146905,
+      "as well as": 0.1049317943336831,
+      "furthermore": 0.2098635886673662,
+      "in addition": 0.1049317943336831,
+      "but": 4.092339979013642,
+      "despite": 0.1049317943336831,
+      "even though": 0.1049317943336831,
+      "however": 0.4197271773347324,
+      "on the other hand": 0.2098635886673662,
+      "still": 1.3641133263378804,
+      "though": 0.3147953830010493,
+      "while": 2.5183630640083945,
+      "yet": 0.2098635886673662,
+      "accordingly": 0.1049317943336831,
+      "because": 1.2591815320041972,
+      "due to": 0.1049317943336831,
+      "for this reason": 0.1049317943336831,
+      "since": 0.6295907660020986,
+      "so": 3.4627492130115427,
+      "for example": 0.8394543546694648,
+      "for instance": 0.3147953830010493,
+      "specifically": 0.1049317943336831,
+      "such as": 1.5739769150052465,
+      "to illustrate": 0.1049317943336831,
+      "after": 0.944386149003148,
+      "before": 3.2528856243441764,
+      "first": 2.098635886673662,
+      "later": 0.2098635886673662,
+      "next": 1.3641133263378804,
+      "second": 0.3147953830010493,
+      "subsequently": 0.1049317943336831,
+      "then": 0.5246589716684155,
+      "overall": 0.5246589716684155,
+      "above all": 0.1049317943336831,
+      "clearly": 0.4197271773347324,
+      "especially": 0.944386149003148,
+      "notably": 0.1049317943336831,
+      "of course": 0.1049317943336831,
+      "particularly": 0.1049317943336831,
+      "significantly": 0.1049317943336831,
+      "undoubtedly": 0.1049317943336831
+    },
+    "discouraged_observed": {},
+    "comma_density": 7.37,
+    "dash_density": 1.73,
+    "semicolon_density": 0.03,
+    "list_frequency": 4.7,
+    "stop_words_hard": {
+      "leverage": 1,
+      "robust": 1,
+      "top-tier": 2,
+      "navigating": 1,
+      "thrilling": 1,
+      "at your fingertips": 2,
+      "whether you are": 1,
+      "if you are": 2,
+      "seasoned": 1,
+      "sleek": 1,
+      "apart from": 1,
+      "excitement": 1,
+      "gateway": 1,
+      "enthusiasts": 2,
+      "punters": 6
+    },
+    "stop_words_soft": {
+      "unlock": 2,
+      "selection": 5,
+      "exciting": 2,
+      "essential": 1,
+      "premier": 3,
+      "crucial": 2,
+      "key": 8,
+      "thrill": 1
+    },
+    "schema_version": "1.0",
+    "article_count": 11,
+    "total_words": 13619,
+    "total_sentences": 953
+  },
+  "article_count": 11,
+  "schema_version": "1.0",
+  "built_at": "2026-06-07T18:21:24.361159Z"
+}

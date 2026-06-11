@@ -1,0 +1,164 @@
+{
+  "layer": "brand",
+  "layer_name": "CookieCasino",
+  "fingerprint": {
+    "sentence_length_mean": 14.28,
+    "sentence_length_median": 14.0,
+    "sentence_length_stdev": 7.34,
+    "sentence_length_p10": 5,
+    "sentence_length_p90": 24,
+    "para_sentences_mean": 2.36,
+    "para_sentences_stdev": 1.72,
+    "para_words_mean": 33.68,
+    "para_words_stdev": 26.96,
+    "second_person_count": 454,
+    "reader_ref_count": 41,
+    "generic_noun_count": 65,
+    "unclear_person_count": 55,
+    "third_person_count": 161,
+    "person_ratio": 11.07,
+    "heading_capitalization": "title_case",
+    "title_case_ratio": 0.77,
+    "common_openers": [
+      [
+        "the cookie casino",
+        2.5517241379310347
+      ],
+      [
+        "yes.",
+        1.5862068965517242
+      ],
+      [
+        "no.",
+        0.8965517241379309
+      ],
+      [
+        "cookie casino keeps",
+        0.6896551724137931
+      ],
+      [
+        "cookie casino does",
+        0.6206896551724138
+      ],
+      [
+        "there is no",
+        0.4827586206896552
+      ],
+      [
+        "cookie casino also",
+        0.4827586206896552
+      ],
+      [
+        "that is the",
+        0.41379310344827586
+      ],
+      [
+        "you can also",
+        0.41379310344827586
+      ],
+      [
+        "cookie casino uses",
+        0.3448275862068966
+      ],
+      [
+        "you should also",
+        0.3448275862068966
+      ],
+      [
+        "bonus banner:",
+        0.3448275862068966
+      ],
+      [
+        "that is a",
+        0.3448275862068966
+      ],
+      [
+        "cookie casino offers",
+        0.27586206896551724
+      ],
+      [
+        "the first deposit",
+        0.27586206896551724
+      ],
+      [
+        "the second deposit",
+        0.27586206896551724
+      ],
+      [
+        "free spins are",
+        0.27586206896551724
+      ],
+      [
+        "cookie casino gives",
+        0.27586206896551724
+      ],
+      [
+        "this is where",
+        0.27586206896551724
+      ],
+      [
+        "support is available",
+        0.27586206896551724
+      ]
+    ],
+    "transitions_used": {
+      "also": 6.413793103448276,
+      "and": 39.6551724137931,
+      "as well as": 0.06896551724137931,
+      "not only": 0.06896551724137931,
+      "although": 0.3448275862068966,
+      "but": 5.0344827586206895,
+      "despite": 0.06896551724137931,
+      "even though": 0.06896551724137931,
+      "however": 0.27586206896551724,
+      "still": 2.413793103448276,
+      "though": 0.20689655172413793,
+      "while": 3.103448275862069,
+      "yet": 0.13793103448275862,
+      "because": 2.7586206896551726,
+      "due to": 0.20689655172413793,
+      "since": 0.27586206896551724,
+      "so": 4.344827586206897,
+      "for example": 0.06896551724137931,
+      "for instance": 0.06896551724137931,
+      "such as": 0.7586206896551724,
+      "after": 3.103448275862069,
+      "before": 4.0,
+      "finally": 0.06896551724137931,
+      "first": 4.827586206896552,
+      "later": 1.3793103448275863,
+      "next": 0.3448275862068966,
+      "second": 1.2413793103448276,
+      "then": 1.4482758620689655,
+      "overall": 1.1724137931034484,
+      "clearly": 0.6896551724137931,
+      "especially": 1.5862068965517242,
+      "of course": 0.06896551724137931,
+      "particularly": 0.13793103448275862
+    },
+    "discouraged_observed": {},
+    "comma_density": 6.81,
+    "dash_density": 1.28,
+    "semicolon_density": 0.02,
+    "list_frequency": 6.42,
+    "stop_words_hard": {
+      "landscape": 4,
+      "seamlessly": 1,
+      "navigating": 1,
+      "if you are": 4,
+      "excitement": 1
+    },
+    "stop_words_soft": {
+      "unlock": 1,
+      "selection": 4,
+      "key": 2
+    },
+    "schema_version": "1.0",
+    "article_count": 28,
+    "total_words": 20712,
+    "total_sentences": 1450
+  },
+  "article_count": 28,
+  "schema_version": "1.0",
+  "built_at": "2026-06-07T18:21:28.808525Z"
+}

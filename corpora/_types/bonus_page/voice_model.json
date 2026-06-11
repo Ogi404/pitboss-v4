@@ -1,0 +1,193 @@
+{
+  "layer": "type",
+  "layer_name": "bonus_page",
+  "fingerprint": {
+    "sentence_length_mean": 14.89,
+    "sentence_length_median": 14,
+    "sentence_length_stdev": 7.13,
+    "sentence_length_p10": 6,
+    "sentence_length_p90": 24,
+    "para_sentences_mean": 2.07,
+    "para_sentences_stdev": 1.01,
+    "para_words_mean": 30.87,
+    "para_words_stdev": 16.91,
+    "second_person_count": 1914,
+    "reader_ref_count": 81,
+    "generic_noun_count": 173,
+    "unclear_person_count": 181,
+    "third_person_count": 435,
+    "person_ratio": 23.63,
+    "heading_capitalization": "title_case",
+    "title_case_ratio": 0.83,
+    "common_openers": [
+      [
+        "the minimum deposit",
+        0.41612483745123535
+      ],
+      [
+        "no.",
+        0.3641092327698309
+      ],
+      [
+        "the first deposit",
+        0.3381014304291287
+      ],
+      [
+        "yes.",
+        0.26007802340702213
+      ],
+      [
+        "the cookie casino",
+        0.26007802340702213
+      ],
+      [
+        "the welcome package",
+        0.26007802340702213
+      ],
+      [
+        "if you are",
+        0.23407022106631986
+      ],
+      [
+        "this is where",
+        0.23407022106631986
+      ],
+      [
+        "if you want",
+        0.23407022106631986
+      ],
+      [
+        "this is the",
+        0.23407022106631986
+      ],
+      [
+        "all you have",
+        0.20806241872561768
+      ],
+      [
+        "you can claim",
+        0.20806241872561768
+      ],
+      [
+        "free spins are",
+        0.18205461638491546
+      ],
+      [
+        "if you prefer",
+        0.18205461638491546
+      ],
+      [
+        "the second deposit",
+        0.18205461638491546
+      ],
+      [
+        "there is no",
+        0.18205461638491546
+      ],
+      [
+        "the free spins",
+        0.18205461638491546
+      ],
+      [
+        "join now and",
+        0.15604681404421328
+      ],
+      [
+        "the welcome bonus",
+        0.15604681404421328
+      ],
+      [
+        "the spins are",
+        0.15604681404421328
+      ]
+    ],
+    "transitions_used": {
+      "additionally": 0.26007802340702213,
+      "also": 3.537061118335501,
+      "and": 40.442132639791936,
+      "as well as": 0.10403120936280884,
+      "besides": 0.15604681404421328,
+      "furthermore": 0.02600780234070221,
+      "in addition": 0.20806241872561768,
+      "not only": 0.15604681404421328,
+      "although": 0.13003901170351106,
+      "but": 4.811443433029909,
+      "despite": 0.02600780234070221,
+      "even though": 0.02600780234070221,
+      "however": 1.0403120936280885,
+      "nevertheless": 0.05201560468140442,
+      "on the other hand": 0.02600780234070221,
+      "still": 1.1703511053315996,
+      "though": 0.15604681404421328,
+      "while": 2.2886866059817943,
+      "yet": 0.20806241872561768,
+      "accordingly": 0.07802340702210664,
+      "because": 1.3263979193758129,
+      "due to": 0.05201560468140442,
+      "since": 0.07802340702210664,
+      "so": 4.265279583875162,
+      "therefore": 0.13003901170351106,
+      "for example": 0.20806241872561768,
+      "for instance": 0.07802340702210664,
+      "namely": 0.02600780234070221,
+      "specifically": 0.07802340702210664,
+      "such as": 0.4681404421326397,
+      "after": 3.1209362808842656,
+      "before": 3.563068920676203,
+      "finally": 0.02600780234070221,
+      "first": 7.412223667100131,
+      "later": 0.4681404421326397,
+      "meanwhile": 0.07802340702210664,
+      "next": 0.7282184655396619,
+      "second": 1.4564369310793237,
+      "then": 1.4824447334200261,
+      "in short": 0.13003901170351106,
+      "overall": 0.10403120936280884,
+      "clearly": 0.5721716514954486,
+      "especially": 0.4681404421326397,
+      "importantly": 0.05201560468140442,
+      "in fact": 0.07802340702210664,
+      "most importantly": 0.02600780234070221,
+      "of course": 0.10403120936280884,
+      "significantly": 0.02600780234070221
+    },
+    "discouraged_observed": {},
+    "comma_density": 5.85,
+    "dash_density": 1.4,
+    "semicolon_density": 0.09,
+    "list_frequency": 5.28,
+    "stop_words_hard": {
+      "landscape": 1,
+      "top-tier": 1,
+      "into the world": 1,
+      "whether you are": 1,
+      "if you are": 14,
+      "seasoned": 1,
+      "apart from": 1,
+      "excitement": 8,
+      "the best part": 4,
+      "punters": 8
+    },
+    "stop_words_soft": {
+      "unlock": 33,
+      "selection": 7,
+      "ensure": 6,
+      "exciting": 38,
+      "essential": 2,
+      "tailored": 7,
+      "cater": 1,
+      "maximize": 2,
+      "crucial": 1,
+      "key": 24,
+      "veteran": 1,
+      "thrill": 3
+    },
+    "schema_version": "1.0",
+    "article_count": 62,
+    "total_words": 57236,
+    "total_sentences": 3845
+  },
+  "article_count": 62,
+  "schema_version": "1.0",
+  "built_at": "2026-06-07T18:21:18.044185Z"
+}

@@ -1,0 +1,32 @@
+# Pitboss v4 - Vave Brand Profile
+# Overrides _defaults.yaml for Vave-specific configuration.
+#
+# Inheritance: This config deep-merges on top of _defaults.yaml
+# - Nested dicts merge (e.g., headings.capitalization is added to headings)
+# - Lists replace (not extend)
+# - Brand values override defaults
+
+schema_version: "1.0"
+
+# Brand identity
+brand_name: "Vave"
+
+# Market/locale - Canada
+market: "CA"
+locale: "en-CA"
+
+# Headings: Vave uses title case (observed from corpus analysis)
+# Architecture doc: "the corpus shows this is genuinely brand-specific -
+# Vave uses title case ('Overview of the Vave Casino App')"
+headings:
+  capitalization: "title_case"
+
+# Currency: Canadian dollar
+currency:
+  symbol: "C$"
+
+# Brand name normalization rules
+brand_normalization:
+  "vave": "Vave"
+  "VAVE": "Vave"
+  "VaVe": "Vave"

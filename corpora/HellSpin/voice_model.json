@@ -1,0 +1,177 @@
+{
+  "layer": "brand",
+  "layer_name": "HellSpin",
+  "fingerprint": {
+    "sentence_length_mean": 14.33,
+    "sentence_length_median": 14.0,
+    "sentence_length_stdev": 6.17,
+    "sentence_length_p10": 7,
+    "sentence_length_p90": 22,
+    "para_sentences_mean": 2.22,
+    "para_sentences_stdev": 0.97,
+    "para_words_mean": 31.84,
+    "para_words_stdev": 17.06,
+    "second_person_count": 691,
+    "reader_ref_count": 5,
+    "generic_noun_count": 38,
+    "unclear_person_count": 47,
+    "third_person_count": 90,
+    "person_ratio": 138.2,
+    "heading_capitalization": "title_case",
+    "title_case_ratio": 0.86,
+    "common_openers": [
+      [
+        "if you want",
+        0.9715994020926756
+      ],
+      [
+        "join hellspin and",
+        0.5979073243647235
+      ],
+      [
+        "if you like",
+        0.4484304932735426
+      ],
+      [
+        "the minimum deposit",
+        0.4484304932735426
+      ],
+      [
+        "the first deposit",
+        0.37369207772795215
+      ],
+      [
+        "you can also",
+        0.37369207772795215
+      ],
+      [
+        "is a",
+        0.29895366218236175
+      ],
+      [
+        "yes, you can",
+        0.29895366218236175
+      ],
+      [
+        "the hellspin casino",
+        0.29895366218236175
+      ],
+      [
+        "read on to",
+        0.29895366218236175
+      ],
+      [
+        "the cashier is",
+        0.2242152466367713
+      ],
+      [
+        "at hellspin, you",
+        0.2242152466367713
+      ],
+      [
+        "all you have",
+        0.2242152466367713
+      ],
+      [
+        "the app bonus",
+        0.2242152466367713
+      ],
+      [
+        "the hellspin welcome",
+        0.2242152466367713
+      ],
+      [
+        "it\u2019s a simple",
+        0.2242152466367713
+      ],
+      [
+        "this is where",
+        0.2242152466367713
+      ],
+      [
+        "it is not",
+        0.2242152466367713
+      ],
+      [
+        "it is a",
+        0.2242152466367713
+      ],
+      [
+        "these are the",
+        0.2242152466367713
+      ]
+    ],
+    "transitions_used": {
+      "also": 3.587443946188341,
+      "and": 45.440956651718984,
+      "besides": 0.07473841554559044,
+      "furthermore": 0.29895366218236175,
+      "in addition": 0.2242152466367713,
+      "not only": 0.07473841554559044,
+      "although": 0.07473841554559044,
+      "but": 4.783258594917788,
+      "however": 0.8968609865470852,
+      "nevertheless": 0.14947683109118087,
+      "on the other hand": 0.07473841554559044,
+      "still": 1.2705530642750373,
+      "though": 0.29895366218236175,
+      "while": 1.8684603886397608,
+      "yet": 0.14947683109118087,
+      "because": 1.7937219730941705,
+      "for this reason": 0.07473841554559044,
+      "since": 0.14947683109118087,
+      "so": 4.0358744394618835,
+      "therefore": 0.37369207772795215,
+      "for example": 0.14947683109118087,
+      "for instance": 0.29895366218236175,
+      "specifically": 0.07473841554559044,
+      "such as": 0.5979073243647235,
+      "to illustrate": 0.07473841554559044,
+      "after": 2.242152466367713,
+      "before": 4.409566517189836,
+      "first": 6.576980568011958,
+      "later": 0.8968609865470852,
+      "meanwhile": 0.29895366218236175,
+      "next": 0.5979073243647235,
+      "second": 1.4947683109118086,
+      "subsequently": 0.07473841554559044,
+      "then": 2.0179372197309418,
+      "overall": 0.14947683109118087,
+      "clearly": 0.5979073243647235,
+      "especially": 0.5979073243647235,
+      "notably": 0.07473841554559044
+    },
+    "discouraged_observed": {},
+    "comma_density": 6.82,
+    "dash_density": 1.49,
+    "semicolon_density": 0.12,
+    "list_frequency": 4.33,
+    "stop_words_hard": {
+      "dive into": 1,
+      "realm": 1,
+      "landscape": 1,
+      "robust": 2,
+      "seamlessly": 1,
+      "at your fingertips": 1,
+      "whether you are": 1,
+      "if you are": 1,
+      "sleek": 1,
+      "breeze": 2
+    },
+    "stop_words_soft": {
+      "unlock": 6,
+      "selection": 4,
+      "exciting": 1,
+      "key": 4,
+      "veteran": 1,
+      "thrill": 2
+    },
+    "schema_version": "1.0",
+    "article_count": 29,
+    "total_words": 19170,
+    "total_sentences": 1338
+  },
+  "article_count": 29,
+  "schema_version": "1.0",
+  "built_at": "2026-06-07T18:21:30.238866Z"
+}

@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(mempalace:search)",
+      "Skill(mempalace)",
+      "Skill(mempalace:mempalace)",
+      "Bash(python -m pytest:*)",
+      "Bash(dir:*)",
+      "Bash(pip install:*)",
+      "Bash(python tests/fixtures/generate_fixtures.py:*)",
+      "Bash(python:*)",
+      "Bash(git init:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}

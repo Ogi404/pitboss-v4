@@ -1,0 +1,174 @@
+{
+  "layer": "type",
+  "layer_name": "live_casino",
+  "fingerprint": {
+    "sentence_length_mean": 14.99,
+    "sentence_length_median": 15.0,
+    "sentence_length_stdev": 7.18,
+    "sentence_length_p10": 6,
+    "sentence_length_p90": 24,
+    "para_sentences_mean": 2.24,
+    "para_sentences_stdev": 0.93,
+    "para_words_mean": 33.59,
+    "para_words_stdev": 15.19,
+    "second_person_count": 430,
+    "reader_ref_count": 23,
+    "generic_noun_count": 30,
+    "unclear_person_count": 31,
+    "third_person_count": 84,
+    "person_ratio": 18.7,
+    "heading_capitalization": "title_case",
+    "title_case_ratio": 0.74,
+    "common_openers": [
+      [
+        "the live section",
+        1.2875536480686696
+      ],
+      [
+        "if you want",
+        0.6437768240343348
+      ],
+      [
+        "yes, you can",
+        0.5364806866952789
+      ],
+      [
+        "yes.",
+        0.5364806866952789
+      ],
+      [
+        "some of the",
+        0.4291845493562232
+      ],
+      [
+        "getting started is",
+        0.4291845493562232
+      ],
+      [
+        "if you like",
+        0.4291845493562232
+      ],
+      [
+        "you can play",
+        0.4291845493562232
+      ],
+      [
+        "this is where",
+        0.3218884120171674
+      ],
+      [
+        "if you\u2019re new,",
+        0.3218884120171674
+      ],
+      [
+        "the cookie casino",
+        0.3218884120171674
+      ],
+      [
+        "you are not",
+        0.3218884120171674
+      ],
+      [
+        "that makes the",
+        0.3218884120171674
+      ],
+      [
+        "pragmatic play live",
+        0.3218884120171674
+      ],
+      [
+        "there are over",
+        0.3218884120171674
+      ],
+      [
+        "you can move",
+        0.3218884120171674
+      ],
+      [
+        "live casino games",
+        0.3218884120171674
+      ],
+      [
+        "the live lobby",
+        0.3218884120171674
+      ],
+      [
+        "that is why",
+        0.3218884120171674
+      ],
+      [
+        "22bet nigeria has",
+        0.2145922746781116
+      ]
+    ],
+    "transitions_used": {
+      "additionally": 0.3218884120171674,
+      "also": 4.07725321888412,
+      "and": 51.39484978540773,
+      "as well as": 0.2145922746781116,
+      "besides": 0.1072961373390558,
+      "in addition": 0.4291845493562232,
+      "moreover": 0.1072961373390558,
+      "not only": 0.1072961373390558,
+      "although": 0.1072961373390558,
+      "but": 3.862660944206009,
+      "however": 0.4291845493562232,
+      "on the other hand": 0.2145922746781116,
+      "still": 0.7510729613733905,
+      "while": 2.2532188841201717,
+      "yet": 0.1072961373390558,
+      "accordingly": 0.1072961373390558,
+      "because": 1.9313304721030045,
+      "since": 0.2145922746781116,
+      "so": 4.399141630901288,
+      "therefore": 0.2145922746781116,
+      "in particular": 0.1072961373390558,
+      "such as": 1.2875536480686696,
+      "after": 0.5364806866952789,
+      "before": 2.3605150214592276,
+      "finally": 0.1072961373390558,
+      "first": 2.3605150214592276,
+      "later": 0.2145922746781116,
+      "next": 0.9656652360515022,
+      "second": 0.5364806866952789,
+      "then": 0.8583690987124464,
+      "overall": 0.8583690987124464,
+      "clearly": 0.5364806866952789,
+      "especially": 0.5364806866952789,
+      "of course": 0.2145922746781116
+    },
+    "discouraged_observed": {},
+    "comma_density": 6.9,
+    "dash_density": 1.32,
+    "semicolon_density": 0.1,
+    "list_frequency": 4.65,
+    "stop_words_hard": {
+      "landscape": 1,
+      "thrilling": 1,
+      "whether you are": 1,
+      "if you are": 4,
+      "sleek": 1,
+      "excitement": 4,
+      "breeze": 1,
+      "enthusiasts": 1,
+      "the best part": 3,
+      "punters": 1
+    },
+    "stop_words_soft": {
+      "selection": 4,
+      "ensure": 4,
+      "exciting": 4,
+      "elevate": 1,
+      "cater": 1,
+      "key": 3,
+      "thrill": 4
+    },
+    "schema_version": "1.0",
+    "article_count": 21,
+    "total_words": 13973,
+    "total_sentences": 932
+  },
+  "article_count": 21,
+  "schema_version": "1.0",
+  "built_at": "2026-06-07T18:21:19.096235Z"
+}

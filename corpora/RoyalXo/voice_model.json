@@ -1,0 +1,174 @@
+{
+  "layer": "brand",
+  "layer_name": "RoyalXo",
+  "fingerprint": {
+    "sentence_length_mean": 15.32,
+    "sentence_length_median": 15,
+    "sentence_length_stdev": 6.97,
+    "sentence_length_p10": 7,
+    "sentence_length_p90": 25,
+    "para_sentences_mean": 2.26,
+    "para_sentences_stdev": 0.96,
+    "para_words_mean": 34.63,
+    "para_words_stdev": 15.32,
+    "second_person_count": 736,
+    "reader_ref_count": 10,
+    "generic_noun_count": 47,
+    "unclear_person_count": 52,
+    "third_person_count": 109,
+    "person_ratio": 73.6,
+    "heading_capitalization": "title_case",
+    "title_case_ratio": 0.86,
+    "common_openers": [
+      [
+        "the best part",
+        1.0721944245889923
+      ],
+      [
+        "the casino has",
+        1.0007147962830594
+      ],
+      [
+        "the good news",
+        0.7147962830593281
+      ],
+      [
+        "for us, that",
+        0.7147962830593281
+      ],
+      [
+        "some of the",
+        0.6433166547533953
+      ],
+      [
+        "yes, you can",
+        0.5003573981415297
+      ],
+      [
+        "that gives us",
+        0.5003573981415297
+      ],
+      [
+        "the casino also",
+        0.5003573981415297
+      ],
+      [
+        "the royalxo app",
+        0.42887776983559683
+      ],
+      [
+        "that makes the",
+        0.42887776983559683
+      ],
+      [
+        "if you want",
+        0.42887776983559683
+      ],
+      [
+        "the royalxo casino",
+        0.42887776983559683
+      ],
+      [
+        "all you have",
+        0.35739814152966404
+      ],
+      [
+        "all you need",
+        0.35739814152966404
+      ],
+      [
+        "when we look",
+        0.35739814152966404
+      ],
+      [
+        "we are not",
+        0.35739814152966404
+      ],
+      [
+        "you can also",
+        0.35739814152966404
+      ],
+      [
+        "we do not",
+        0.35739814152966404
+      ],
+      [
+        "they include:",
+        0.28591851322373124
+      ],
+      [
+        "here\u2019s how to",
+        0.28591851322373124
+      ]
+    ],
+    "transitions_used": {
+      "additionally": 1.5010721944245888,
+      "also": 6.36168691922802,
+      "and": 41.95854181558256,
+      "besides": 0.28591851322373124,
+      "furthermore": 0.14295925661186562,
+      "in addition": 0.5003573981415297,
+      "moreover": 0.21443888491779842,
+      "not only": 0.5003573981415297,
+      "but": 3.5025017869907074,
+      "however": 2.3588277340957826,
+      "still": 1.2866333095067906,
+      "though": 0.07147962830593281,
+      "while": 1.2866333095067906,
+      "yet": 0.07147962830593281,
+      "because": 2.9306647605432454,
+      "due to": 0.21443888491779842,
+      "for this reason": 0.07147962830593281,
+      "since": 0.21443888491779842,
+      "so": 2.501786990707648,
+      "therefore": 0.5003573981415297,
+      "in particular": 0.07147962830593281,
+      "specifically": 0.14295925661186562,
+      "such as": 0.8577555396711937,
+      "after": 1.0007147962830594,
+      "before": 3.5025017869907074,
+      "first": 4.503216583273767,
+      "later": 0.35739814152966404,
+      "next": 0.5003573981415297,
+      "second": 0.5718370264474625,
+      "then": 0.5718370264474625,
+      "overall": 0.5003573981415297,
+      "clearly": 0.7147962830593281,
+      "especially": 0.5003573981415297,
+      "of course": 0.07147962830593281
+    },
+    "discouraged_observed": {},
+    "comma_density": 5.58,
+    "dash_density": 1.06,
+    "semicolon_density": 0.04,
+    "list_frequency": 4.85,
+    "stop_words_hard": {
+      "thrilling": 4,
+      "at your fingertips": 1,
+      "if you are": 1,
+      "seasoned": 1,
+      "excitement": 6,
+      "step into": 1,
+      "breeze": 1,
+      "the best part": 15,
+      "punters": 6
+    },
+    "stop_words_soft": {
+      "unlock": 4,
+      "selection": 1,
+      "ensure": 32,
+      "exciting": 8,
+      "tailored": 2,
+      "crucial": 2,
+      "key": 8,
+      "thrill": 1
+    },
+    "schema_version": "1.0",
+    "article_count": 27,
+    "total_words": 21435,
+    "total_sentences": 1399
+  },
+  "article_count": 27,
+  "schema_version": "1.0",
+  "built_at": "2026-06-07T18:21:36.732699Z"
+}

@@ -1,0 +1,216 @@
+{
+  "layer": "type",
+  "layer_name": "main_review",
+  "fingerprint": {
+    "sentence_length_mean": 15.61,
+    "sentence_length_median": 15.0,
+    "sentence_length_stdev": 7.28,
+    "sentence_length_p10": 7,
+    "sentence_length_p90": 25,
+    "para_sentences_mean": 2.08,
+    "para_sentences_stdev": 0.99,
+    "para_words_mean": 32.41,
+    "para_words_stdev": 16.04,
+    "second_person_count": 3011,
+    "reader_ref_count": 182,
+    "generic_noun_count": 312,
+    "unclear_person_count": 392,
+    "third_person_count": 886,
+    "person_ratio": 16.54,
+    "heading_capitalization": "title_case",
+    "title_case_ratio": 0.84,
+    "common_openers": [
+      [
+        "if you want",
+        0.38603558241020475
+      ],
+      [
+        "the minimum deposit",
+        0.3188989593823431
+      ],
+      [
+        "you can also",
+        0.3021148036253776
+      ],
+      [
+        "yes.",
+        0.2853306478684122
+      ],
+      [
+        "if you like",
+        0.2853306478684122
+      ],
+      [
+        "here\u2019s how to",
+        0.2014098690835851
+      ],
+      [
+        "if you prefer",
+        0.2014098690835851
+      ],
+      [
+        "here are some",
+        0.18462571332661967
+      ],
+      [
+        "if you are",
+        0.18462571332661967
+      ],
+      [
+        "below is a",
+        0.18462571332661967
+      ],
+      [
+        "on top of",
+        0.16784155756965424
+      ],
+      [
+        "when it comes",
+        0.16784155756965424
+      ],
+      [
+        "the best part",
+        0.16784155756965424
+      ],
+      [
+        "some of the",
+        0.1510574018126888
+      ],
+      [
+        "creating an account",
+        0.1510574018126888
+      ],
+      [
+        "mason slots is",
+        0.1510574018126888
+      ],
+      [
+        "one of the",
+        0.13427324605572338
+      ],
+      [
+        "here\u2019s how the",
+        0.13427324605572338
+      ],
+      [
+        "for players who",
+        0.13427324605572338
+      ],
+      [
+        "the process is",
+        0.13427324605572338
+      ]
+    ],
+    "transitions_used": {
+      "additionally": 0.26854649211144677,
+      "also": 4.9513259483048,
+      "and": 56.49546827794561,
+      "as well as": 0.13427324605572338,
+      "besides": 0.16784155756965424,
+      "in addition": 0.16784155756965424,
+      "moreover": 0.016784155756965423,
+      "not only": 0.11748909029875797,
+      "although": 0.2014098690835851,
+      "but": 3.55824102047667,
+      "conversely": 0.016784155756965423,
+      "despite": 0.06713662302786169,
+      "even though": 0.033568311513930846,
+      "however": 0.671366230278617,
+      "nevertheless": 0.016784155756965423,
+      "on the other hand": 0.016784155756965423,
+      "still": 0.788855320577375,
+      "though": 0.3356831151393085,
+      "while": 2.5176233635448138,
+      "yet": 0.23497818059751593,
+      "accordingly": 0.033568311513930846,
+      "as a result": 0.033568311513930846,
+      "because": 1.5609264853977844,
+      "due to": 0.10070493454179255,
+      "for this reason": 0.016784155756965423,
+      "since": 0.18462571332661967,
+      "so": 4.9513259483048,
+      "therefore": 0.050352467270896276,
+      "thus": 0.016784155756965423,
+      "for example": 0.21819402484055053,
+      "for instance": 0.08392077878482712,
+      "namely": 0.033568311513930846,
+      "specifically": 0.016784155756965423,
+      "such as": 0.9734810339039948,
+      "after": 1.7455521987244043,
+      "afterward": 0.016784155756965423,
+      "before": 3.289694528365223,
+      "finally": 0.033568311513930846,
+      "first": 3.7092984222893586,
+      "later": 0.6210137630077207,
+      "meanwhile": 0.016784155756965423,
+      "next": 0.43638804968110106,
+      "second": 0.6210137630077207,
+      "then": 0.8727760993622021,
+      "all in all": 0.033568311513930846,
+      "overall": 0.4867405169519974,
+      "ultimately": 0.016784155756965423,
+      "above all": 0.016784155756965423,
+      "certainly": 0.016784155756965423,
+      "clearly": 0.8559919436052367,
+      "especially": 0.8224236320913058,
+      "importantly": 0.033568311513930846,
+      "indeed": 0.016784155756965423,
+      "most importantly": 0.016784155756965423,
+      "of course": 0.08392077878482712,
+      "particularly": 0.06713662302786169,
+      "significantly": 0.033568311513930846
+    },
+    "discouraged_observed": {},
+    "comma_density": 7.21,
+    "dash_density": 1.77,
+    "semicolon_density": 0.08,
+    "list_frequency": 5.62,
+    "stop_words_hard": {
+      "dive into": 4,
+      "dive in": 1,
+      "landscape": 2,
+      "robust": 5,
+      "cutting-edge": 1,
+      "top-tier": 5,
+      "seamless": 9,
+      "seamlessly": 3,
+      "thrilling": 6,
+      "top-notch": 1,
+      "whether you are": 2,
+      "if you are": 15,
+      "seasoned": 7,
+      "sleek": 7,
+      "locate": 1,
+      "apart from": 2,
+      "excitement": 16,
+      "step into": 2,
+      "gateway": 2,
+      "breeze": 3,
+      "enthusiasts": 2,
+      "the best part": 10,
+      "punters": 50
+    },
+    "stop_words_soft": {
+      "unlock": 26,
+      "selection": 40,
+      "ensure": 25,
+      "exciting": 22,
+      "essential": 2,
+      "tailored": 5,
+      "premier": 4,
+      "destination": 5,
+      "maximize": 1,
+      "crucial": 2,
+      "key": 31,
+      "veteran": 2,
+      "thrill": 9
+    },
+    "schema_version": "1.0",
+    "article_count": 50,
+    "total_words": 93008,
+    "total_sentences": 5958
+  },
+  "article_count": 50,
+  "schema_version": "1.0",
+  "built_at": "2026-06-07T18:21:13.275887Z"
+}

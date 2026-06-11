@@ -1,0 +1,152 @@
+{
+  "layer": "type",
+  "layer_name": "responsible_gaming",
+  "fingerprint": {
+    "sentence_length_mean": 14.43,
+    "sentence_length_median": 14,
+    "sentence_length_stdev": 7.1,
+    "sentence_length_p10": 6,
+    "sentence_length_p90": 23,
+    "para_sentences_mean": 2.31,
+    "para_sentences_stdev": 1.29,
+    "para_words_mean": 33.41,
+    "para_words_stdev": 20.73,
+    "second_person_count": 227,
+    "reader_ref_count": 6,
+    "generic_noun_count": 8,
+    "unclear_person_count": 20,
+    "third_person_count": 34,
+    "person_ratio": 37.83,
+    "heading_capitalization": "title_case",
+    "title_case_ratio": 0.97,
+    "common_openers": [
+      [
+        "responsible gambling means",
+        1.3333333333333335
+      ],
+      [
+        "you can also",
+        1.3333333333333335
+      ],
+      [
+        "the goal is",
+        1.0666666666666667
+      ],
+      [
+        "responsible gambling is",
+        0.8
+      ],
+      [
+        "these tools are",
+        0.8
+      ],
+      [
+        "if gambling starts",
+        0.8
+      ],
+      [
+        "cookie casino gives",
+        0.5333333333333333
+      ],
+      [
+        "cookie casino also",
+        0.5333333333333333
+      ],
+      [
+        "that matters because",
+        0.5333333333333333
+      ],
+      [
+        "if gambling stops",
+        0.5333333333333333
+      ],
+      [
+        "you don\u2019t have",
+        0.5333333333333333
+      ],
+      [
+        "if gambling has",
+        0.5333333333333333
+      ],
+      [
+        "if you want",
+        0.5333333333333333
+      ],
+      [
+        "hellspin canada provides",
+        0.5333333333333333
+      ],
+      [
+        "it means playing",
+        0.5333333333333333
+      ],
+      [
+        "at its core,",
+        0.5333333333333333
+      ],
+      [
+        "some of the",
+        0.5333333333333333
+      ],
+      [
+        "that is why",
+        0.5333333333333333
+      ],
+      [
+        "you do not",
+        0.5333333333333333
+      ],
+      [
+        "there is no",
+        0.5333333333333333
+      ]
+    ],
+    "transitions_used": {
+      "additionally": 0.26666666666666666,
+      "also": 5.866666666666666,
+      "and": 34.66666666666667,
+      "furthermore": 0.26666666666666666,
+      "not only": 0.8,
+      "but": 6.666666666666667,
+      "however": 0.8,
+      "still": 1.0666666666666667,
+      "while": 1.3333333333333335,
+      "yet": 0.26666666666666666,
+      "because": 2.4,
+      "so": 1.866666666666667,
+      "therefore": 0.26666666666666666,
+      "specifically": 0.26666666666666666,
+      "such as": 0.5333333333333333,
+      "after": 1.0666666666666667,
+      "before": 3.2,
+      "first": 3.4666666666666663,
+      "later": 0.26666666666666666,
+      "next": 1.6,
+      "second": 0.5333333333333333,
+      "then": 0.8,
+      "clearly": 0.26666666666666666,
+      "especially": 0.5333333333333333
+    },
+    "discouraged_observed": {},
+    "comma_density": 5.89,
+    "dash_density": 1.39,
+    "semicolon_density": 0.04,
+    "list_frequency": 6.28,
+    "stop_words_hard": {
+      "if you are": 1,
+      "excitement": 1
+    },
+    "stop_words_soft": {
+      "ensure": 2,
+      "exciting": 1,
+      "key": 2
+    },
+    "schema_version": "1.0",
+    "article_count": 15,
+    "total_words": 5412,
+    "total_sentences": 375
+  },
+  "article_count": 15,
+  "schema_version": "1.0",
+  "built_at": "2026-06-07T18:21:21.454510Z"
+}

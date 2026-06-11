@@ -1,0 +1,143 @@
+{
+  "layer": "type",
+  "layer_name": "vip_loyalty",
+  "fingerprint": {
+    "sentence_length_mean": 13.24,
+    "sentence_length_median": 13,
+    "sentence_length_stdev": 7.66,
+    "sentence_length_p10": 3,
+    "sentence_length_p90": 25,
+    "para_sentences_mean": 2.44,
+    "para_sentences_stdev": 1.74,
+    "para_words_mean": 32.35,
+    "para_words_stdev": 24.43,
+    "second_person_count": 74,
+    "reader_ref_count": 1,
+    "generic_noun_count": 7,
+    "unclear_person_count": 1,
+    "third_person_count": 9,
+    "person_ratio": 74.0,
+    "heading_capitalization": "mixed",
+    "title_case_ratio": 0.69,
+    "common_openers": [
+      [
+        "table games and",
+        3.149606299212598
+      ],
+      [
+        "no.",
+        2.3622047244094486
+      ],
+      [
+        "the vip system",
+        1.574803149606299
+      ],
+      [
+        "the 22bet loyalty",
+        1.574803149606299
+      ],
+      [
+        "that makes the",
+        1.574803149606299
+      ],
+      [
+        "yes.",
+        1.574803149606299
+      ],
+      [
+        "you join automatically",
+        1.574803149606299
+      ],
+      [
+        "it takes so",
+        0.7874015748031495
+      ],
+      [
+        "we all want",
+        0.7874015748031495
+      ],
+      [
+        "but instead of",
+        0.7874015748031495
+      ],
+      [
+        "we are talking",
+        0.7874015748031495
+      ],
+      [
+        "join 22bet casino",
+        0.7874015748031495
+      ],
+      [
+        "as you place",
+        0.7874015748031495
+      ],
+      [
+        "every new level",
+        0.7874015748031495
+      ],
+      [
+        "your cps will",
+        0.7874015748031495
+      ],
+      [
+        "on top of",
+        0.7874015748031495
+      ],
+      [
+        "that said, don\u2019t",
+        0.7874015748031495
+      ],
+      [
+        "enjoy them as",
+        0.7874015748031495
+      ],
+      [
+        "here\u2019s the best",
+        0.7874015748031495
+      ],
+      [
+        "it all boils",
+        0.7874015748031495
+      ]
+    ],
+    "transitions_used": {
+      "also": 4.724409448818897,
+      "and": 39.37007874015748,
+      "not only": 0.7874015748031495,
+      "but": 3.149606299212598,
+      "still": 2.3622047244094486,
+      "while": 1.574803149606299,
+      "because": 2.3622047244094486,
+      "so": 7.874015748031496,
+      "such as": 0.7874015748031495,
+      "after": 5.511811023622047,
+      "finally": 0.7874015748031495,
+      "first": 3.937007874015748,
+      "later": 0.7874015748031495,
+      "then": 2.3622047244094486,
+      "overall": 0.7874015748031495,
+      "clearly": 2.3622047244094486,
+      "especially": 0.7874015748031495
+    },
+    "discouraged_observed": {},
+    "comma_density": 5.83,
+    "dash_density": 1.01,
+    "semicolon_density": 0.06,
+    "list_frequency": 4.16,
+    "stop_words_hard": {
+      "the best part": 1
+    },
+    "stop_words_soft": {
+      "unlock": 3,
+      "key": 2
+    },
+    "schema_version": "1.0",
+    "article_count": 4,
+    "total_words": 1682,
+    "total_sentences": 127
+  },
+  "article_count": 4,
+  "schema_version": "1.0",
+  "built_at": "2026-06-07T18:21:22.759332Z"
+}

@@ -1,0 +1,171 @@
+{
+  "layer": "type",
+  "layer_name": "game_review",
+  "fingerprint": {
+    "sentence_length_mean": 14.2,
+    "sentence_length_median": 14.0,
+    "sentence_length_stdev": 6.9,
+    "sentence_length_p10": 6,
+    "sentence_length_p90": 23,
+    "para_sentences_mean": 2.35,
+    "para_sentences_stdev": 1.06,
+    "para_words_mean": 33.31,
+    "para_words_stdev": 16.81,
+    "second_person_count": 379,
+    "reader_ref_count": 11,
+    "generic_noun_count": 41,
+    "unclear_person_count": 20,
+    "third_person_count": 72,
+    "person_ratio": 34.45,
+    "heading_capitalization": "title_case",
+    "title_case_ratio": 0.77,
+    "common_openers": [
+      [
+        "yes.",
+        0.8948545861297539
+      ],
+      [
+        "demo mode is",
+        0.5592841163310962
+      ],
+      [
+        "it is a",
+        0.5592841163310962
+      ],
+      [
+        "demo versions are",
+        0.5592841163310962
+      ],
+      [
+        "no.",
+        0.44742729306487694
+      ],
+      [
+        "it is not",
+        0.44742729306487694
+      ],
+      [
+        "here are the",
+        0.33557046979865773
+      ],
+      [
+        "absolutely.",
+        0.33557046979865773
+      ],
+      [
+        "the main slot",
+        0.33557046979865773
+      ],
+      [
+        "demo play is",
+        0.33557046979865773
+      ],
+      [
+        "you can also",
+        0.33557046979865773
+      ],
+      [
+        "you can play",
+        0.33557046979865773
+      ],
+      [
+        "the best part",
+        0.33557046979865773
+      ],
+      [
+        "this slot by",
+        0.33557046979865773
+      ],
+      [
+        "gates of olympus",
+        0.33557046979865773
+      ],
+      [
+        "getting started with",
+        0.22371364653243847
+      ],
+      [
+        "that means you",
+        0.22371364653243847
+      ],
+      [
+        "the variety is",
+        0.22371364653243847
+      ],
+      [
+        "the theme and",
+        0.22371364653243847
+      ],
+      [
+        "the casinochan live",
+        0.22371364653243847
+      ]
+    ],
+    "transitions_used": {
+      "additionally": 0.44742729306487694,
+      "also": 3.2438478747203576,
+      "and": 43.95973154362416,
+      "as well as": 0.11185682326621924,
+      "besides": 0.22371364653243847,
+      "furthermore": 0.11185682326621924,
+      "in addition": 0.11185682326621924,
+      "moreover": 0.11185682326621924,
+      "not only": 0.22371364653243847,
+      "although": 0.11185682326621924,
+      "but": 4.809843400447427,
+      "however": 0.6711409395973155,
+      "still": 2.1252796420581657,
+      "though": 0.22371364653243847,
+      "while": 1.2304250559284116,
+      "yet": 0.33557046979865773,
+      "because": 2.237136465324385,
+      "since": 0.22371364653243847,
+      "so": 2.684563758389262,
+      "such as": 0.33557046979865773,
+      "after": 1.2304250559284116,
+      "before": 3.5794183445190155,
+      "first": 4.3624161073825505,
+      "later": 0.11185682326621924,
+      "meanwhile": 0.11185682326621924,
+      "next": 0.6711409395973155,
+      "second": 0.6711409395973155,
+      "then": 1.1185682326621924,
+      "overall": 0.44742729306487694,
+      "clearly": 0.5592841163310962,
+      "especially": 1.1185682326621924,
+      "of course": 0.22371364653243847
+    },
+    "discouraged_observed": {},
+    "comma_density": 6.25,
+    "dash_density": 1.52,
+    "semicolon_density": 0.04,
+    "list_frequency": 5.91,
+    "stop_words_hard": {
+      "realm": 1,
+      "landscape": 1,
+      "top-tier": 2,
+      "picture this": 1,
+      "thrilling": 1,
+      "whether you are": 2,
+      "if you are": 1,
+      "seasoned": 1,
+      "excitement": 6,
+      "the best part": 4,
+      "utilize": 1,
+      "punters": 1
+    },
+    "stop_words_soft": {
+      "unlock": 4,
+      "selection": 4,
+      "ensure": 3,
+      "thrill": 3
+    },
+    "schema_version": "1.0",
+    "article_count": 16,
+    "total_words": 12691,
+    "total_sentences": 894
+  },
+  "article_count": 16,
+  "schema_version": "1.0",
+  "built_at": "2026-06-07T18:21:22.626863Z"
+}

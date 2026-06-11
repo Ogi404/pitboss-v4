@@ -1,0 +1,168 @@
+{
+  "layer": "brand",
+  "layer_name": "Playamo",
+  "fingerprint": {
+    "sentence_length_mean": 14.44,
+    "sentence_length_median": 14,
+    "sentence_length_stdev": 6.9,
+    "sentence_length_p10": 5,
+    "sentence_length_p90": 23,
+    "para_sentences_mean": 2.13,
+    "para_sentences_stdev": 0.94,
+    "para_words_mean": 30.74,
+    "para_words_stdev": 15.41,
+    "second_person_count": 476,
+    "reader_ref_count": 9,
+    "generic_noun_count": 10,
+    "unclear_person_count": 37,
+    "third_person_count": 56,
+    "person_ratio": 52.89,
+    "heading_capitalization": "title_case",
+    "title_case_ratio": 0.82,
+    "common_openers": [
+      [
+        "this is the",
+        0.6675567423230975
+      ],
+      [
+        "the minimum deposit",
+        0.5340453938584779
+      ],
+      [
+        "the playamo app",
+        0.5340453938584779
+      ],
+      [
+        "is a",
+        0.4005340453938585
+      ],
+      [
+        "here are a",
+        0.4005340453938585
+      ],
+      [
+        "on the other",
+        0.4005340453938585
+      ],
+      [
+        "there\u2019s also a",
+        0.4005340453938585
+      ],
+      [
+        "sign up with",
+        0.4005340453938585
+      ],
+      [
+        "but if you\u2019re",
+        0.26702269692923897
+      ],
+      [
+        "the playamo welcome",
+        0.26702269692923897
+      ],
+      [
+        "top up with",
+        0.26702269692923897
+      ],
+      [
+        "this is paired",
+        0.26702269692923897
+      ],
+      [
+        "here\u2019s a quick",
+        0.26702269692923897
+      ],
+      [
+        "on top of",
+        0.26702269692923897
+      ],
+      [
+        "as of now,",
+        0.26702269692923897
+      ],
+      [
+        "there is no",
+        0.26702269692923897
+      ],
+      [
+        "here\u2019s how you",
+        0.26702269692923897
+      ],
+      [
+        "you have probably",
+        0.26702269692923897
+      ],
+      [
+        "when it comes",
+        0.26702269692923897
+      ],
+      [
+        "just click on",
+        0.26702269692923897
+      ]
+    ],
+    "transitions_used": {
+      "also": 3.871829105473965,
+      "and": 48.598130841121495,
+      "as well as": 0.4005340453938585,
+      "besides": 0.13351134846461948,
+      "although": 0.26702269692923897,
+      "but": 5.607476635514018,
+      "however": 0.26702269692923897,
+      "nevertheless": 0.13351134846461948,
+      "on the other hand": 0.4005340453938585,
+      "still": 1.335113484646195,
+      "though": 0.6675567423230975,
+      "while": 1.4686248331108143,
+      "yet": 0.4005340453938585,
+      "accordingly": 0.13351134846461948,
+      "because": 0.5340453938584779,
+      "since": 0.13351134846461948,
+      "so": 7.209612817089453,
+      "for example": 0.26702269692923897,
+      "such as": 0.13351134846461948,
+      "after": 1.4686248331108143,
+      "before": 1.2016021361815754,
+      "finally": 0.4005340453938585,
+      "first": 3.204272363150868,
+      "later": 0.6675567423230975,
+      "next": 0.4005340453938585,
+      "second": 0.5340453938584779,
+      "then": 1.335113484646195,
+      "in short": 0.13351134846461948,
+      "overall": 0.13351134846461948,
+      "clearly": 0.5340453938584779,
+      "especially": 0.4005340453938585,
+      "indeed": 0.13351134846461948,
+      "of course": 0.5340453938584779
+    },
+    "discouraged_observed": {},
+    "comma_density": 6.11,
+    "dash_density": 1.53,
+    "semicolon_density": 0.21,
+    "list_frequency": 5.64,
+    "stop_words_hard": {
+      "dive into": 1,
+      "if you are": 2,
+      "ins and outs": 1,
+      "sleek": 1,
+      "excitement": 1,
+      "the best part": 1
+    },
+    "stop_words_soft": {
+      "selection": 2,
+      "exciting": 2,
+      "elevate": 1,
+      "destination": 1,
+      "key": 4,
+      "thrill": 3
+    },
+    "schema_version": "1.0",
+    "article_count": 13,
+    "total_words": 10819,
+    "total_sentences": 749
+  },
+  "article_count": 13,
+  "schema_version": "1.0",
+  "built_at": "2026-06-07T18:21:34.985964Z"
+}

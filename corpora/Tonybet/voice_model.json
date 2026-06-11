@@ -1,0 +1,176 @@
+{
+  "layer": "brand",
+  "layer_name": "Tonybet",
+  "fingerprint": {
+    "sentence_length_mean": 14.47,
+    "sentence_length_median": 14.0,
+    "sentence_length_stdev": 7.37,
+    "sentence_length_p10": 6,
+    "sentence_length_p90": 24,
+    "para_sentences_mean": 2.05,
+    "para_sentences_stdev": 0.94,
+    "para_words_mean": 29.66,
+    "para_words_stdev": 14.69,
+    "second_person_count": 506,
+    "reader_ref_count": 15,
+    "generic_noun_count": 41,
+    "unclear_person_count": 79,
+    "third_person_count": 135,
+    "person_ratio": 33.73,
+    "heading_capitalization": "title_case",
+    "title_case_ratio": 0.92,
+    "common_openers": [
+      [
+        "18+ | play",
+        1.6293279022403258
+      ],
+      [
+        "you don\u2019t need",
+        0.6109979633401221
+      ],
+      [
+        "meta title: tonybet",
+        0.5091649694501018
+      ],
+      [
+        "runs a",
+        0.40733197556008144
+      ],
+      [
+        "here are some",
+        0.40733197556008144
+      ],
+      [
+        "below is a",
+        0.40733197556008144
+      ],
+      [
+        "some of the",
+        0.40733197556008144
+      ],
+      [
+        "live betting odds",
+        0.30549898167006106
+      ],
+      [
+        "this goes to",
+        0.30549898167006106
+      ],
+      [
+        "the more you",
+        0.30549898167006106
+      ],
+      [
+        "meta description: discover",
+        0.20366598778004072
+      ],
+      [
+        "here\u2019s a quick",
+        0.20366598778004072
+      ],
+      [
+        "casino players get",
+        0.20366598778004072
+      ],
+      [
+        "one example is",
+        0.20366598778004072
+      ],
+      [
+        "read on to",
+        0.20366598778004072
+      ],
+      [
+        "wondering if tonybet",
+        0.20366598778004072
+      ],
+      [
+        "it\u2019s the same",
+        0.20366598778004072
+      ],
+      [
+        "are you ready",
+        0.20366598778004072
+      ],
+      [
+        "at the same",
+        0.20366598778004072
+      ],
+      [
+        "live odds are",
+        0.20366598778004072
+      ]
+    ],
+    "transitions_used": {
+      "additionally": 0.10183299389002036,
+      "also": 3.7678207739307537,
+      "and": 40.73319755600815,
+      "besides": 0.20366598778004072,
+      "but": 3.5641547861507124,
+      "even though": 0.10183299389002036,
+      "however": 0.10183299389002036,
+      "on the other hand": 0.20366598778004072,
+      "still": 0.8146639511201629,
+      "though": 0.5091649694501018,
+      "while": 2.240325865580448,
+      "yet": 0.30549898167006106,
+      "because": 1.0183299389002036,
+      "for this reason": 0.10183299389002036,
+      "since": 0.6109979633401221,
+      "so": 4.989816700610998,
+      "for example": 0.30549898167006106,
+      "for instance": 0.20366598778004072,
+      "such as": 0.7128309572301426,
+      "after": 0.9164969450101833,
+      "before": 3.054989816700611,
+      "first": 2.240325865580448,
+      "later": 0.5091649694501018,
+      "next": 1.2219959266802443,
+      "second": 0.5091649694501018,
+      "then": 0.7128309572301426,
+      "all in all": 0.10183299389002036,
+      "in short": 0.10183299389002036,
+      "overall": 0.10183299389002036,
+      "above all": 0.10183299389002036,
+      "clearly": 0.5091649694501018,
+      "especially": 0.40733197556008144,
+      "of course": 0.10183299389002036,
+      "particularly": 0.10183299389002036
+    },
+    "discouraged_observed": {},
+    "comma_density": 5.49,
+    "dash_density": 1.78,
+    "semicolon_density": 0.06,
+    "list_frequency": 6.83,
+    "stop_words_hard": {
+      "leverage": 1,
+      "thrilling": 1,
+      "at your fingertips": 2,
+      "if you are": 1,
+      "seasoned": 1,
+      "excitement": 2,
+      "gateway": 1,
+      "enthusiasts": 2,
+      "the best part": 1,
+      "punters": 4
+    },
+    "stop_words_soft": {
+      "unlock": 4,
+      "selection": 3,
+      "ensure": 8,
+      "exciting": 7,
+      "tailored": 1,
+      "premier": 1,
+      "crucial": 2,
+      "key": 8,
+      "thrill": 1
+    },
+    "schema_version": "1.0",
+    "article_count": 13,
+    "total_words": 14209,
+    "total_sentences": 982
+  },
+  "article_count": 13,
+  "schema_version": "1.0",
+  "built_at": "2026-06-07T18:21:39.853571Z"
+}

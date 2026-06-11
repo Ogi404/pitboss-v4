@@ -1,0 +1,180 @@
+{
+  "layer": "brand",
+  "layer_name": "Vave",
+  "fingerprint": {
+    "sentence_length_mean": 16.4,
+    "sentence_length_median": 16,
+    "sentence_length_stdev": 7.14,
+    "sentence_length_p10": 7,
+    "sentence_length_p90": 25,
+    "para_sentences_mean": 2.14,
+    "para_sentences_stdev": 0.93,
+    "para_words_mean": 35.09,
+    "para_words_stdev": 15.74,
+    "second_person_count": 692,
+    "reader_ref_count": 53,
+    "generic_noun_count": 64,
+    "unclear_person_count": 80,
+    "third_person_count": 197,
+    "person_ratio": 13.06,
+    "heading_capitalization": "title_case",
+    "title_case_ratio": 0.83,
+    "common_openers": [
+      [
+        "meta title: vave",
+        0.6583760058522311
+      ],
+      [
+        "the vave casino",
+        0.36576444769568395
+      ],
+      [
+        "the sports vip",
+        0.36576444769568395
+      ],
+      [
+        "below are the",
+        0.36576444769568395
+      ],
+      [
+        "if you want",
+        0.2926115581565472
+      ],
+      [
+        "if you are",
+        0.2926115581565472
+      ],
+      [
+        "you can also",
+        0.2926115581565472
+      ],
+      [
+        "to install the",
+        0.2926115581565472
+      ],
+      [
+        "for players who",
+        0.2926115581565472
+      ],
+      [
+        "the best part",
+        0.2926115581565472
+      ],
+      [
+        "the best thing",
+        0.2926115581565472
+      ],
+      [
+        "all you have",
+        0.2926115581565472
+      ],
+      [
+        "as soon as",
+        0.21945866861741037
+      ],
+      [
+        "the cashier is",
+        0.21945866861741037
+      ],
+      [
+        "yes.",
+        0.21945866861741037
+      ],
+      [
+        "is a",
+        0.21945866861741037
+      ],
+      [
+        "operates under",
+        0.21945866861741037
+      ],
+      [
+        "horse racing is",
+        0.21945866861741037
+      ],
+      [
+        "the platform is",
+        0.21945866861741037
+      ],
+      [
+        "the betslip is",
+        0.21945866861741037
+      ]
+    ],
+    "transitions_used": {
+      "additionally": 1.024140453547915,
+      "also": 3.3650329188002925,
+      "and": 58.961228968544255,
+      "as well as": 0.1463057790782736,
+      "besides": 0.1463057790782736,
+      "in addition": 0.2926115581565472,
+      "not only": 0.0731528895391368,
+      "although": 0.2926115581565472,
+      "but": 2.7798098024871982,
+      "despite": 0.0731528895391368,
+      "even though": 0.0731528895391368,
+      "however": 1.755669348939283,
+      "still": 0.6583760058522311,
+      "though": 0.43891733723482074,
+      "while": 2.487198244330651,
+      "accordingly": 0.0731528895391368,
+      "because": 0.8778346744696415,
+      "due to": 0.1463057790782736,
+      "since": 0.21945866861741037,
+      "so": 4.828090709583028,
+      "for example": 0.21945866861741037,
+      "such as": 1.3899049012435991,
+      "after": 1.8288222384784198,
+      "before": 3.4381858083394294,
+      "first": 3.8771031455742504,
+      "later": 1.024140453547915,
+      "meanwhile": 0.0731528895391368,
+      "next": 0.43891733723482074,
+      "second": 0.36576444769568395,
+      "then": 0.9509875640087784,
+      "overall": 0.21945866861741037,
+      "certainly": 0.0731528895391368,
+      "clearly": 1.2435991221653255,
+      "especially": 0.7315288953913679,
+      "notably": 0.0731528895391368,
+      "particularly": 0.0731528895391368,
+      "significantly": 0.0731528895391368
+    },
+    "discouraged_observed": {},
+    "comma_density": 7.47,
+    "dash_density": 2.16,
+    "semicolon_density": 0.06,
+    "list_frequency": 3.79,
+    "stop_words_hard": {
+      "landscape": 2,
+      "top-tier": 2,
+      "navigating": 1,
+      "at your fingertips": 1,
+      "if you are": 5,
+      "seasoned": 1,
+      "apart from": 1,
+      "excitement": 3,
+      "the best part": 4,
+      "punters": 5
+    },
+    "stop_words_soft": {
+      "unlock": 12,
+      "selection": 6,
+      "ensure": 5,
+      "exciting": 2,
+      "essential": 1,
+      "tailored": 1,
+      "premier": 1,
+      "maximize": 3,
+      "key": 7,
+      "veteran": 1
+    },
+    "schema_version": "1.0",
+    "article_count": 10,
+    "total_words": 22420,
+    "total_sentences": 1367
+  },
+  "article_count": 10,
+  "schema_version": "1.0",
+  "built_at": "2026-06-07T18:21:42.006764Z"
+}

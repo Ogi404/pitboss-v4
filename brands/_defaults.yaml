@@ -1,0 +1,187 @@
+# Pitboss v4 - Default Standards
+# Company-wide standards from General Writing Requirements
+# Brand-specific YAML files override these defaults via deep merge.
+#
+# Inheritance rules:
+# - Nested dicts merge recursively
+# - Lists replace (not extend)
+# - Scalars replace
+# - Brand config wins on conflicts
+
+schema_version: "1.0"
+
+# =============================================================================
+# Section 7: Who's Talking + Architecture doc
+# =============================================================================
+voice:
+  # "write for people, by people" + observed 10:1 ratio in corpus
+  person: second
+  # Requirements Section 7: "Write like you're talking on behalf of..."
+  on_behalf_of: "gambling expert team"
+
+# =============================================================================
+# Section 5: Readability
+# =============================================================================
+readability:
+  # "use shorter sentences"; corpus avg is 14-17 words
+  max_sentence_words: 25
+  # "3-5 sentences" per paragraph
+  paragraph_sentences: [3, 5]
+  # Section 10: "at least 1 small paragraph between two headings"
+  require_para_between_headings: true
+
+# =============================================================================
+# Section 8: Keywords
+# =============================================================================
+keywords:
+  # "use all the main keywords"
+  use_all_main: true
+  # "keyword density must be up to 3%"
+  max_density_percent: 3.0
+  # "highlight them in yellow"
+  highlight_color: "yellow"
+  # "don't overuse brand names or location keywords"
+  warn_brand_name_overuse: true
+
+# =============================================================================
+# Section 11: Currencies
+# =============================================================================
+currency:
+  # "abbreviations (e.g., CAD, USD, EUR) OR symbols ($, C$). Not both."
+  mode: exclusive
+
+# =============================================================================
+# Section 10: Structure & Headings
+# =============================================================================
+headings:
+  # "H1->H2->H3->H4 hierarchy"
+  hierarchy: ["H1", "H2", "H3", "H4"]
+  # "'Promotions' is not a good title" - headings must be descriptive
+  descriptive_required: true
+  # Observed edit: remove ? from headings ("How to Create an Account?" -> "How to Create an Account")
+  no_question_marks: true
+  # capitalization is brand-specific (see architecture doc note), not set in defaults
+  # headings.capitalization is set per-brand
+
+# =============================================================================
+# Section 9: Other Brand Names
+# =============================================================================
+# "Don't use any other casino or sportsbook brands in your review unless they're mentioned among keywords"
+forbidden_brands: true
+
+# =============================================================================
+# Section 14: Stop Words + Architecture doc weighted tiers
+# =============================================================================
+stop_words:
+  # Hard tier: rarely/never acceptable - weight 1.0
+  # These are the strongly AI-associated words that should almost never appear
+  hard:
+    - delve
+    - "dive into"
+    - "dive in"
+    - realm
+    - landscape
+    - "state-of-the-art"
+    - leverage
+    - robust
+    - "cutting-edge"
+    - "top-tier"
+    - seamless
+    - seamlessly
+    - navigating
+    - "treasure trove"
+    - galore
+    - "hidden gem"
+    - embark
+    - immerse
+    - "picture this"
+    - "the icing on the cake"
+    - "cherry on top"
+    - thrilling
+    - exhilarating
+    - "top-notch"
+    - "at your fingertips"
+    - "into the world"
+    - "whether you are"
+    - "if you are"
+    - "ins and outs"
+    - "step into the world"
+    - "informed decisions"
+    - seasoned
+    - sleek
+    - locate
+    - "apart from"
+    - excitement
+    - "step into"
+    - gateway
+    - breeze
+    - enthusiasts
+    - "a treasure trove"
+    - "up our sleeve"
+    - unraveling
+    - "the best part"
+    - utilize
+
+  # Soft tier: tolerated in context - weight 0.3
+  # Corpus contains these in approved work, so a single occurrence is not an error
+  soft:
+    - unlock
+    - selection
+    - ensure
+    - exciting
+    - essential
+    - tailored
+    - elevate
+    - cater
+    - premier
+    - destination
+    - maximize
+    - crucial
+    - key
+    - veteran
+    - thrill
+
+# =============================================================================
+# Section 4: Prohibited Style Elements
+# =============================================================================
+prohibited_style:
+  # "no e.g., i.e., etc. - just get straight to the point"
+  - latin_abbreviations: ["e.g.", "i.e.", "etc."]
+  # "No usage of swearing or 'questionable' language"
+  - profanity_mild: ["sucks", "jerk"]
+
+# =============================================================================
+# Section 4: Language and Localization
+# =============================================================================
+locale_mappings:
+  # British EN: UK, India, Sri Lanka, Pakistan, Singapore, Myanmar, Hong Kong, Kenya, Nigeria
+  british:
+    - UK
+    - IN
+    - LK
+    - PK
+    - SG
+    - MM
+    - HK
+    - KE
+    - NG
+
+  # American EN: US, Philippines, Taiwan, South Korea, Japan
+  american:
+    - US
+    - PH
+    - TW
+    - KR
+    - JP
+
+  # Canadian EN
+  canadian:
+    - CA
+
+  # Australian EN
+  australian:
+    - AU
+
+  # New Zealand EN
+  new_zealand:
+    - NZ

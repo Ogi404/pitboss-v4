@@ -1,0 +1,160 @@
+{
+  "layer": "type",
+  "layer_name": "payments",
+  "fingerprint": {
+    "sentence_length_mean": 14.41,
+    "sentence_length_median": 14,
+    "sentence_length_stdev": 6.51,
+    "sentence_length_p10": 7,
+    "sentence_length_p90": 23,
+    "para_sentences_mean": 2.21,
+    "para_sentences_stdev": 1.07,
+    "para_words_mean": 31.78,
+    "para_words_stdev": 17.92,
+    "second_person_count": 220,
+    "reader_ref_count": 3,
+    "generic_noun_count": 14,
+    "unclear_person_count": 16,
+    "third_person_count": 33,
+    "person_ratio": 73.33,
+    "heading_capitalization": "title_case",
+    "title_case_ratio": 0.83,
+    "common_openers": [
+      [
+        "the cookie casino",
+        1.366742596810934
+      ],
+      [
+        "cookie casino supports",
+        0.683371298405467
+      ],
+      [
+        "if you prefer",
+        0.683371298405467
+      ],
+      [
+        "the hellspin withdrawal",
+        0.683371298405467
+      ],
+      [
+        "the minimum deposit",
+        0.683371298405467
+      ],
+      [
+        "e-wallets are a",
+        0.45558086560364464
+      ],
+      [
+        "as soon as",
+        0.45558086560364464
+      ],
+      [
+        "in most cases,",
+        0.45558086560364464
+      ],
+      [
+        "the 22bet withdrawal",
+        0.45558086560364464
+      ],
+      [
+        "visa and mastercard",
+        0.45558086560364464
+      ],
+      [
+        "after these steps,",
+        0.45558086560364464
+      ],
+      [
+        "no.",
+        0.45558086560364464
+      ],
+      [
+        "there\u2019s also a",
+        0.45558086560364464
+      ],
+      [
+        "card deposits are",
+        0.45558086560364464
+      ],
+      [
+        "most deposits are",
+        0.45558086560364464
+      ],
+      [
+        "these options are",
+        0.45558086560364464
+      ],
+      [
+        "on the hellspin",
+        0.45558086560364464
+      ],
+      [
+        "if you want",
+        0.45558086560364464
+      ],
+      [
+        "are you ready",
+        0.22779043280182232
+      ],
+      [
+        "enjoy fast deposits",
+        0.22779043280182232
+      ]
+    ],
+    "transitions_used": {
+      "also": 5.239179954441914,
+      "and": 43.735763097949885,
+      "as well as": 0.22779043280182232,
+      "although": 0.683371298405467,
+      "but": 6.150341685649203,
+      "however": 0.683371298405467,
+      "on the other hand": 0.22779043280182232,
+      "still": 1.8223234624145785,
+      "though": 0.683371298405467,
+      "while": 2.050113895216401,
+      "yet": 0.22779043280182232,
+      "because": 2.5056947608200453,
+      "due to": 0.22779043280182232,
+      "since": 0.22779043280182232,
+      "so": 4.555808656036446,
+      "therefore": 0.22779043280182232,
+      "for example": 0.22779043280182232,
+      "for instance": 0.22779043280182232,
+      "such as": 1.1389521640091116,
+      "after": 1.5945330296127564,
+      "before": 6.150341685649203,
+      "first": 3.189066059225513,
+      "later": 0.9111617312072893,
+      "meanwhile": 0.22779043280182232,
+      "next": 0.45558086560364464,
+      "second": 0.22779043280182232,
+      "then": 2.050113895216401,
+      "overall": 0.45558086560364464,
+      "clearly": 0.45558086560364464,
+      "especially": 1.366742596810934
+    },
+    "discouraged_observed": {},
+    "comma_density": 7.19,
+    "dash_density": 1.66,
+    "semicolon_density": 0.22,
+    "list_frequency": 4.43,
+    "stop_words_hard": {
+      "dive into": 1,
+      "if you are": 1
+    },
+    "stop_words_soft": {
+      "unlock": 1,
+      "selection": 2,
+      "exciting": 1,
+      "essential": 1,
+      "key": 1
+    },
+    "schema_version": "1.0",
+    "article_count": 7,
+    "total_words": 6325,
+    "total_sentences": 439
+  },
+  "article_count": 7,
+  "schema_version": "1.0",
+  "built_at": "2026-06-07T18:21:19.582980Z"
+}

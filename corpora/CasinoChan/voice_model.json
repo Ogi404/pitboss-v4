@@ -1,0 +1,167 @@
+{
+  "layer": "brand",
+  "layer_name": "CasinoChan",
+  "fingerprint": {
+    "sentence_length_mean": 15.87,
+    "sentence_length_median": 16,
+    "sentence_length_stdev": 7.5,
+    "sentence_length_p10": 6,
+    "sentence_length_p90": 25,
+    "para_sentences_mean": 1.89,
+    "para_sentences_stdev": 0.76,
+    "para_words_mean": 30.02,
+    "para_words_stdev": 13.69,
+    "second_person_count": 437,
+    "reader_ref_count": 8,
+    "generic_noun_count": 28,
+    "unclear_person_count": 30,
+    "third_person_count": 66,
+    "person_ratio": 54.62,
+    "heading_capitalization": "title_case",
+    "title_case_ratio": 0.81,
+    "common_openers": [
+      [
+        "yes.",
+        0.7320644216691069
+      ],
+      [
+        "you can also",
+        0.43923865300146414
+      ],
+      [
+        "the casinochan live",
+        0.43923865300146414
+      ],
+      [
+        "here\u2019s how to",
+        0.43923865300146414
+      ],
+      [
+        "if you want",
+        0.43923865300146414
+      ],
+      [
+        "if you\u2019re after",
+        0.43923865300146414
+      ],
+      [
+        "if you choose",
+        0.29282576866764276
+      ],
+      [
+        "make sure your",
+        0.29282576866764276
+      ],
+      [
+        "here\u2019s a look",
+        0.29282576866764276
+      ],
+      [
+        "the games are",
+        0.29282576866764276
+      ],
+      [
+        "you can play",
+        0.29282576866764276
+      ],
+      [
+        "bonus buy slots",
+        0.29282576866764276
+      ],
+      [
+        "if you prefer",
+        0.29282576866764276
+      ],
+      [
+        "here\u2019s what you",
+        0.29282576866764276
+      ],
+      [
+        "it\u2019s the kind",
+        0.29282576866764276
+      ],
+      [
+        "when it comes",
+        0.29282576866764276
+      ],
+      [
+        "there\u2019s also a",
+        0.29282576866764276
+      ],
+      [
+        "operates under",
+        0.29282576866764276
+      ],
+      [
+        "if you don\u2019t",
+        0.29282576866764276
+      ],
+      [
+        "if your device",
+        0.29282576866764276
+      ]
+    ],
+    "transitions_used": {
+      "additionally": 0.14641288433382138,
+      "also": 2.635431918008785,
+      "and": 61.49341142020498,
+      "as well as": 0.14641288433382138,
+      "not only": 0.29282576866764276,
+      "but": 3.953147877013177,
+      "despite": 0.14641288433382138,
+      "even though": 0.14641288433382138,
+      "however": 0.14641288433382138,
+      "still": 0.43923865300146414,
+      "though": 0.29282576866764276,
+      "while": 2.4890190336749636,
+      "yet": 0.43923865300146414,
+      "because": 0.29282576866764276,
+      "for this reason": 0.14641288433382138,
+      "since": 0.29282576866764276,
+      "so": 3.953147877013177,
+      "specifically": 0.29282576866764276,
+      "such as": 0.7320644216691069,
+      "after": 2.781844802342606,
+      "before": 2.1961932650073206,
+      "first": 3.513909224011713,
+      "later": 0.14641288433382138,
+      "next": 0.14641288433382138,
+      "second": 0.14641288433382138,
+      "then": 1.171303074670571,
+      "in short": 0.14641288433382138,
+      "overall": 0.43923865300146414,
+      "clearly": 1.171303074670571,
+      "especially": 0.8784773060029283,
+      "of course": 0.29282576866764276
+    },
+    "discouraged_observed": {},
+    "comma_density": 7.21,
+    "dash_density": 2.31,
+    "semicolon_density": 0.1,
+    "list_frequency": 5.35,
+    "stop_words_hard": {
+      "dive into": 1,
+      "robust": 1,
+      "top-tier": 1,
+      "seamless": 1,
+      "seamlessly": 2,
+      "seasoned": 1,
+      "sleek": 1,
+      "the best part": 1
+    },
+    "stop_words_soft": {
+      "unlock": 2,
+      "exciting": 1,
+      "tailored": 1,
+      "destination": 1,
+      "key": 2
+    },
+    "schema_version": "1.0",
+    "article_count": 13,
+    "total_words": 10838,
+    "total_sentences": 683
+  },
+  "article_count": 13,
+  "schema_version": "1.0",
+  "built_at": "2026-06-07T18:21:27.270201Z"
+}

@@ -1,0 +1,174 @@
+{
+  "layer": "brand",
+  "layer_name": "Ivibet",
+  "fingerprint": {
+    "sentence_length_mean": 18.33,
+    "sentence_length_median": 17.0,
+    "sentence_length_stdev": 9.68,
+    "sentence_length_p10": 7,
+    "sentence_length_p90": 31,
+    "para_sentences_mean": 1.86,
+    "para_sentences_stdev": 0.79,
+    "para_words_mean": 34.09,
+    "para_words_stdev": 14.96,
+    "second_person_count": 697,
+    "reader_ref_count": 22,
+    "generic_noun_count": 41,
+    "unclear_person_count": 37,
+    "third_person_count": 100,
+    "person_ratio": 31.68,
+    "heading_capitalization": "title_case",
+    "title_case_ratio": 0.81,
+    "common_openers": [
+      [
+        "if you want",
+        0.8403361344537815
+      ],
+      [
+        "absolutely.",
+        0.5252100840336135
+      ],
+      [
+        "meta title: ivibet",
+        0.42016806722689076
+      ],
+      [
+        "if you prefer",
+        0.42016806722689076
+      ],
+      [
+        "has a",
+        0.42016806722689076
+      ],
+      [
+        "if you follow",
+        0.31512605042016806
+      ],
+      [
+        "on ivibet, the",
+        0.31512605042016806
+      ],
+      [
+        "this is the",
+        0.31512605042016806
+      ],
+      [
+        "these are the",
+        0.31512605042016806
+      ],
+      [
+        "the idea is",
+        0.31512605042016806
+      ],
+      [
+        "yes.",
+        0.31512605042016806
+      ],
+      [
+        "the practical benefit",
+        0.31512605042016806
+      ],
+      [
+        "is built",
+        0.31512605042016806
+      ],
+      [
+        "meta description: explore",
+        0.21008403361344538
+      ],
+      [
+        "if you like",
+        0.21008403361344538
+      ],
+      [
+        "if you\u2019re new",
+        0.21008403361344538
+      ],
+      [
+        "the welcome package",
+        0.21008403361344538
+      ],
+      [
+        "a concrete example",
+        0.21008403361344538
+      ],
+      [
+        "the practical rule",
+        0.21008403361344538
+      ],
+      [
+        "doesn\u2019t just",
+        0.21008403361344538
+      ]
+    ],
+    "transitions_used": {
+      "also": 6.722689075630252,
+      "and": 54.93697478991597,
+      "as well as": 0.21008403361344538,
+      "in addition": 0.21008403361344538,
+      "not only": 0.31512605042016806,
+      "but": 4.516806722689076,
+      "despite": 0.10504201680672269,
+      "however": 0.21008403361344538,
+      "still": 1.680672268907563,
+      "though": 0.10504201680672269,
+      "while": 2.3109243697478994,
+      "accordingly": 0.21008403361344538,
+      "because": 2.73109243697479,
+      "due to": 0.10504201680672269,
+      "since": 0.31512605042016806,
+      "so": 6.512605042016808,
+      "for example": 0.5252100840336135,
+      "for instance": 0.10504201680672269,
+      "specifically": 0.31512605042016806,
+      "such as": 0.7352941176470588,
+      "after": 1.7857142857142856,
+      "before": 2.3109243697478994,
+      "first": 5.042016806722689,
+      "later": 0.31512605042016806,
+      "next": 1.5756302521008403,
+      "second": 0.8403361344537815,
+      "then": 2.8361344537815127,
+      "in short": 0.21008403361344538,
+      "overall": 0.6302521008403361,
+      "clearly": 0.31512605042016806,
+      "especially": 1.9957983193277309,
+      "of course": 0.10504201680672269,
+      "particularly": 0.10504201680672269,
+      "undoubtedly": 0.10504201680672269
+    },
+    "discouraged_observed": {},
+    "comma_density": 6.33,
+    "dash_density": 2.14,
+    "semicolon_density": 0.05,
+    "list_frequency": 4.7,
+    "stop_words_hard": {
+      "robust": 1,
+      "top-tier": 3,
+      "whether you are": 1,
+      "if you are": 1,
+      "seasoned": 1,
+      "sleek": 1,
+      "apart from": 1,
+      "excitement": 1,
+      "enthusiasts": 1,
+      "the best part": 1,
+      "punters": 6
+    },
+    "stop_words_soft": {
+      "unlock": 6,
+      "selection": 8,
+      "exciting": 8,
+      "premier": 1,
+      "key": 13,
+      "thrill": 3
+    },
+    "schema_version": "1.0",
+    "article_count": 14,
+    "total_words": 17453,
+    "total_sentences": 952
+  },
+  "article_count": 14,
+  "schema_version": "1.0",
+  "built_at": "2026-06-07T18:21:31.730809Z"
+}

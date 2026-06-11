@@ -1,0 +1,234 @@
+{
+  "layer": "house",
+  "layer_name": "",
+  "fingerprint": {
+    "sentence_length_mean": 14.93,
+    "sentence_length_median": 14.0,
+    "sentence_length_stdev": 7.18,
+    "sentence_length_p10": 6,
+    "sentence_length_p90": 24,
+    "para_sentences_mean": 2.14,
+    "para_sentences_stdev": 1.03,
+    "para_words_mean": 32.0,
+    "para_words_stdev": 16.57,
+    "second_person_count": 9165,
+    "reader_ref_count": 408,
+    "generic_noun_count": 733,
+    "unclear_person_count": 937,
+    "third_person_count": 2078,
+    "person_ratio": 22.46,
+    "heading_capitalization": "title_case",
+    "title_case_ratio": 0.81,
+    "common_openers": [
+      [
+        "yes.",
+        0.3888456838129097
+      ],
+      [
+        "if you want",
+        0.31663148539051217
+      ],
+      [
+        "you can also",
+        0.2555271636484835
+      ],
+      [
+        "no.",
+        0.2277524719475614
+      ],
+      [
+        "the minimum deposit",
+        0.2110876569270081
+      ],
+      [
+        "the cookie casino",
+        0.2055327185868237
+      ],
+      [
+        "if you are",
+        0.18886790356627042
+      ],
+      [
+        "this is the",
+        0.16109321186534828
+      ],
+      [
+        "some of the",
+        0.1555382735251639
+      ],
+      [
+        "if you like",
+        0.1555382735251639
+      ],
+      [
+        "if you prefer",
+        0.1555382735251639
+      ],
+      [
+        "you don\u2019t need",
+        0.14998333518497944
+      ],
+      [
+        "on top of",
+        0.14998333518497944
+      ],
+      [
+        "there is no",
+        0.14998333518497944
+      ],
+      [
+        "here\u2019s how to",
+        0.14442839684479503
+      ],
+      [
+        "the best part",
+        0.13887345850461058
+      ],
+      [
+        "this is where",
+        0.1333185201644262
+      ],
+      [
+        "here are some",
+        0.1166537051438729
+      ],
+      [
+        "here are the",
+        0.1166537051438729
+      ],
+      [
+        "all you have",
+        0.11109876680368848
+      ]
+    ],
+    "transitions_used": {
+      "additionally": 0.27774691700922116,
+      "also": 4.416175980446617,
+      "and": 47.794689478946786,
+      "as well as": 0.09998889012331963,
+      "besides": 0.16109321186534828,
+      "furthermore": 0.0444395067214754,
+      "in addition": 0.14998333518497944,
+      "moreover": 0.0222197533607377,
+      "not only": 0.14998333518497944,
+      "although": 0.16109321186534828,
+      "but": 4.1884235084990555,
+      "conversely": 0.005554938340184425,
+      "despite": 0.03888456838129097,
+      "even though": 0.0444395067214754,
+      "however": 0.8110209976669259,
+      "nevertheless": 0.03332963004110655,
+      "on the other hand": 0.0444395067214754,
+      "still": 1.2887456949227862,
+      "though": 0.27774691700922116,
+      "while": 2.1164315076102653,
+      "yet": 0.2110876569270081,
+      "accordingly": 0.03888456838129097,
+      "as a result": 0.01110987668036885,
+      "because": 1.6331518720142206,
+      "due to": 0.08332407510276636,
+      "for this reason": 0.0222197533607377,
+      "since": 0.2333074102877458,
+      "so": 4.255082768581269,
+      "therefore": 0.11109876680368848,
+      "thus": 0.005554938340184425,
+      "for example": 0.17220308854571714,
+      "for instance": 0.0666592600822131,
+      "in particular": 0.005554938340184425,
+      "namely": 0.016664815020553274,
+      "specifically": 0.05554938340184424,
+      "such as": 0.8610154427285858,
+      "to illustrate": 0.005554938340184425,
+      "after": 1.8109098989001222,
+      "afterward": 0.01110987668036885,
+      "before": 3.1496500388845683,
+      "finally": 0.03888456838129097,
+      "first": 3.927341406510388,
+      "later": 0.5943784023997334,
+      "meanwhile": 0.0444395067214754,
+      "next": 0.5777135873791801,
+      "second": 0.7110321075436064,
+      "subsequently": 0.005554938340184425,
+      "then": 1.049883346294856,
+      "all in all": 0.01110987668036885,
+      "in short": 0.07221419842239751,
+      "overall": 0.3721808687923564,
+      "ultimately": 0.01110987668036885,
+      "above all": 0.01110987668036885,
+      "certainly": 0.01110987668036885,
+      "clearly": 0.5943784023997334,
+      "especially": 0.8165759360071103,
+      "importantly": 0.02777469170092212,
+      "in fact": 0.016664815020553274,
+      "indeed": 0.005554938340184425,
+      "most importantly": 0.016664815020553274,
+      "notably": 0.01110987668036885,
+      "of course": 0.12220864348405733,
+      "particularly": 0.049994445061659815,
+      "significantly": 0.0222197533607377,
+      "undoubtedly": 0.005554938340184425
+    },
+    "discouraged_observed": {},
+    "comma_density": 6.78,
+    "dash_density": 1.56,
+    "semicolon_density": 0.07,
+    "list_frequency": 5.55,
+    "stop_words_hard": {
+      "dive into": 5,
+      "dive in": 1,
+      "realm": 1,
+      "landscape": 16,
+      "leverage": 1,
+      "robust": 6,
+      "cutting-edge": 1,
+      "top-tier": 11,
+      "seamless": 17,
+      "seamlessly": 12,
+      "navigating": 3,
+      "picture this": 2,
+      "thrilling": 12,
+      "top-notch": 1,
+      "at your fingertips": 5,
+      "into the world": 1,
+      "whether you are": 8,
+      "if you are": 52,
+      "ins and outs": 1,
+      "seasoned": 12,
+      "sleek": 12,
+      "locate": 1,
+      "apart from": 4,
+      "excitement": 36,
+      "step into": 3,
+      "gateway": 3,
+      "breeze": 5,
+      "enthusiasts": 5,
+      "the best part": 29,
+      "utilize": 1,
+      "punters": 77
+    },
+    "stop_words_soft": {
+      "unlock": 74,
+      "selection": 69,
+      "ensure": 70,
+      "exciting": 72,
+      "essential": 9,
+      "tailored": 14,
+      "elevate": 2,
+      "cater": 2,
+      "premier": 8,
+      "destination": 5,
+      "maximize": 3,
+      "crucial": 5,
+      "key": 88,
+      "veteran": 3,
+      "thrill": 25
+    },
+    "schema_version": "1.0",
+    "article_count": 270,
+    "total_words": 268823,
+    "total_sentences": 18002
+  },
+  "article_count": 270,
+  "schema_version": "1.0",
+  "built_at": "2026-06-07T18:21:03.694970Z"
+}

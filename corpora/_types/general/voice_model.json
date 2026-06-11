@@ -1,0 +1,131 @@
+{
+  "layer": "type",
+  "layer_name": "general",
+  "fingerprint": {
+    "sentence_length_mean": 14.7,
+    "sentence_length_median": 14,
+    "sentence_length_stdev": 5.22,
+    "sentence_length_p10": 8,
+    "sentence_length_p90": 21,
+    "para_sentences_mean": 2.2,
+    "para_sentences_stdev": 0.73,
+    "para_words_mean": 32.33,
+    "para_words_stdev": 12.63,
+    "second_person_count": 74,
+    "reader_ref_count": 1,
+    "generic_noun_count": 4,
+    "unclear_person_count": 12,
+    "third_person_count": 17,
+    "person_ratio": 74.0,
+    "heading_capitalization": "title_case",
+    "title_case_ratio": 0.89,
+    "common_openers": [
+      [
+        "this goes to",
+        3.0303030303030303
+      ],
+      [
+        "meta title: tonybet",
+        2.0202020202020203
+      ],
+      [
+        "all you need",
+        2.0202020202020203
+      ],
+      [
+        "you\u2019ll be promoting",
+        2.0202020202020203
+      ],
+      [
+        "some of the",
+        2.0202020202020203
+      ],
+      [
+        "tonybet partners is",
+        2.0202020202020203
+      ],
+      [
+        "becoming a partner",
+        2.0202020202020203
+      ],
+      [
+        "to join the",
+        2.0202020202020203
+      ],
+      [
+        "meta description: learn",
+        1.0101010101010102
+      ],
+      [
+        "any good relationship",
+        1.0101010101010102
+      ],
+      [
+        "the same applies",
+        1.0101010101010102
+      ],
+      [
+        "knowing these terms",
+        1.0101010101010102
+      ],
+      [
+        "these terms and",
+        1.0101010101010102
+      ],
+      [
+        "the company enjoys",
+        1.0101010101010102
+      ],
+      [
+        "understanding them will",
+        1.0101010101010102
+      ],
+      [
+        "as a tonybet",
+        1.0101010101010102
+      ],
+      [
+        "these let you",
+        1.0101010101010102
+      ],
+      [
+        "https://app.originality.ai/home/content-scan/34559168",
+        1.0101010101010102
+      ],
+      [
+        "meta description: discover",
+        1.0101010101010102
+      ],
+      [
+        "affiliate partnerships help",
+        1.0101010101010102
+      ]
+    ],
+    "transitions_used": {
+      "also": 8.080808080808081,
+      "and": 60.60606060606061,
+      "besides": 1.0101010101010102,
+      "since": 1.0101010101010102,
+      "such as": 1.0101010101010102
+    },
+    "discouraged_observed": {},
+    "comma_density": 3.92,
+    "dash_density": 1.37,
+    "semicolon_density": 0.0,
+    "list_frequency": 5.5,
+    "stop_words_hard": {
+      "the best part": 1
+    },
+    "stop_words_soft": {
+      "ensure": 7,
+      "key": 1
+    },
+    "schema_version": "1.0",
+    "article_count": 2,
+    "total_words": 1455,
+    "total_sentences": 99
+  },
+  "article_count": 2,
+  "schema_version": "1.0",
+  "built_at": "2026-06-07T18:21:24.490659Z"
+}

@@ -1,0 +1,159 @@
+{
+  "layer": "brand",
+  "layer_name": "Slotrave",
+  "fingerprint": {
+    "sentence_length_mean": 13.77,
+    "sentence_length_median": 13,
+    "sentence_length_stdev": 6.81,
+    "sentence_length_p10": 6,
+    "sentence_length_p90": 23,
+    "para_sentences_mean": 2.28,
+    "para_sentences_stdev": 1.04,
+    "para_words_mean": 31.42,
+    "para_words_stdev": 15.65,
+    "second_person_count": 412,
+    "reader_ref_count": 49,
+    "generic_noun_count": 61,
+    "unclear_person_count": 85,
+    "third_person_count": 195,
+    "person_ratio": 8.41,
+    "heading_capitalization": "title_case",
+    "title_case_ratio": 0.83,
+    "common_openers": [
+      [
+        "yes.",
+        0.6317119393556538
+      ],
+      [
+        "for canadian players,",
+        0.505369551484523
+      ],
+      [
+        "it is not",
+        0.505369551484523
+      ],
+      [
+        "does not",
+        0.4421983575489577
+      ],
+      [
+        "there is no",
+        0.4421983575489577
+      ],
+      [
+        "the welcome package",
+        0.4421983575489577
+      ],
+      [
+        "there is also",
+        0.3790271636133923
+      ],
+      [
+        "you are not",
+        0.3790271636133923
+      ],
+      [
+        "no.",
+        0.3790271636133923
+      ],
+      [
+        "the minimum deposit",
+        0.3790271636133923
+      ],
+      [
+        "the live section",
+        0.3790271636133923
+      ],
+      [
+        "the contact page",
+        0.3790271636133923
+      ],
+      [
+        "that is why",
+        0.3158559696778269
+      ],
+      [
+        "this is where",
+        0.3158559696778269
+      ],
+      [
+        "the app is",
+        0.3158559696778269
+      ],
+      [
+        "that matters because",
+        0.3158559696778269
+      ],
+      [
+        "says it",
+        0.3158559696778269
+      ],
+      [
+        "the policy says",
+        0.3158559696778269
+      ],
+      [
+        "there are also",
+        0.2526847757422615
+      ],
+      [
+        "this is the",
+        0.2526847757422615
+      ]
+    ],
+    "transitions_used": {
+      "also": 3.9166140240050535,
+      "and": 42.893240682248894,
+      "as well as": 0.06317119393556538,
+      "not only": 0.06317119393556538,
+      "although": 0.06317119393556538,
+      "but": 4.421983575489577,
+      "however": 0.06317119393556538,
+      "still": 1.705622236260265,
+      "though": 0.12634238787113075,
+      "while": 2.0846493998736575,
+      "yet": 0.12634238787113075,
+      "because": 3.0953885028427037,
+      "since": 0.12634238787113075,
+      "so": 2.274162981680354,
+      "for example": 0.06317119393556538,
+      "specifically": 0.06317119393556538,
+      "such as": 1.3897662665824384,
+      "after": 2.337334175615919,
+      "before": 4.674668351231838,
+      "first": 4.9273531269741,
+      "later": 0.7580543272267846,
+      "next": 0.6317119393556538,
+      "second": 0.6948831332912192,
+      "then": 0.6317119393556538,
+      "in short": 0.06317119393556538,
+      "overall": 0.6317119393556538,
+      "clearly": 0.3790271636133923,
+      "especially": 0.8843967150979154,
+      "of course": 0.06317119393556538
+    },
+    "discouraged_observed": {},
+    "comma_density": 7.47,
+    "dash_density": 1.33,
+    "semicolon_density": 0.02,
+    "list_frequency": 5.87,
+    "stop_words_hard": {
+      "landscape": 1,
+      "whether you are": 2,
+      "if you are": 5
+    },
+    "stop_words_soft": {
+      "unlock": 9,
+      "selection": 3,
+      "tailored": 1,
+      "key": 5
+    },
+    "schema_version": "1.0",
+    "article_count": 27,
+    "total_words": 21806,
+    "total_sentences": 1583
+  },
+  "article_count": 27,
+  "schema_version": "1.0",
+  "built_at": "2026-06-07T18:21:38.736131Z"
+}

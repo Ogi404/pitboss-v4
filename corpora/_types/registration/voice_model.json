@@ -1,0 +1,151 @@
+{
+  "layer": "type",
+  "layer_name": "registration",
+  "fingerprint": {
+    "sentence_length_mean": 12.87,
+    "sentence_length_median": 13,
+    "sentence_length_stdev": 6.72,
+    "sentence_length_p10": 5,
+    "sentence_length_p90": 22,
+    "para_sentences_mean": 2.16,
+    "para_sentences_stdev": 1.19,
+    "para_words_mean": 27.74,
+    "para_words_stdev": 17.21,
+    "second_person_count": 200,
+    "reader_ref_count": 1,
+    "generic_noun_count": 11,
+    "unclear_person_count": 16,
+    "third_person_count": 28,
+    "person_ratio": 200.0,
+    "heading_capitalization": "title_case",
+    "title_case_ratio": 0.77,
+    "common_openers": [
+      [
+        "yes.",
+        1.0666666666666667
+      ],
+      [
+        "no.",
+        1.0666666666666667
+      ],
+      [
+        "most login issues",
+        1.0666666666666667
+      ],
+      [
+        "the good news",
+        0.8
+      ],
+      [
+        "the most common",
+        0.8
+      ],
+      [
+        "if you forget",
+        0.8
+      ],
+      [
+        "yes, you can",
+        0.8
+      ],
+      [
+        "if you experience",
+        0.5333333333333333
+      ],
+      [
+        "the first step",
+        0.5333333333333333
+      ],
+      [
+        "cookie casino keeps",
+        0.5333333333333333
+      ],
+      [
+        "you enter your",
+        0.5333333333333333
+      ],
+      [
+        "the casino may",
+        0.5333333333333333
+      ],
+      [
+        "cookie casino does",
+        0.5333333333333333
+      ],
+      [
+        "most games are",
+        0.5333333333333333
+      ],
+      [
+        "the platform uses",
+        0.5333333333333333
+      ],
+      [
+        "the registration process",
+        0.5333333333333333
+      ],
+      [
+        "these checks help",
+        0.5333333333333333
+      ],
+      [
+        "you need to",
+        0.5333333333333333
+      ],
+      [
+        "if none of",
+        0.5333333333333333
+      ],
+      [
+        "the royalxo registration",
+        0.5333333333333333
+      ]
+    ],
+    "transitions_used": {
+      "also": 1.866666666666667,
+      "and": 42.13333333333333,
+      "although": 0.26666666666666666,
+      "but": 3.2,
+      "however": 1.866666666666667,
+      "still": 0.26666666666666666,
+      "while": 0.26666666666666666,
+      "because": 1.6,
+      "so": 3.2,
+      "such as": 0.26666666666666666,
+      "after": 3.2,
+      "before": 5.6000000000000005,
+      "first": 4.266666666666667,
+      "later": 2.933333333333333,
+      "next": 0.26666666666666666,
+      "second": 0.5333333333333333,
+      "then": 2.4,
+      "overall": 0.26666666666666666,
+      "especially": 0.5333333333333333,
+      "of course": 0.26666666666666666
+    },
+    "discouraged_observed": {},
+    "comma_density": 6.73,
+    "dash_density": 1.39,
+    "semicolon_density": 0.04,
+    "list_frequency": 8.5,
+    "stop_words_hard": {
+      "seamlessly": 1,
+      "thrilling": 1,
+      "breeze": 1,
+      "punters": 1
+    },
+    "stop_words_soft": {
+      "ensure": 2,
+      "exciting": 1,
+      "tailored": 1,
+      "key": 1
+    },
+    "schema_version": "1.0",
+    "article_count": 12,
+    "total_words": 4826,
+    "total_sentences": 375
+  },
+  "article_count": 12,
+  "schema_version": "1.0",
+  "built_at": "2026-06-07T18:21:21.069007Z"
+}

@@ -1,0 +1,192 @@
+{
+  "layer": "type",
+  "layer_name": "app_review",
+  "fingerprint": {
+    "sentence_length_mean": 14.74,
+    "sentence_length_median": 14,
+    "sentence_length_stdev": 7.44,
+    "sentence_length_p10": 5,
+    "sentence_length_p90": 25,
+    "para_sentences_mean": 2.19,
+    "para_sentences_stdev": 1.09,
+    "para_words_mean": 32.25,
+    "para_words_stdev": 16.5,
+    "second_person_count": 1587,
+    "reader_ref_count": 49,
+    "generic_noun_count": 70,
+    "unclear_person_count": 94,
+    "third_person_count": 213,
+    "person_ratio": 32.39,
+    "heading_capitalization": "title_case",
+    "title_case_ratio": 0.73,
+    "common_openers": [
+      [
+        "yes.",
+        0.5584642233856894
+      ],
+      [
+        "the avalon78 app",
+        0.48865619546247824
+      ],
+      [
+        "the app is",
+        0.45375218150087265
+      ],
+      [
+        "no.",
+        0.45375218150087265
+      ],
+      [
+        "you don\u2019t need",
+        0.45375218150087265
+      ],
+      [
+        "if you are",
+        0.34904013961605584
+      ],
+      [
+        "the mobile website",
+        0.34904013961605584
+      ],
+      [
+        "the cookie casino",
+        0.31413612565445026
+      ],
+      [
+        "the mobile site",
+        0.2792321116928447
+      ],
+      [
+        "here\u2019s how to",
+        0.2792321116928447
+      ],
+      [
+        "if your device",
+        0.2792321116928447
+      ],
+      [
+        "if you want",
+        0.2792321116928447
+      ],
+      [
+        "the mason slots",
+        0.2792321116928447
+      ],
+      [
+        "you can also",
+        0.24432809773123912
+      ],
+      [
+        "below are the",
+        0.24432809773123912
+      ],
+      [
+        "the process is",
+        0.20942408376963353
+      ],
+      [
+        "to get the",
+        0.20942408376963353
+      ],
+      [
+        "there is no",
+        0.20942408376963353
+      ],
+      [
+        "if you don\u2019t",
+        0.20942408376963353
+      ],
+      [
+        "on android, the",
+        0.20942408376963353
+      ]
+    ],
+    "transitions_used": {
+      "additionally": 0.38394415357766143,
+      "also": 3.3856893542757414,
+      "and": 48.69109947643979,
+      "as well as": 0.034904013961605584,
+      "besides": 0.20942408376963353,
+      "furthermore": 0.10471204188481677,
+      "in addition": 0.034904013961605584,
+      "not only": 0.06980802792321117,
+      "although": 0.034904013961605584,
+      "but": 3.804537521815009,
+      "despite": 0.034904013961605584,
+      "even though": 0.13961605584642234,
+      "however": 0.9424083769633508,
+      "nevertheless": 0.06980802792321117,
+      "still": 2.3036649214659684,
+      "though": 0.45375218150087265,
+      "while": 1.6404886561954626,
+      "yet": 0.24432809773123912,
+      "because": 1.8499127399650959,
+      "due to": 0.06980802792321117,
+      "since": 0.48865619546247824,
+      "so": 4.328097731239092,
+      "therefore": 0.17452006980802792,
+      "specifically": 0.10471204188481677,
+      "such as": 0.8376963350785341,
+      "after": 1.0471204188481675,
+      "afterward": 0.034904013961605584,
+      "before": 2.2338568935427574,
+      "finally": 0.06980802792321117,
+      "first": 1.8848167539267016,
+      "later": 0.8027923211169284,
+      "meanwhile": 0.034904013961605584,
+      "next": 0.31413612565445026,
+      "second": 0.45375218150087265,
+      "then": 0.8726003490401396,
+      "in short": 0.24432809773123912,
+      "overall": 0.31413612565445026,
+      "certainly": 0.034904013961605584,
+      "clearly": 0.2792321116928447,
+      "especially": 0.9075043630017453,
+      "importantly": 0.034904013961605584,
+      "most importantly": 0.034904013961605584,
+      "notably": 0.034904013961605584,
+      "of course": 0.24432809773123912,
+      "particularly": 0.06980802792321117
+    },
+    "discouraged_observed": {},
+    "comma_density": 7.18,
+    "dash_density": 1.61,
+    "semicolon_density": 0.06,
+    "list_frequency": 6.28,
+    "stop_words_hard": {
+      "landscape": 11,
+      "top-tier": 1,
+      "seamless": 7,
+      "seamlessly": 8,
+      "navigating": 2,
+      "picture this": 1,
+      "thrilling": 2,
+      "at your fingertips": 3,
+      "if you are": 14,
+      "ins and outs": 1,
+      "seasoned": 2,
+      "sleek": 3,
+      "the best part": 6,
+      "punters": 10
+    },
+    "stop_words_soft": {
+      "unlock": 5,
+      "selection": 7,
+      "ensure": 13,
+      "exciting": 2,
+      "essential": 1,
+      "tailored": 1,
+      "elevate": 1,
+      "premier": 1,
+      "key": 10,
+      "thrill": 4
+    },
+    "schema_version": "1.0",
+    "article_count": 41,
+    "total_words": 42219,
+    "total_sentences": 2865
+  },
+  "article_count": 41,
+  "schema_version": "1.0",
+  "built_at": "2026-06-07T18:21:06.342926Z"
+}

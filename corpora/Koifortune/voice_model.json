@@ -1,0 +1,175 @@
+{
+  "layer": "brand",
+  "layer_name": "Koifortune",
+  "fingerprint": {
+    "sentence_length_mean": 14.32,
+    "sentence_length_median": 14.0,
+    "sentence_length_stdev": 6.23,
+    "sentence_length_p10": 7,
+    "sentence_length_p90": 22,
+    "para_sentences_mean": 2.2,
+    "para_sentences_stdev": 0.91,
+    "para_words_mean": 31.55,
+    "para_words_stdev": 13.89,
+    "second_person_count": 668,
+    "reader_ref_count": 26,
+    "generic_noun_count": 55,
+    "unclear_person_count": 56,
+    "third_person_count": 137,
+    "person_ratio": 25.69,
+    "heading_capitalization": "title_case",
+    "title_case_ratio": 0.9,
+    "common_openers": [
+      [
+        "you can also",
+        0.6474820143884892
+      ],
+      [
+        "the game has",
+        0.5035971223021583
+      ],
+      [
+        "yes.",
+        0.4316546762589928
+      ],
+      [
+        "the minimum deposit",
+        0.4316546762589928
+      ],
+      [
+        "you can claim",
+        0.4316546762589928
+      ],
+      [
+        "no.",
+        0.3597122302158274
+      ],
+      [
+        "the crypto reload",
+        0.3597122302158274
+      ],
+      [
+        "the koifortune casino",
+        0.28776978417266186
+      ],
+      [
+        "the welcome package",
+        0.28776978417266186
+      ],
+      [
+        "is a",
+        0.28776978417266186
+      ],
+      [
+        "always check the",
+        0.28776978417266186
+      ],
+      [
+        "does not",
+        0.28776978417266186
+      ],
+      [
+        "this is the",
+        0.28776978417266186
+      ],
+      [
+        "the thursday reload",
+        0.28776978417266186
+      ],
+      [
+        "you can start",
+        0.28776978417266186
+      ],
+      [
+        "offers a",
+        0.28776978417266186
+      ],
+      [
+        "here's how to",
+        0.2158273381294964
+      ],
+      [
+        "iphone and ipad",
+        0.2158273381294964
+      ],
+      [
+        "live dealer games",
+        0.2158273381294964
+      ],
+      [
+        "if you are",
+        0.2158273381294964
+      ]
+    ],
+    "transitions_used": {
+      "also": 5.0359712230215825,
+      "and": 42.51798561151079,
+      "besides": 0.2158273381294964,
+      "furthermore": 0.07194244604316546,
+      "in addition": 0.28776978417266186,
+      "not only": 0.07194244604316546,
+      "but": 3.597122302158273,
+      "even though": 0.2158273381294964,
+      "however": 0.7194244604316548,
+      "nevertheless": 0.14388489208633093,
+      "still": 1.2949640287769784,
+      "though": 0.3597122302158274,
+      "while": 1.7985611510791366,
+      "yet": 0.07194244604316546,
+      "accordingly": 0.07194244604316546,
+      "as a result": 0.07194244604316546,
+      "because": 3.093525179856115,
+      "due to": 0.14388489208633093,
+      "since": 0.3597122302158274,
+      "so": 4.60431654676259,
+      "for example": 0.14388489208633093,
+      "for instance": 0.07194244604316546,
+      "such as": 0.5035971223021583,
+      "after": 2.086330935251799,
+      "before": 4.172661870503598,
+      "first": 4.100719424460432,
+      "later": 0.5755395683453237,
+      "meanwhile": 0.14388489208633093,
+      "next": 0.14388489208633093,
+      "second": 0.4316546762589928,
+      "then": 0.5755395683453237,
+      "clearly": 0.2158273381294964,
+      "especially": 1.1510791366906474,
+      "importantly": 0.07194244604316546,
+      "of course": 0.07194244604316546,
+      "particularly": 0.07194244604316546
+    },
+    "discouraged_observed": {},
+    "comma_density": 7.15,
+    "dash_density": 1.26,
+    "semicolon_density": 0.06,
+    "list_frequency": 3.97,
+    "stop_words_hard": {
+      "landscape": 2,
+      "seamlessly": 1,
+      "picture this": 1,
+      "thrilling": 1,
+      "if you are": 4,
+      "seasoned": 2,
+      "excitement": 4,
+      "breeze": 1,
+      "the best part": 1,
+      "punters": 4
+    },
+    "stop_words_soft": {
+      "unlock": 4,
+      "selection": 9,
+      "ensure": 3,
+      "exciting": 2,
+      "key": 5,
+      "thrill": 5
+    },
+    "schema_version": "1.0",
+    "article_count": 14,
+    "total_words": 19905,
+    "total_sentences": 1390
+  },
+  "article_count": 14,
+  "schema_version": "1.0",
+  "built_at": "2026-06-07T18:21:33.336315Z"
+}

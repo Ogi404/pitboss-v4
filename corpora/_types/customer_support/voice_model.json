@@ -1,0 +1,161 @@
+{
+  "layer": "type",
+  "layer_name": "customer_support",
+  "fingerprint": {
+    "sentence_length_mean": 14.83,
+    "sentence_length_median": 14.0,
+    "sentence_length_stdev": 6.84,
+    "sentence_length_p10": 7,
+    "sentence_length_p90": 24,
+    "para_sentences_mean": 2.16,
+    "para_sentences_stdev": 0.92,
+    "para_words_mean": 32.03,
+    "para_words_stdev": 17.15,
+    "second_person_count": 302,
+    "reader_ref_count": 15,
+    "generic_noun_count": 12,
+    "unclear_person_count": 40,
+    "third_person_count": 67,
+    "person_ratio": 20.13,
+    "heading_capitalization": "title_case",
+    "title_case_ratio": 0.79,
+    "common_openers": [
+      [
+        "this is the",
+        1.1673151750972763
+      ],
+      [
+        "the contact page",
+        0.9727626459143969
+      ],
+      [
+        "the live chat",
+        0.7782101167315175
+      ],
+      [
+        "there is no",
+        0.7782101167315175
+      ],
+      [
+        "live chat is",
+        0.7782101167315175
+      ],
+      [
+        "you can contact",
+        0.7782101167315175
+      ],
+      [
+        "the support team",
+        0.7782101167315175
+      ],
+      [
+        "yes.",
+        0.5836575875486382
+      ],
+      [
+        "the support setup",
+        0.5836575875486382
+      ],
+      [
+        "the contact form",
+        0.5836575875486382
+      ],
+      [
+        "you can use",
+        0.5836575875486382
+      ],
+      [
+        "you can also",
+        0.5836575875486382
+      ],
+      [
+        "that is when",
+        0.38910505836575876
+      ],
+      [
+        "in most cases,",
+        0.38910505836575876
+      ],
+      [
+        "sometimes you want",
+        0.38910505836575876
+      ],
+      [
+        "there\u2019s also a",
+        0.38910505836575876
+      ],
+      [
+        "when you\u2019re playing",
+        0.38910505836575876
+      ],
+      [
+        "got a question?",
+        0.38910505836575876
+      ],
+      [
+        "support teams are",
+        0.38910505836575876
+      ],
+      [
+        "you don\u2019t have",
+        0.38910505836575876
+      ]
+    ],
+    "transitions_used": {
+      "additionally": 0.19455252918287938,
+      "also": 5.447470817120623,
+      "and": 39.10505836575876,
+      "in addition": 0.19455252918287938,
+      "although": 0.38910505836575876,
+      "but": 4.474708171206226,
+      "however": 0.7782101167315175,
+      "nevertheless": 0.19455252918287938,
+      "on the other hand": 0.19455252918287938,
+      "still": 0.38910505836575876,
+      "though": 0.19455252918287938,
+      "while": 1.7509727626459144,
+      "yet": 0.19455252918287938,
+      "because": 1.1673151750972763,
+      "for this reason": 0.19455252918287938,
+      "since": 0.19455252918287938,
+      "so": 4.863813229571985,
+      "therefore": 0.19455252918287938,
+      "specifically": 0.19455252918287938,
+      "such as": 0.7782101167315175,
+      "after": 0.9727626459143969,
+      "before": 1.1673151750972763,
+      "first": 2.529182879377432,
+      "later": 0.5836575875486382,
+      "meanwhile": 0.19455252918287938,
+      "next": 0.5836575875486382,
+      "second": 0.19455252918287938,
+      "then": 0.38910505836575876,
+      "in short": 0.19455252918287938,
+      "overall": 0.19455252918287938,
+      "ultimately": 0.19455252918287938,
+      "clearly": 0.38910505836575876,
+      "especially": 1.9455252918287937
+    },
+    "discouraged_observed": {},
+    "comma_density": 6.93,
+    "dash_density": 0.89,
+    "semicolon_density": 0.03,
+    "list_frequency": 3.54,
+    "stop_words_hard": {
+      "whether you are": 1,
+      "step into": 1
+    },
+    "stop_words_soft": {
+      "ensure": 1,
+      "essential": 2,
+      "key": 1
+    },
+    "schema_version": "1.0",
+    "article_count": 18,
+    "total_words": 7624,
+    "total_sentences": 514
+  },
+  "article_count": 18,
+  "schema_version": "1.0",
+  "built_at": "2026-06-07T18:21:23.325548Z"
+}
