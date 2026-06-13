@@ -8,6 +8,7 @@ Checks complete:
 - `deterministic/voice.py` - third-to-second person conversion
 - `deterministic/stop_words.py` - weighted stop word detection (hard/soft tiers)
 - `deterministic/headings.py` - capitalization, question marks, hierarchy, blank lines
+- `deterministic/currency.py` - symbol/code consistency, combined violations, multi-convention gating
 
 ### Phase 1 Recap
 Voice models built from 270 articles across 17 brands:
@@ -125,13 +126,14 @@ The 937 UNCLEAR count in the corpus confirms this middle path matters — silent
 ## Test Status
 
 ```
-405 tests passing
+446 tests passing
 ├── 148 tests (Phase 0 - core contracts)
 ├── 51 tests (Phase 1 - voice model)
 ├── 78 tests (Phase 1 - person reference classifier)
 ├── 59 tests (Phase 2 - voice check)
 ├── 35 tests (Phase 2 - stop words check)
-└── 34 tests (Phase 2 - headings check)
+├── 34 tests (Phase 2 - headings check)
+└── 41 tests (Phase 2 - currency check)
 ```
 
 ## Phase 2 Deliverables
@@ -252,6 +254,59 @@ This approach correctly handles:
 - Brand names: "Vave Casino Features" → proposal (Vave not in dictionary)
 - Provider names: "NetEnt Slots" → proposal (NetEnt not in dictionary)
 
+### Currency Check (Complete)
+
+**Files:**
+- `deterministic/currency.py` - Currency formatting consistency check (~560 lines)
+- `tests/test_currency_check.py` - 41 comprehensive tests
+
+**Section 11 Compliance:**
+1. Use currency symbol OR abbreviation, never both
+2. Be consistent within an article
+
+**Two Sub-Checks:**
+
+| Sub-check | Detection | auto_applicable |
+|-----------|-----------|-----------------|
+| `combined_violation` | Symbol + code together (`$20 CAD`) | True (definite §11 violation) |
+| `style_inconsistency` | Minority style vs dominant | Conditional (see below) |
+
+**Key Features:**
+
+1. **Combined Violations Always Auto**: `$20 CAD` → `20 CAD` is a definite §11 violation (using both symbol AND code). These auto-apply regardless of convention count.
+
+2. **Distinct Convention Tracking**: Each symbol/code tracked separately:
+   - `symbol:A$`, `symbol:$`, `symbol:€` (different conventions)
+   - `code:AUD`, `code:USD`, `code:USDT` (different conventions)
+   - Bare `$` distinguished from prefixed symbols (`A$`, `C$`, `NZ$`)
+
+3. **Multi-Convention Gating**: Lone-minority normalization (`10 AUD` → `A$10`) becomes PROPOSAL when:
+   - 3+ distinct conventions present (no clear house style)
+   - Prose and tables use different conventions
+   - Dominant style ratio ≤70%
+
+4. **Crypto Support**: USDT, USDC, BTC, ETH, etc. recognized; no symbol mapping for code-only crypto skips gracefully
+
+**Corpus Validation:**
+- **KoiFortune Bonus Canada**: 6 combined violations (`$20 CAD` → `20 CAD`) — all **AUTO**
+- **KoiFortune Bonuses AU**: 4 conventions (A$, $, AUD, USDT) — `10 AUD` → `A$10` is **PROPOSAL**
+  - Reasoning: "This article uses 4 different currency conventions. Human review needed to decide which style to standardize on."
+
+### Auto-Apply Design Principle (Confirmed Across All Checks)
+
+The same bar applies to all four completed checks:
+
+**Auto-apply = edits you'd unambiguously make yourself.**
+
+| Situation | Action | Reasoning |
+|-----------|--------|-----------|
+| Definite violation | AUTO | Clear rule broken (combined `$20 CAD`, hard stop word, `?` on non-FAQ heading) |
+| Clear majority style | AUTO | >70% dominant, simple conversion (READER_REF → you, dictionary word recase) |
+| Ambiguous/judgment call | PROPOSAL | Multiple conventions, unknown word, UNCLEAR classification |
+| Context-dependent | PROPOSAL | Prose vs table differ, proper noun possible, relative clause |
+
+This principle ensures the deterministic layer's value: 100% consistency for auto-applies, human review for anything requiring judgment.
+
 ### Remaining Phase 2 Checks
 
 | Check | Description | Status |
@@ -259,12 +314,12 @@ This approach correctly handles:
 | `voice.py` | Third-to-second person | **Complete** |
 | `stop_words.py` | Weighted stop-word detection (hard/soft tiers) | **Complete** |
 | `headings.py` | Capitalization, hierarchy, spacing, question marks | **Complete** |
+| `currency.py` | Format consistency (symbol XOR abbreviation) | **Complete** |
 | `brand_names.py` | Normalization (Bet Label → BetLabel) | Pending |
 | `locale_spelling.py` | UK/US/CA/AU/NZ dictionary swaps | Pending |
-| `currency.py` | Format consistency (symbol XOR abbreviation) | Pending |
 | `formatting.py` | Whitespace, list punctuation, UI quoting | Pending |
 | `keywords.py` | Keyword counting + density against brief | Pending |
 | `structure.py` | Paragraph-between-headings, other structure rules | Pending |
 
 ---
-*Last updated: Phase 2 in progress - voice, stop words, and headings checks complete and validated (headings now uses dictionary-based proper noun detection)*
+*Last updated: Phase 2 in progress - voice, stop words, headings, and currency checks complete and validated (446 tests). Remaining: formatting, locale_spelling, brand_names, keywords, structure.*
