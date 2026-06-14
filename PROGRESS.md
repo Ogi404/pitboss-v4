@@ -10,6 +10,7 @@ Checks complete:
 - `deterministic/headings.py` - capitalization, question marks, hierarchy, blank lines
 - `deterministic/currency.py` - symbol/code consistency, combined violations, multi-convention gating
 - `deterministic/formatting.py` - whitespace, punctuation spacing, Latin abbreviations
+- `deterministic/locale_spelling.py` - regional variant enforcement (British/American/Canadian/Australian/NZ)
 
 ### Phase 1 Recap
 Voice models built from 270 articles across 17 brands:
@@ -127,7 +128,7 @@ The 937 UNCLEAR count in the corpus confirms this middle path matters — silent
 ## Test Status
 
 ```
-492 tests passing (3 skipped)
+544 tests passing (3 skipped)
 ├── 148 tests (Phase 0 - core contracts)
 ├── 51 tests (Phase 1 - voice model)
 ├── 78 tests (Phase 1 - person reference classifier)
@@ -135,7 +136,8 @@ The 937 UNCLEAR count in the corpus confirms this middle path matters — silent
 ├── 35 tests (Phase 2 - stop words check)
 ├── 34 tests (Phase 2 - headings check)
 ├── 41 tests (Phase 2 - currency check)
-└── 46 tests (Phase 2 - formatting check, 3 skipped)
+├── 46 tests (Phase 2 - formatting check, 3 skipped)
+└── 55 tests (Phase 2 - locale spelling check)
 ```
 
 ## Phase 2 Deliverables
@@ -342,6 +344,53 @@ This approach correctly handles:
 
 Writers have good formatting hygiene; this check catches edge cases rather than systemic issues.
 
+### Locale Spelling Check (Complete)
+
+**Files:**
+- `deterministic/locale_spelling.py` - Regional spelling variant enforcement (~480 lines)
+- `tests/test_locale_spelling_check.py` - 55 comprehensive tests
+
+**Section 4 Compliance:**
+Enforce correct regional spelling variants based on brand's target market (read from `standards.spelling_region`).
+
+**Five Spelling Regions:**
+
+| Region | Countries | Key Patterns |
+|--------|-----------|--------------|
+| british | UK, IN, LK, PK, SG, MM, HK, KE, NG | -ise, -our, -re, -lled |
+| american | US, PH, TW, KR, JP | -ize, -or, -er, -led |
+| canadian | CA | **HYBRID**: British -our/-re + American -ize |
+| australian | AU | Follows British |
+| new_zealand | NZ | Follows British |
+
+**Key Features:**
+
+1. **Canadian Hybrid**: Critical for Koifortune (CA market). Correctly enforces:
+   - British -our (colour, favour, favourite)
+   - British -re (centre, metre, theatre)
+   - American -ize (organize, realize, finalize) — British -ise is **wrong** in Canadian
+   - British grey (not gray)
+
+2. **100+ Word Pairs**: Covers -ise/-ize, -isation/-ization, -our/-or, -re/-er, -lled/-led, -ogue/-og patterns plus special cases (defence/defense, tyre/tire, cheque/check, programme/program, jewellery/jewelry, etc.)
+
+3. **Case Preservation**: Maintains original casing (lowercase, UPPERCASE, Title Case)
+
+4. **Exclusions**: Quoted strings, URLs, email addresses skipped (brand names, proper nouns protected)
+
+5. **Auto-Applicable for Unambiguous Swaps**: All standard variant swaps are auto (confidence 0.95). Context-dependent words (programme/program for software) handled in standard swap.
+
+**Corpus Validation (Koifortune/Canadian, 14 articles):**
+
+| Finding | Count | Type |
+|---------|-------|------|
+| finalise → finalize | 1 | AUTO (Canadian uses -ize) |
+| realise → realize | 1 | AUTO (Canadian uses -ize) |
+| favor → favour | 1 | AUTO (Canadian uses -our) |
+| favorite → favourite | 3 | AUTO (Canadian uses -our) |
+| flavor → flavour | 2 | AUTO (Canadian uses -our) |
+
+**8 findings total, all clean common words** — no brand names, game titles, or proper nouns touched. Canadian hybrid working correctly: British -ise flagged as wrong, American -or flagged as wrong.
+
 ### Auto-Apply Design Principle (Confirmed Across All Checks)
 
 The same bar applies to all five completed checks:
@@ -366,10 +415,12 @@ This principle ensures the deterministic layer's value: 100% consistency for aut
 | `headings.py` | Capitalization, hierarchy, spacing, question marks | **Complete** |
 | `currency.py` | Format consistency (symbol XOR abbreviation) | **Complete** |
 | `formatting.py` | Whitespace, punctuation spacing, Latin abbreviations | **Complete** |
-| `locale_spelling.py` | UK/US/CA/AU/NZ dictionary swaps | Pending |
+| `locale_spelling.py` | UK/US/CA/AU/NZ regional variant enforcement | **Complete** |
 | `brand_names.py` | Normalization (Bet Label → BetLabel) | Pending |
-| `keywords.py` | Keyword counting + density against brief | Pending |
-| `structure.py` | Paragraph-between-headings, other structure rules | Pending |
+| `keywords.py` | Keyword counting + density against brief | Needs brief agent (Phase 3) |
+| `structure.py` | Paragraph-between-headings, other structure rules | Needs brief agent (Phase 3) |
+
+**Phase 2 Remaining:** `brand_names.py` (article-scope only, no brief needed). `keywords.py` and `structure.py` require brief agent to extract target keywords and structure requirements — moving to Phase 3.
 
 ---
-*Last updated: Phase 2 in progress - voice, stop words, headings, currency, and formatting checks complete and validated (492 tests). Remaining: locale_spelling, brand_names, keywords, structure.*
+*Last updated: Phase 2 in progress - voice, stop words, headings, currency, formatting, and locale_spelling checks complete and validated (544 tests). Remaining: brand_names (then keywords/structure move to Phase 3 with brief agent).*
