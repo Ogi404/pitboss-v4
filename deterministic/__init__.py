@@ -5,3 +5,6 @@
 from .voice import VoiceThirdPersonCheck  # noqa: F401
 from .stop_words import StopWordsCheck  # noqa: F401
 from .headings import HeadingsCheck  # noqa: F401
+from .currency import CurrencyConsistencyCheck  # noqa: F401
+from .formatting import FormattingCheck  # noqa: F401
+from .locale_spelling import LocaleSpellingCheck  # noqa: F401

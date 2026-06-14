@@ -9,6 +9,7 @@ Checks complete:
 - `deterministic/stop_words.py` - weighted stop word detection (hard/soft tiers)
 - `deterministic/headings.py` - capitalization, question marks, hierarchy, blank lines
 - `deterministic/currency.py` - symbol/code consistency, combined violations, multi-convention gating
+- `deterministic/formatting.py` - whitespace, punctuation spacing, Latin abbreviations
 
 ### Phase 1 Recap
 Voice models built from 270 articles across 17 brands:
@@ -126,14 +127,15 @@ The 937 UNCLEAR count in the corpus confirms this middle path matters — silent
 ## Test Status
 
 ```
-446 tests passing
+492 tests passing (3 skipped)
 ├── 148 tests (Phase 0 - core contracts)
 ├── 51 tests (Phase 1 - voice model)
 ├── 78 tests (Phase 1 - person reference classifier)
 ├── 59 tests (Phase 2 - voice check)
 ├── 35 tests (Phase 2 - stop words check)
 ├── 34 tests (Phase 2 - headings check)
-└── 41 tests (Phase 2 - currency check)
+├── 41 tests (Phase 2 - currency check)
+└── 46 tests (Phase 2 - formatting check, 3 skipped)
 ```
 
 ## Phase 2 Deliverables
@@ -292,9 +294,57 @@ This approach correctly handles:
 - **KoiFortune Bonuses AU**: 4 conventions (A$, $, AUD, USDT) — `10 AUD` → `A$10` is **PROPOSAL**
   - Reasoning: "This article uses 4 different currency conventions. Human review needed to decide which style to standardize on."
 
+### Formatting Check (Complete)
+
+**Files:**
+- `deterministic/formatting.py` - Mechanical formatting consistency (~500 lines)
+- `tests/test_formatting_check.py` - 46 tests (3 skipped)
+
+**Six Sub-Checks:**
+
+| Sub-check | Detection | auto_applicable | Status |
+|-----------|-----------|-----------------|--------|
+| `double_space` | Two+ consecutive spaces | True | Active |
+| `space_before_punct` | Space before `,` `.` `;` `:` `!` `?` | True | Active |
+| `missing_space_after` | Missing space after `,` `.` | True (clear), False (ambiguous) | Active |
+| `latin_abbrev` | `e.g.`, `i.e.`, `etc.`, `viz.`, `cf.` | False (contextual) | Active |
+| `ui_quoting` | Unquoted UI elements | False | **DISABLED** |
+| `trailing_whitespace` | Trailing spaces/tabs | True | Active |
+
+**Key Features:**
+
+1. **Whitespace Auto-Fixes**: Double spaces, space-before-punctuation, and trailing whitespace are always safe to auto-apply. Corpus is clean (writers have good formatting hygiene).
+
+2. **Missing Space After Punctuation**: Catches real typos ("now.Solid" → "now. Solid") with extensive false-positive exclusions:
+   - Decimals: `3.5`, `0.99`
+   - Thousands separators: `1,000`
+   - Domains/TLDs: `.com`, `.ai`, `.co.uk`
+   - Abbreviations: `e.g.`, `i.e.`, `N.V.`, `Dr.`
+   - Version numbers: `v1.2`
+
+3. **Latin Abbreviations**: Requirements prohibit `e.g.`, `i.e.`, `etc.` ("get straight to the point"). Flagged as proposals with suggested replacements:
+   - `e.g.` → "for example"
+   - `i.e.` → "that is"
+   - `etc.` → "[rephrase to be specific]"
+
+4. **UI Quoting DISABLED**: Sub-check intended to flag unquoted UI elements ("tap Register" → "tap 'Register'"). **Disabled after 3/3 false positives** in corpus validation:
+   - Flagged country names ("choose India")
+   - Flagged nationalities ("choose Malaysian")
+   - Flagged section headings ("Hit Wins With")
+   - Method retained for future refinement if needed.
+
+**Corpus Validation (20 articles):**
+- **0 double_space** — corpus is clean
+- **0 space_before_punct** — corpus is clean
+- **1 missing_space_after** — valid typo caught
+- **2 latin_abbrev** — "etc." correctly flagged
+- **0 trailing_whitespace** — corpus is clean
+
+Writers have good formatting hygiene; this check catches edge cases rather than systemic issues.
+
 ### Auto-Apply Design Principle (Confirmed Across All Checks)
 
-The same bar applies to all four completed checks:
+The same bar applies to all five completed checks:
 
 **Auto-apply = edits you'd unambiguously make yourself.**
 
@@ -315,11 +365,11 @@ This principle ensures the deterministic layer's value: 100% consistency for aut
 | `stop_words.py` | Weighted stop-word detection (hard/soft tiers) | **Complete** |
 | `headings.py` | Capitalization, hierarchy, spacing, question marks | **Complete** |
 | `currency.py` | Format consistency (symbol XOR abbreviation) | **Complete** |
-| `brand_names.py` | Normalization (Bet Label → BetLabel) | Pending |
+| `formatting.py` | Whitespace, punctuation spacing, Latin abbreviations | **Complete** |
 | `locale_spelling.py` | UK/US/CA/AU/NZ dictionary swaps | Pending |
-| `formatting.py` | Whitespace, list punctuation, UI quoting | Pending |
+| `brand_names.py` | Normalization (Bet Label → BetLabel) | Pending |
 | `keywords.py` | Keyword counting + density against brief | Pending |
 | `structure.py` | Paragraph-between-headings, other structure rules | Pending |
 
 ---
-*Last updated: Phase 2 in progress - voice, stop words, headings, and currency checks complete and validated (446 tests). Remaining: formatting, locale_spelling, brand_names, keywords, structure.*
+*Last updated: Phase 2 in progress - voice, stop words, headings, currency, and formatting checks complete and validated (492 tests). Remaining: locale_spelling, brand_names, keywords, structure.*
