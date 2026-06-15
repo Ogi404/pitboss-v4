@@ -11,6 +11,7 @@ Checks complete:
 - `deterministic/currency.py` - symbol/code consistency, combined violations, multi-convention gating
 - `deterministic/formatting.py` - whitespace, punctuation spacing, Latin abbreviations
 - `deterministic/locale_spelling.py` - regional variant enforcement (British/American/Canadian/Australian/NZ)
+- `deterministic/brand_names.py` - own-brand normalization with dominance threshold, competitor detection
 
 ### Phase 1 Recap
 Voice models built from 270 articles across 17 brands:
@@ -128,7 +129,7 @@ The 937 UNCLEAR count in the corpus confirms this middle path matters — silent
 ## Test Status
 
 ```
-544 tests passing (3 skipped)
+577 tests passing (3 skipped)
 ├── 148 tests (Phase 0 - core contracts)
 ├── 51 tests (Phase 1 - voice model)
 ├── 78 tests (Phase 1 - person reference classifier)
@@ -137,7 +138,8 @@ The 937 UNCLEAR count in the corpus confirms this middle path matters — silent
 ├── 34 tests (Phase 2 - headings check)
 ├── 41 tests (Phase 2 - currency check)
 ├── 46 tests (Phase 2 - formatting check, 3 skipped)
-└── 55 tests (Phase 2 - locale spelling check)
+├── 55 tests (Phase 2 - locale spelling check)
+└── 33 tests (Phase 2 - brand names check)
 ```
 
 ## Phase 2 Deliverables
@@ -391,6 +393,86 @@ Enforce correct regional spelling variants based on brand's target market (read 
 
 **8 findings total, all clean common words** — no brand names, game titles, or proper nouns touched. Canadian hybrid working correctly: British -ise flagged as wrong, American -or flagged as wrong.
 
+### Brand Names Check (Complete)
+
+**Files:**
+- `deterministic/brand_names.py` - Own-brand normalization and competitor detection (~550 lines)
+- `tests/test_brand_names_check.py` - 33 comprehensive tests
+- `config/known_operators.txt` - Competitor brand list (corpus + external operators)
+- `brands/*.yaml` - 17 brand configs with corpus-derived canonicals and dominance ratios
+
+**Section 9 Compliance:**
+1. Normalize own-brand variants to canonical form (auto or proposal based on dominance)
+2. Flag competitor brand mentions (always proposal)
+
+**Two Sub-Checks:**
+
+| Sub-check | Detection | auto_applicable |
+|-----------|-----------|-----------------|
+| `own_brand` | Brand variants (KoiFortune → Koifortune) | Conditional (see dominance threshold) |
+| `competitor` | Other operator names in text | False (always proposal) |
+
+**Key Feature: Corpus-Derived Canonicals with Dominance Threshold**
+
+Canonicals are DERIVED FROM CORPUS analysis, not hand-set. Each brand YAML stores:
+- `brand_name`: Corpus-dominant form (e.g., "KoiFortune" not "Koifortune")
+- `canonical_dominance`: Ratio of canonical vs all variants in corpus
+
+**85% Dominance Threshold:**
+
+| Dominance | Mode | Behavior |
+|-----------|------|----------|
+| ≥ 85% | AUTO | Safe to auto-normalize (overwhelming corpus consensus) |
+| < 85% | PROPOSAL | Human review required (mixed usage in corpus) |
+
+**Final Brand Status:**
+
+| Brand | Canonical | Dominance | Mode |
+|-------|-----------|-----------|------|
+| TonyBet | TonyBet | 94.9% | AUTO |
+| Slotrave | Slotrave | 85.6% | AUTO |
+| PlayAmo | PlayAmo | 97.8% | AUTO |
+| HellSpin | HellSpin | 96.1% | AUTO |
+| 22Bet | 22Bet | 96.8% | AUTO |
+| Vave | Vave | 96.3% | AUTO |
+| Mason Slots | Mason Slots | 97.3% | AUTO |
+| Cookie Casino | Cookie Casino | 96.9% | AUTO |
+| *(+ 5 more)* | - | 96-99% | AUTO |
+| **KoiFortune** | KoiFortune | 58.0% | **PROPOSAL** |
+| **Ivibet** | Ivibet | 64.3% | **PROPOSAL** |
+| **Avalon78** | Avalon78 | 72.7% | **PROPOSAL** |
+| **Royalxo** | Royalxo | 54.7% | **PROPOSAL** |
+
+**Corpus Validation:**
+- **13 AUTO brands**: 52 normalizations (genuine variants of high-dominance brands)
+- **4 PROPOSAL brands**: 526 normalizations (mixed-usage brands → human review)
+
+**Competitor Detection:**
+- Flags mentions of other operators (bet365, DraftKings, etc.)
+- High-precision mode for ambiguous names (stake/spin/royal/national/bet):
+  - Only flags when capitalized AND not preceded by articles
+  - "place your stake" → not flagged (common word)
+  - "Stake offers crypto" → flagged (operator name)
+
+**Load-Time Validation Guard:**
+Warns if configured canonical doesn't match corpus-dominant form — catches config bugs before they cause mass mis-normalization.
+
+### KEY LESSON: Corpus Validation is Essential
+
+**Three wrong canonicals were caught ONLY by corpus-validating against ground truth:**
+
+1. **KoiFortune**: YAML said "Koifortune" but corpus dominant was "KoiFortune" (251 vs 171)
+2. **RoyalXO**: YAML said "RoyalXO" but corpus dominant was "Royalxo" (226 vs 173)
+3. **Ivibet/Avalon78**: Set as canonical but <85% dominant — mixed usage shouldn't auto-normalize
+
+**All three passed unit tests.** Green tests prove internal consistency; only corpus validation proves correctness about the real domain.
+
+**Principle for all future checks and the judgment layer:**
+- A high auto-apply count is a **risk surface**, not a success metric
+- The corpus is the source of truth for anything brand-specific
+- Config values that CAN be corpus-derived MUST be corpus-derived
+- Hand-set values MUST be cross-checked against corpus ground truth
+
 ### Auto-Apply Design Principle (Confirmed Across All Checks)
 
 The same bar applies to all five completed checks:
@@ -416,11 +498,13 @@ This principle ensures the deterministic layer's value: 100% consistency for aut
 | `currency.py` | Format consistency (symbol XOR abbreviation) | **Complete** |
 | `formatting.py` | Whitespace, punctuation spacing, Latin abbreviations | **Complete** |
 | `locale_spelling.py` | UK/US/CA/AU/NZ regional variant enforcement | **Complete** |
-| `brand_names.py` | Normalization (Bet Label → BetLabel) | Pending |
+| `brand_names.py` | Own-brand normalization with dominance threshold, competitor detection | **Complete** |
 | `keywords.py` | Keyword counting + density against brief | Needs brief agent (Phase 3) |
 | `structure.py` | Paragraph-between-headings, other structure rules | Needs brief agent (Phase 3) |
 
-**Phase 2 Remaining:** `brand_names.py` (article-scope only, no brief needed). `keywords.py` and `structure.py` require brief agent to extract target keywords and structure requirements — moving to Phase 3.
+**Phase 2 Status:**
+- **DONE & committed**: voice, stop_words, headings, currency, formatting, locale_spelling, brand_names (7 checks)
+- **REMAINING**: keywords.py, structure.py — both compare article AGAINST brief → depend on Phase 3 brief agent
 
 ---
-*Last updated: Phase 2 in progress - voice, stop words, headings, currency, formatting, and locale_spelling checks complete and validated (544 tests). Remaining: brand_names (then keywords/structure move to Phase 3 with brief agent).*
+*Last updated: Phase 2 near complete - 7 deterministic checks done and validated (577 tests). Remaining: keywords and structure (both require brief agent from Phase 3).*
