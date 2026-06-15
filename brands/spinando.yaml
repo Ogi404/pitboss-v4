@@ -1,0 +1,14 @@
+# Pitboss v4 - Spinando Brand Profile
+# Corpus-verified canonical: Spinando (291 occurrences)
+schema_version: "1.0"
+
+brand_name: "Spinando"
+
+# Dominance >= 85% → normalizations are AUTO
+canonical_dominance: 0.997
+
+brand_normalization:
+  "spinando": "Spinando"
+  "SPINANDO": "Spinando"
+  "SpinAndo": "Spinando"
+  "Spin Ando": "Spinando"

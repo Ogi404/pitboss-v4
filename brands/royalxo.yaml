@@ -1,0 +1,16 @@
+# Pitboss v4 - Royalxo Brand Profile
+# Corpus-verified canonical: Royalxo (226 occurrences, 54.7% dominance)
+schema_version: "1.0"
+
+brand_name: "Royalxo"
+
+# Dominance < 85% → normalizations are PROPOSAL, not AUTO
+canonical_dominance: 0.547
+
+brand_normalization:
+  "royalxo": "Royalxo"
+  "RoyalXO": "Royalxo"
+  "RoyalXo": "Royalxo"
+  "ROYALXO": "Royalxo"
+  "Royal XO": "Royalxo"
+  "royal xo": "Royalxo"

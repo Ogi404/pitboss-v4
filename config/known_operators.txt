@@ -1,0 +1,54 @@
+# Known casino/sportsbook operators for competitor detection
+# One brand's article should not mention other operators (per §9)
+# Lines starting with # are comments
+# Forms are corpus-verified canonical names
+
+# Corpus brands (internal) - corpus-verified canonical forms
+20Bet
+22Bet
+Avalon78
+CasinoChan
+Cookie Casino
+HellSpin
+Ivibet
+KoiFortune
+Mason Slots
+National
+PlayAmo
+Royalxo
+SafeCasino
+Slotrave
+Spinando
+TonyBet
+Vave
+
+# Major external operators
+bet365
+William Hill
+Ladbrokes
+DraftKings
+FanDuel
+Stake
+Bovada
+PokerStars
+888casino
+Betway
+Unibet
+Paddy Power
+Betfair
+Caesars
+BetMGM
+Pinnacle
+Cloudbet
+BC.Game
+Roobet
+Rollbit
+1xBet
+Melbet
+Mostbet
+LeoVegas
+Mr Green
+Casumo
+Rizk
+Betsafe
+Betsson

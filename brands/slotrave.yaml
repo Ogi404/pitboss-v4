@@ -1,0 +1,15 @@
+# Pitboss v4 - Slotrave Brand Profile
+# Corpus-verified canonical: Slotrave (309 occurrences vs SlotRave 28)
+schema_version: "1.0"
+
+brand_name: "Slotrave"
+
+# Dominance >= 85% → normalizations are AUTO
+canonical_dominance: 0.856
+
+brand_normalization:
+  "slotrave": "Slotrave"
+  "SlotRave": "Slotrave"
+  "SLOTRAVE": "Slotrave"
+  "Slot Rave": "Slotrave"
+  "slot rave": "Slotrave"

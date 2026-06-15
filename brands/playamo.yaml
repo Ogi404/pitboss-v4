@@ -1,0 +1,15 @@
+# Pitboss v4 - PlayAmo Brand Profile
+# Corpus-verified canonical: PlayAmo (312 occurrences)
+schema_version: "1.0"
+
+brand_name: "PlayAmo"
+
+# Dominance >= 85% → normalizations are AUTO
+canonical_dominance: 0.978
+
+brand_normalization:
+  "playamo": "PlayAmo"
+  "Playamo": "PlayAmo"
+  "PLAYAMO": "PlayAmo"
+  "Play Amo": "PlayAmo"
+  "play amo": "PlayAmo"

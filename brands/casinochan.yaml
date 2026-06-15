@@ -1,0 +1,15 @@
+# Pitboss v4 - CasinoChan Brand Profile
+# Corpus-verified canonical: CasinoChan (273 occurrences)
+schema_version: "1.0"
+
+brand_name: "CasinoChan"
+
+# Dominance >= 85% → normalizations are AUTO
+canonical_dominance: 0.961
+
+brand_normalization:
+  "casinochan": "CasinoChan"
+  "Casinochan": "CasinoChan"
+  "CASINOCHAN": "CasinoChan"
+  "Casino Chan": "CasinoChan"
+  "casino chan": "CasinoChan"

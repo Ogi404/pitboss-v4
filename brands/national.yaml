@@ -1,0 +1,13 @@
+# Pitboss v4 - National Brand Profile
+# Corpus-verified canonical: National (174 occurrences)
+# Note: This is an ambiguous brand name (also a common word)
+schema_version: "1.0"
+
+brand_name: "National"
+
+# Dominance >= 85% → normalizations are AUTO
+canonical_dominance: 0.994
+
+brand_normalization:
+  "national": "National"
+  "NATIONAL": "National"

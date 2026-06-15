@@ -1,0 +1,14 @@
+# Pitboss v4 - 20Bet Brand Profile
+# Corpus-verified canonical: 20Bet (336 occurrences)
+schema_version: "1.0"
+
+brand_name: "20Bet"
+
+# Dominance >= 85% → normalizations are AUTO
+canonical_dominance: 0.982
+
+brand_normalization:
+  "20bet": "20Bet"
+  "20BET": "20Bet"
+  "20 Bet": "20Bet"
+  "20 bet": "20Bet"

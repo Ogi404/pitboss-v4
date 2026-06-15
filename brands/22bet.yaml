@@ -1,0 +1,14 @@
+# Pitboss v4 - 22Bet Brand Profile
+# Corpus-verified canonical: 22Bet (670 occurrences)
+schema_version: "1.0"
+
+brand_name: "22Bet"
+
+# Dominance >= 85% → normalizations are AUTO
+canonical_dominance: 0.968
+
+brand_normalization:
+  "22bet": "22Bet"
+  "22BET": "22Bet"
+  "22 Bet": "22Bet"
+  "22 bet": "22Bet"

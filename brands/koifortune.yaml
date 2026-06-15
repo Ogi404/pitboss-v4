@@ -8,8 +8,11 @@
 
 schema_version: "1.0"
 
-# Brand identity
-brand_name: "Koifortune"
+# Brand identity (corpus-verified: KoiFortune 251/433 = 58.0% dominance)
+brand_name: "KoiFortune"
+
+# Dominance < 85% → normalizations are PROPOSAL, not AUTO
+canonical_dominance: 0.580
 
 # Market/locale - Canada
 market: "CA"
@@ -23,10 +26,10 @@ headings:
 currency:
   symbol: "C$"
 
-# Brand name normalization rules
+# Brand name normalization rules (normalize variants to corpus-dominant form)
 brand_normalization:
-  "koifortune": "Koifortune"
-  "KoiFortune": "Koifortune"
-  "KOIFORTUNE": "Koifortune"
-  "Koi Fortune": "Koifortune"
-  "koi fortune": "Koifortune"
+  "koifortune": "KoiFortune"
+  "Koifortune": "KoiFortune"
+  "KOIFORTUNE": "KoiFortune"
+  "Koi Fortune": "KoiFortune"
+  "koi fortune": "KoiFortune"

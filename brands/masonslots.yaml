@@ -1,0 +1,16 @@
+# Pitboss v4 - Mason Slots Brand Profile
+# Corpus-verified canonical: "Mason Slots" WITH SPACE (320 occurrences)
+schema_version: "1.0"
+
+brand_name: "Mason Slots"
+
+# Dominance >= 85% → normalizations are AUTO
+canonical_dominance: 0.973
+
+brand_normalization:
+  "masonslots": "Mason Slots"
+  "MasonSlots": "Mason Slots"
+  "Masonslots": "Mason Slots"
+  "MASONSLOTS": "Mason Slots"
+  "mason slots": "Mason Slots"
+  "MASON SLOTS": "Mason Slots"

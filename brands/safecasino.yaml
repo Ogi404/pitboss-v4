@@ -1,0 +1,15 @@
+# Pitboss v4 - SafeCasino Brand Profile
+# Corpus-verified canonical: SafeCasino (96 occurrences)
+schema_version: "1.0"
+
+brand_name: "SafeCasino"
+
+# Dominance >= 85% → normalizations are AUTO
+canonical_dominance: 0.990
+
+brand_normalization:
+  "safecasino": "SafeCasino"
+  "Safecasino": "SafeCasino"
+  "SAFECASINO": "SafeCasino"
+  "Safe Casino": "SafeCasino"
+  "safe casino": "SafeCasino"

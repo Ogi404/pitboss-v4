@@ -1,0 +1,16 @@
+# Pitboss v4 - Cookie Casino Brand Profile
+# Corpus-verified canonical: "Cookie Casino" WITH SPACE (314 occurrences)
+schema_version: "1.0"
+
+brand_name: "Cookie Casino"
+
+# Dominance >= 85% → normalizations are AUTO
+canonical_dominance: 0.969
+
+brand_normalization:
+  "cookiecasino": "Cookie Casino"
+  "CookieCasino": "Cookie Casino"
+  "Cookiecasino": "Cookie Casino"
+  "COOKIECASINO": "Cookie Casino"
+  "cookie casino": "Cookie Casino"
+  "COOKIE CASINO": "Cookie Casino"

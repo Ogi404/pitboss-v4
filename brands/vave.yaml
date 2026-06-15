@@ -11,6 +11,9 @@ schema_version: "1.0"
 # Brand identity
 brand_name: "Vave"
 
+# Dominance >= 85% → normalizations are AUTO
+canonical_dominance: 0.963
+
 # Market/locale - Canada
 market: "CA"
 locale: "en-CA"

@@ -1,0 +1,15 @@
+# Pitboss v4 - HellSpin Brand Profile
+# Corpus-verified canonical: HellSpin (449 occurrences)
+schema_version: "1.0"
+
+brand_name: "HellSpin"
+
+# Dominance >= 85% → normalizations are AUTO
+canonical_dominance: 0.961
+
+brand_normalization:
+  "hellspin": "HellSpin"
+  "Hellspin": "HellSpin"
+  "HELLSPIN": "HellSpin"
+  "Hell Spin": "HellSpin"
+  "hell spin": "HellSpin"

@@ -1,0 +1,15 @@
+# Pitboss v4 - TonyBet Brand Profile
+# Corpus-verified canonical: TonyBet (242 occurrences vs Tonybet 3)
+schema_version: "1.0"
+
+brand_name: "TonyBet"
+
+# Dominance >= 85% → normalizations are AUTO
+canonical_dominance: 0.949
+
+brand_normalization:
+  "tonybet": "TonyBet"
+  "Tonybet": "TonyBet"
+  "TONYBET": "TonyBet"
+  "Tony Bet": "TonyBet"
+  "tony bet": "TonyBet"

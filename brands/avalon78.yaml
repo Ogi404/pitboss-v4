@@ -1,0 +1,15 @@
+# Pitboss v4 - Avalon78 Brand Profile
+# Corpus-verified canonical: Avalon78 (232 occurrences vs "Avalon 78" 79)
+# Note: NO SPACE despite folder name "Avalon 78"
+schema_version: "1.0"
+
+brand_name: "Avalon78"
+
+# Dominance < 85% → normalizations are PROPOSAL, not AUTO
+canonical_dominance: 0.727
+
+brand_normalization:
+  "avalon78": "Avalon78"
+  "AVALON78": "Avalon78"
+  "Avalon 78": "Avalon78"
+  "avalon 78": "Avalon78"

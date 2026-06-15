@@ -1,0 +1,15 @@
+# Pitboss v4 - Ivibet Brand Profile
+# Corpus-verified canonical: Ivibet (207 occurrences vs IviBet 105)
+schema_version: "1.0"
+
+brand_name: "Ivibet"
+
+# Dominance < 85% → normalizations are PROPOSAL, not AUTO
+canonical_dominance: 0.643
+
+brand_normalization:
+  "ivibet": "Ivibet"
+  "IviBet": "Ivibet"
+  "IVIBET": "Ivibet"
+  "Ivi Bet": "Ivibet"
+  "ivi bet": "Ivibet"
