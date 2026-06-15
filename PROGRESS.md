@@ -2,7 +2,9 @@
 
 ## Current Phase
 
-**Phase 2: In Progress** - Deterministic Layer (the 95%)
+**Phase 3: Complete** - Brief Understanding Agent
+
+**Phase 2: Near Complete** - Deterministic Layer (the 95%)
 
 Checks complete:
 - `deterministic/voice.py` - third-to-second person conversion
@@ -47,8 +49,8 @@ The Check interface with registry:
 |-------|-------------|--------|
 | 0 | Core contracts (Document, Finding, Check) | **Complete** |
 | 1 | Layered Voice Model Builder | **Complete** |
-| 2 | Deterministic Layer (the 95%) | **In Progress** |
-| 3 | Brief agent (confidence-scored extraction) | Pending |
+| 2 | Deterministic Layer (the 95%) | **Near Complete** (7/9 checks) |
+| 3 | Brief agent (confidence-scored extraction) | **Complete** |
 | 4 | Output/redline (Google Doc integration) | Pending |
 | 5 | Judgment layer (the 5%) | Pending |
 | 6 | Learning loop (feedback calibration) | Pending |
@@ -129,7 +131,7 @@ The 937 UNCLEAR count in the corpus confirms this middle path matters — silent
 ## Test Status
 
 ```
-577 tests passing (3 skipped)
+639 tests passing (3 skipped)
 ├── 148 tests (Phase 0 - core contracts)
 ├── 51 tests (Phase 1 - voice model)
 ├── 78 tests (Phase 1 - person reference classifier)
@@ -139,7 +141,8 @@ The 937 UNCLEAR count in the corpus confirms this middle path matters — silent
 ├── 41 tests (Phase 2 - currency check)
 ├── 46 tests (Phase 2 - formatting check, 3 skipped)
 ├── 55 tests (Phase 2 - locale spelling check)
-└── 33 tests (Phase 2 - brand names check)
+├── 33 tests (Phase 2 - brand names check)
+└── 62 tests (Phase 3 - brief agent)
 ```
 
 ## Phase 2 Deliverables
@@ -506,5 +509,121 @@ This principle ensures the deterministic layer's value: 100% consistency for aut
 - **DONE & committed**: voice, stop_words, headings, currency, formatting, locale_spelling, brand_names (7 checks)
 - **REMAINING**: keywords.py, structure.py — both compare article AGAINST brief → depend on Phase 3 brief agent
 
+## Phase 3 Deliverables
+
+### Brief Understanding Agent (Complete)
+
+**Files Created:**
+- `ingest/brief_model.py` - Data models (~200 lines)
+- `ingest/brief_base.py` - Parser ABC and registry (~230 lines)
+- `ingest/brief_agent.py` - Orchestrator (~300 lines)
+- `ingest/brief_formats/__init__.py` - Parser package init
+- `ingest/brief_formats/xlsx_parser.py` - Excel brief parser (~300 lines)
+- `ingest/brief_formats/docx_parser.py` - Word brief parser (~250 lines)
+- `tests/test_brief_agent.py` - 62 comprehensive tests
+
+**Core Rule: NEVER SILENTLY GUESS**
+
+The Brief Agent is a first-class subsystem that parses briefs into structured, confidence-scored data. When confidence is low on critical elements, it asks rather than fabricating.
+
+**BriefModel (The Fourth Frozen Contract):**
+```python
+@dataclass(frozen=True)
+class BriefModel:
+    keywords: BriefKeywords        # main, support, LSI groups
+    keywords_confidence: float
+    sections: tuple[BriefSection, ...]
+    sections_confidence: float
+    target_word_count: int
+    word_count_confidence: float
+    task_name: str
+    article_type: ArticleType      # Mapped from task name
+    article_type_confidence: float
+    locale: Optional[str]
+    market: Optional[str]
+    locale_confidence: float
+    brand_name: str
+    source_path: str
+    source_format: str             # xlsx, docx, sheets
+```
+
+**Three Return States:**
+
+| State | When | Action |
+|-------|------|--------|
+| `READY` | All critical elements high confidence | Proceed to checks |
+| `NEEDS_CLARIFICATION` | Keywords/sections below threshold | Ask user to confirm |
+| `NEEDS_TASK_SELECTION` | Multi-task brief detected | Ask user to pick task |
+
+**Confidence Thresholds:**
+
+| Element | Threshold | Triggers |
+|---------|-----------|----------|
+| Keywords | 0.7 | Clarification if below |
+| Sections | 0.6 | Clarification if below |
+| Article Type | 0.6 | Clarification if below |
+| Word Count | 0.5 | Clarification only if missing |
+
+**Confidence Scoring by Extraction Quality:**
+
+| Scenario | Confidence |
+|----------|------------|
+| Clean table with headers (Keyword/Qty) | 0.95 |
+| Table without clear quantity column | 0.75-0.80 |
+| Inline pattern ("Keywords: a, b, c") | 0.60-0.70 |
+| Ambiguous inline blob | 0.40 |
+| No keywords found | 0.0 (triggers NEEDS_CLARIFICATION) |
+
+**Article Type Mapping:**
+- 13 article type clusters from task name patterns
+- Fuzzy pattern matching (e.g., "Bonus" → BONUS_PAGE)
+- Unknown types fall back to GENERAL with low confidence
+
+**Self-Registering Parser Pattern:**
+```python
+@register_brief_parser
+class XlsxBriefParser(BriefParser):
+    def get_format_name(self) -> str:
+        return "xlsx"
+
+    def can_parse(self, source) -> bool:
+        return Path(source).suffix.lower() in (".xlsx", ".xls")
+
+    def extract(self, source) -> RawBriefExtraction:
+        # Format-specific parsing with confidence scoring
+        ...
+```
+
+**Format Support:**
+- **xlsx**: Single/multi-tab, multi-task detection, keyword tables, section tables, meta fields
+- **docx**: Inline keywords, key-value tables, structured tables
+- **sheets**: Deferred (requires Google API credentials)
+
+**Usage Example:**
+```python
+agent = BriefAgent()
+result = agent.parse("path/to/brief.xlsx")
+
+if result.state == BriefState.READY:
+    brief = result.brief
+    # proceed to checks
+elif result.state == BriefState.NEEDS_CLARIFICATION:
+    for clar in result.clarifications:
+        print(f"{clar.question}")
+        # Get user input...
+    confirmed = agent.confirm_clarifications(result.brief, user_confirmations)
+elif result.state == BriefState.NEEDS_TASK_SELECTION:
+    print(f"Pick a task: {result.task_options}")
+    result = agent.parse_with_task(path, selected_task)
+```
+
+**Key Design Decisions:**
+
+1. **Frozen Immutability**: BriefModel is immutable (frozen=True) like Document and Finding
+2. **Confidence Per Element**: Every extracted element has its own confidence score
+3. **Clarification Interrupt**: Low confidence on critical elements stops parsing and asks user
+4. **Registry Pattern**: Parsers self-register; adding new formats is a single file
+5. **Raw Data Preservation**: Original extracted data stored for debugging
+
 ---
-*Last updated: Phase 2 near complete - 7 deterministic checks done and validated (577 tests). Remaining: keywords and structure (both require brief agent from Phase 3).*
+*Last updated: Phase 3 complete - Brief Understanding Agent done (639 tests). Phase 2 remaining: keywords.py and structure.py (now unblocked by brief agent).*
