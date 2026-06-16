@@ -4,7 +4,7 @@
 
 **Phase 3: Complete** - Brief Understanding Agent
 
-**Phase 2: Near Complete** - Deterministic Layer (the 95%)
+**Phase 2: Near Complete** - Deterministic Layer (the 95%) - 8/9 checks done
 
 Checks complete:
 - `deterministic/voice.py` - third-to-second person conversion
@@ -14,6 +14,7 @@ Checks complete:
 - `deterministic/formatting.py` - whitespace, punctuation spacing, Latin abbreviations
 - `deterministic/locale_spelling.py` - regional variant enforcement (British/American/Canadian/Australian/NZ)
 - `deterministic/brand_names.py` - own-brand normalization with dominance threshold, competitor detection
+- `deterministic/keywords.py` - keyword coverage/density against brief (exact-phrase matching per §8)
 
 ### Phase 1 Recap
 Voice models built from 270 articles across 17 brands:
@@ -49,7 +50,7 @@ The Check interface with registry:
 |-------|-------------|--------|
 | 0 | Core contracts (Document, Finding, Check) | **Complete** |
 | 1 | Layered Voice Model Builder | **Complete** |
-| 2 | Deterministic Layer (the 95%) | **Near Complete** (7/9 checks) |
+| 2 | Deterministic Layer (the 95%) | **Near Complete** (8/9 checks) |
 | 3 | Brief agent (confidence-scored extraction) | **Complete** |
 | 4 | Output/redline (Google Doc integration) | Pending |
 | 5 | Judgment layer (the 5%) | Pending |
@@ -131,7 +132,7 @@ The 937 UNCLEAR count in the corpus confirms this middle path matters — silent
 ## Test Status
 
 ```
-644 tests passing (3 skipped)
+684 tests passing (3 skipped)
 ├── 148 tests (Phase 0 - core contracts)
 ├── 51 tests (Phase 1 - voice model)
 ├── 78 tests (Phase 1 - person reference classifier)
@@ -142,6 +143,7 @@ The 937 UNCLEAR count in the corpus confirms this middle path matters — silent
 ├── 46 tests (Phase 2 - formatting check, 3 skipped)
 ├── 55 tests (Phase 2 - locale spelling check)
 ├── 33 tests (Phase 2 - brand names check)
+├── 40 tests (Phase 2 - keywords check)
 └── 67 tests (Phase 3 - brief agent)
 ```
 
@@ -460,6 +462,61 @@ Canonicals are DERIVED FROM CORPUS analysis, not hand-set. Each brand YAML store
 **Load-Time Validation Guard:**
 Warns if configured canonical doesn't match corpus-dominant form — catches config bugs before they cause mass mis-normalization.
 
+### Keywords Check (Complete)
+
+**Files:**
+- `deterministic/keywords.py` - Keyword coverage and density check (~500 lines)
+- `tests/test_keywords_check.py` - 40 comprehensive tests
+- `validate_keywords_check.py` - Real article+brief validation script
+
+**Section 8 Compliance:**
+Compares article against READY BriefModel from brief agent. Exact-phrase matching per §8 ("use keywords as they are").
+
+**Key Design Decision (Confirmed with Ogi):**
+Reordered constructions like "Promotions at KoiFortune" do NOT satisfy keyword "Koifortune promotions". The brief requires the exact phrase as specified.
+
+**Five Sub-Checks:**
+
+| Sub-check | Detection | auto_applicable |
+|-----------|-----------|-----------------|
+| `keywords.missing` | Required keyword not found | False (always) |
+| `keywords.quantity` | Count outside min/max range | False (always) |
+| `keywords.density` | Overall density exceeds 3% | False (always) |
+| `keywords.highlighting` | Main keywords not highlighted yellow | False (always) |
+| `keywords.brand_overuse` / `keywords.location_overuse` | Stuffing detection | False (always) |
+
+**ALL findings auto_applicable=False** — keyword fixes are always editorial judgment, never auto-applied.
+
+**Missing Keyword Sub-Types:**
+
+| Type | Meaning | Editor Action |
+|------|---------|---------------|
+| `truly_absent` | Concept not in article at all | Add new content |
+| `wrong_construction` | Words present but not as exact phrase | Adjust existing wording |
+
+For `wrong_construction` findings, reasoning includes nearby-text hint showing where the words appear:
+> "Required keyword 'Koifortune promotions' not found. Note: article contains 'Promotions at KoiFortune AU' — the words are present but not as the exact keyword phrase."
+
+**Key Features:**
+
+1. **Exact Phrase Matching**: Word boundaries enforced, case-insensitive, singular/plural variants supported
+2. **Longest-First Sorting**: Keywords sorted by length before matching to prevent overlap double-counting ("Koifortune Australia" matched before "Koifortune")
+3. **Highlighting Detection**: Uses `document.highlighted_spans()` to check yellow highlighting per §8
+4. **Density Calculation**: `(keyword_occurrences / total_words) * 100` with 50-word minimum threshold
+5. **Brand/Location Overuse**: Flags when brand name or market location exceeds 2% density
+
+**Corpus Validation (Koifortune article + brief):**
+
+| Finding Type | Count | Details |
+|--------------|-------|---------|
+| Missing (wrong_construction) | 7 | Words present but not as phrase |
+| Missing (truly_absent) | 7 | Concept not in article |
+| Quantity (over max) | 2 | "Koifortune website" 3x (max 1) |
+| Density | 1 | 3.2% overall (max 3%) |
+| Brand overuse | 1 | 67 mentions (3.2% density) |
+
+**All 14 missing findings are legitimate** — verified by manual inspection that exact phrases are genuinely absent.
+
 ### KEY LESSON: Corpus Validation is Essential
 
 **Three wrong canonicals were caught ONLY by corpus-validating against ground truth:**
@@ -502,12 +559,12 @@ This principle ensures the deterministic layer's value: 100% consistency for aut
 | `formatting.py` | Whitespace, punctuation spacing, Latin abbreviations | **Complete** |
 | `locale_spelling.py` | UK/US/CA/AU/NZ regional variant enforcement | **Complete** |
 | `brand_names.py` | Own-brand normalization with dominance threshold, competitor detection | **Complete** |
-| `keywords.py` | Keyword counting + density against brief | Needs brief agent (Phase 3) |
-| `structure.py` | Paragraph-between-headings, other structure rules | Needs brief agent (Phase 3) |
+| `keywords.py` | Keyword coverage + density against brief (exact-phrase matching) | **Complete** |
+| `structure.py` | Paragraph-between-headings, other structure rules | Pending (uses same brief+article plumbing) |
 
 **Phase 2 Status:**
-- **DONE & committed**: voice, stop_words, headings, currency, formatting, locale_spelling, brand_names (7 checks)
-- **REMAINING**: keywords.py, structure.py — both compare article AGAINST brief → depend on Phase 3 brief agent
+- **DONE & committed**: voice, stop_words, headings, currency, formatting, locale_spelling, brand_names, keywords (8 checks)
+- **REMAINING**: structure.py — last deterministic check, uses same brief+article plumbing as keywords.py
 
 ## Phase 3 Deliverables
 
@@ -705,7 +762,7 @@ elif result.state == BriefState.NEEDS_TASK_SELECTION:
 
 Brief parsing was v3's biggest failure source — this discipline is why v4's is solid.
 
-**Phase 2 deterministic checks now UNBLOCKED:** keywords.py and structure.py can consume a READY BriefModel.
+**Phase 2 deterministic checks:** keywords.py complete, structure.py remaining (uses same brief+article plumbing).
 
 ---
-*Last updated: Phase 3 complete - Brief Understanding Agent done (644 tests). Phase 2 remaining: keywords.py and structure.py (now unblocked by brief agent).*
+*Last updated: Phase 2 keywords check complete (684 tests). Phase 2 remaining: structure.py (last deterministic check).*

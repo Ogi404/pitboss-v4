@@ -19,7 +19,8 @@
       "Bash(Get-ChildItem -Path corpora -Recurse -Filter \"*.docx\")",
       "Bash(Where-Object { $_Name -match \"au|australia\" })",
       "Bash(Select-Object FullName)",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Bash(find:*)"
     ]
   }
 }
