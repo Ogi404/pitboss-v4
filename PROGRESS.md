@@ -131,7 +131,7 @@ The 937 UNCLEAR count in the corpus confirms this middle path matters — silent
 ## Test Status
 
 ```
-639 tests passing (3 skipped)
+644 tests passing (3 skipped)
 ├── 148 tests (Phase 0 - core contracts)
 ├── 51 tests (Phase 1 - voice model)
 ├── 78 tests (Phase 1 - person reference classifier)
@@ -142,7 +142,7 @@ The 937 UNCLEAR count in the corpus confirms this middle path matters — silent
 ├── 46 tests (Phase 2 - formatting check, 3 skipped)
 ├── 55 tests (Phase 2 - locale spelling check)
 ├── 33 tests (Phase 2 - brand names check)
-└── 62 tests (Phase 3 - brief agent)
+└── 67 tests (Phase 3 - brief agent)
 ```
 
 ## Phase 2 Deliverables
@@ -595,9 +595,61 @@ class XlsxBriefParser(BriefParser):
 ```
 
 **Format Support:**
-- **xlsx**: Single/multi-tab, multi-task detection, keyword tables, section tables, meta fields
-- **docx**: Inline keywords, key-value tables, structured tables
+- **xlsx**: Single/multi-tab, multi-task detection (stacked Task-name/Topic blocks), keyword tables, section tables, meta fields
+- **docx**: Inline keywords, key-value tables, structured tables, Title-styled multi-task detection
 - **sheets**: Deferred (requires Google API credentials)
+
+**Multi-Task Detection (Pluggable Detectors):**
+
+Two detector patterns, extensible for future layouts:
+
+| Detector | Format | Signal | Example |
+|----------|--------|--------|---------|
+| Stacked blocks | xlsx | Multiple "Task name:"/"Topic:" rows | Content Task 22Bet (stacked tasks) |
+| Title-styled paragraphs | docx | `style=Title` paragraphs | 10-page Ghana briefs |
+
+When any detector finds 2+ tasks → NEEDS_TASK_SELECTION with task list.
+
+**Multi-Language Keyword Parsing:**
+
+Handles messy multi-language keyword lines like:
+```
+LSI Keywords: bonus, cashback, VIP. (ITA: bonus, rimborso.) bonus, cashback (CZ)
+```
+
+**Translation stripping:**
+- Strips `(ITA: ...)` parenthetical blocks
+- Strips `.ITA:` bare language markers
+- Strips trailing `(CZ)` markers
+- Only extracts English portion before first translation marker
+
+**Validation output:** 102 fragment-keywords → 41 clean English keywords
+
+**Article Type Inference (Highest-Count-Wins):**
+
+When task name is missing/ambiguous, infers type from keyword content:
+- Counts matches for ALL categories (slot, sports, bonus, app, payments)
+- Returns category with MOST matches (not first-match-wins)
+- Ties or all-below-threshold → GENERAL with low confidence (asks user)
+
+Example fix: Vave bonuses had 32 bonus matches vs 7 slot matches — now correctly returns `bonus_page` instead of `game_review`.
+
+**Metadata Label Negative Filter:**
+
+NEVER extracts structural labels as keywords:
+- Section, Platform, Target URL, Word Count, Template Variant, Tone
+- H1, H2, H2 #1, H2 #2, etc.
+- Link 1, Link 1 — Anchor, Link 1 — URL, etc.
+- Key Competitions, Unique Aspects, FAQ Targets, Content Strategy
+
+**Keyword Validation:**
+
+Keywords passing through must:
+- Not contain language markers (ITA:, CZ:, parentheses)
+- Not exceed 8 words (likely sentence fragments)
+- Not be metadata labels
+
+Invalid keywords dropped; many failures → lower confidence → asks user.
 
 **Usage Example:**
 ```python
@@ -624,6 +676,36 @@ elif result.state == BriefState.NEEDS_TASK_SELECTION:
 3. **Clarification Interrupt**: Low confidence on critical elements stops parsing and asks user
 4. **Registry Pattern**: Parsers self-register; adding new formats is a single file
 5. **Raw Data Preservation**: Original extracted data stored for debugging
+6. **Never Silently Guess**: Messy/ambiguous briefs ask rather than fabricate
+
+**Real Brief Validation (7 briefs):**
+
+| Brief | Format | State | Keywords | Article Type |
+|-------|--------|-------|----------|--------------|
+| Koifortune AU | xlsx | READY | 23 main | main_review |
+| 22Bet Zambia | xlsx | READY | 24 main | main_review |
+| App Page Task | docx | NEEDS_CLARIFICATION | 0 (none in brief) | asks |
+| Vave bonuses | docx | NEEDS_CLARIFICATION | 41 LSI (clean) | bonus_page |
+| Big Bass Splash | docx | NEEDS_CLARIFICATION | 10 main | game_review |
+| Boxing LINE | docx | NEEDS_CLARIFICATION | 24 main | sports_market |
+| 10-page Ghana | docx | NEEDS_TASK_SELECTION | — | 10 tasks listed |
+
+### KEY LESSON REINFORCED: Real-Brief Validation is Essential
+
+**This phase reported "complete" with passing tests THREE times before real-brief validation proved it correct.** Each pass caught real defects:
+
+1. **First "complete"**: Missing features (multi-task detection, type inference) — 2-brief validation shortcut
+2. **Second "complete"**: 6-brief validation found 3 genuine bugs:
+   - Multi-task docx detection missing (10-page brief returned NEEDS_CLARIFICATION instead of NEEDS_TASK_SELECTION)
+   - Type misclassification (Vave bonuses → game_review instead of bonus_page)
+   - Translation-fragment leakage (102 garbage keywords instead of 41 clean)
+3. **Third "complete"**: Edge case in translation stripping (`.ITA:` without space)
+
+**Tests prove internal logic; only raw output from hard real cases proves correctness.**
+
+Brief parsing was v3's biggest failure source — this discipline is why v4's is solid.
+
+**Phase 2 deterministic checks now UNBLOCKED:** keywords.py and structure.py can consume a READY BriefModel.
 
 ---
-*Last updated: Phase 3 complete - Brief Understanding Agent done (639 tests). Phase 2 remaining: keywords.py and structure.py (now unblocked by brief agent).*
+*Last updated: Phase 3 complete - Brief Understanding Agent done (644 tests). Phase 2 remaining: keywords.py and structure.py (now unblocked by brief agent).*
