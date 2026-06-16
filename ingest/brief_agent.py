@@ -371,7 +371,9 @@ class BriefAgent:
         """
         Infer article type from keyword content when task name is missing/unclear.
 
-        This is a fallback for docx briefs that may not have explicit task names.
+        BUG 2 FIX: Count ALL categories and return the one with MOST matches,
+        not first-match-wins. This prevents a brief with 32 bonus matches and
+        7 slot matches from being classified as game_review.
         """
         import re
 
@@ -386,41 +388,66 @@ class BriefAgent:
 
         keyword_text = " ".join(all_keywords)
 
-        # Check for game/slot patterns (high priority)
-        slot_patterns = [
-            r"\bslot\b", r"\bslots\b", r"\brtp\b", r"\bfree\s*spin",
-            r"\bpragmatic", r"\bnetent\b", r"\bdemo\b", r"\bmax\s*win",
-        ]
-        slot_count = sum(1 for p in slot_patterns if re.search(p, keyword_text))
-        if slot_count >= 2:
-            return ArticleType.GAME_REVIEW, 0.75
+        # Define all category patterns
+        category_patterns = {
+            ArticleType.GAME_REVIEW: [
+                r"\bslot\b", r"\bslots\b", r"\brtp\b", r"\bfree\s*spin",
+                r"\bpragmatic", r"\bnetent\b", r"\bdemo\b", r"\bmax\s*win",
+            ],
+            ArticleType.SPORTS_MARKET: [
+                r"\bbet\b", r"\bbetting\b", r"\bodds\b", r"\bprediction",
+                r"\bboxing\b", r"\bfootball\b", r"\bbasketball\b", r"\btennis\b",
+                r"\bcricket\b", r"\bracing\b", r"\bsports?\b", r"\bmoneyline\b",
+            ],
+            ArticleType.BONUS_PAGE: [
+                r"\bbonus\b", r"\bbonuses\b", r"\bpromo\b", r"\bpromotion",
+                r"\bwelcome\b", r"\bcashback\b", r"\breload\b", r"\bloyalty\b",
+                r"\bvip\b", r"\breward",
+            ],
+            ArticleType.APP_REVIEW: [
+                r"\bapp\b", r"\bapk\b", r"\bdownload\b", r"\bmobile\b",
+                r"\bandroid\b", r"\bios\b",
+            ],
+            ArticleType.PAYMENTS: [
+                r"\bpayment\b", r"\bdeposit\b", r"\bwithdraw\b", r"\bbanking\b",
+                r"\bpayout\b",
+            ],
+        }
 
-        # Check for sports/betting patterns
-        sports_patterns = [
-            r"\bbet\b", r"\bbetting\b", r"\bodds\b", r"\bprediction",
-            r"\bboxing\b", r"\bfootball\b", r"\bbasketball\b", r"\btennis\b",
-            r"\bcricket\b", r"\bracing\b", r"\bsports?\b", r"\bmoneyline\b",
-        ]
-        sports_count = sum(1 for p in sports_patterns if re.search(p, keyword_text))
-        if sports_count >= 2:
-            return ArticleType.SPORTS_MARKET, 0.75
+        # Count matches for each category
+        category_counts = {}
+        for article_type, patterns in category_patterns.items():
+            count = sum(len(re.findall(p, keyword_text)) for p in patterns)
+            category_counts[article_type] = count
 
-        # Check for bonus patterns
-        bonus_patterns = [
-            r"\bbonus\b", r"\bpromo\b", r"\bfree\s*bet\b", r"\bwelcome\b",
-            r"\bdeposit\b", r"\bcashback\b",
-        ]
-        bonus_count = sum(1 for p in bonus_patterns if re.search(p, keyword_text))
-        if bonus_count >= 2:
-            return ArticleType.BONUS_PAGE, 0.70
+        # Find category with most matches
+        if not category_counts:
+            return ArticleType.GENERAL, 0.40
 
-        # Check for app patterns
-        app_patterns = [r"\bapp\b", r"\bapk\b", r"\bdownload\b", r"\bmobile\b", r"\bandroid\b", r"\bios\b"]
-        app_count = sum(1 for p in app_patterns if re.search(p, keyword_text))
-        if app_count >= 2:
-            return ArticleType.APP_REVIEW, 0.70
+        best_type = max(category_counts, key=category_counts.get)
+        best_count = category_counts[best_type]
 
-        return ArticleType.GENERAL, 0.40
+        # Minimum threshold - need at least 2 pattern matches
+        if best_count < 2:
+            return ArticleType.GENERAL, 0.40
+
+        # Check for ties (within 20% of best)
+        tie_threshold = best_count * 0.8
+        tied_types = [t for t, c in category_counts.items() if c >= tie_threshold and c > 0]
+
+        if len(tied_types) > 1:
+            # Multiple strong candidates - return GENERAL with low confidence to ask
+            return ArticleType.GENERAL, 0.45
+
+        # Clear winner - confidence based on match count
+        if best_count >= 10:
+            confidence = 0.85
+        elif best_count >= 5:
+            confidence = 0.75
+        else:
+            confidence = 0.65
+
+        return best_type, confidence
 
     def _build_keywords_from_confirmation(self, kw_data: Any) -> BriefKeywords:
         """Build BriefKeywords from user confirmation."""

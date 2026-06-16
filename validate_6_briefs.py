@@ -25,6 +25,7 @@ BRIEF_FILES = [
     "Vave bonuses.docx",
     "Big Bass Splash_Slots_NG.docx",
     "Boxing_LINE_NG.docx",
+    "Content task Mar'26 22bet.com.gh - 10 pages.docx",  # Multi-task test
 ]
 
 

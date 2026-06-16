@@ -91,9 +91,68 @@ def _infer_group_name(header: str) -> str:
     return "main"
 
 
+def _strip_translations(text: str) -> str:
+    """
+    Strip translation blocks from multi-language keyword lines.
+
+    Format: "eng1, eng2, eng3. (ITA: ita1, ita2.) czech1, czech2 (CZ)"
+    Also handles: "eng1, eng2.ITA: ita1, ita2" (no space before marker)
+
+    Returns only the English portion before the first parenthetical or language marker.
+    """
+    # Find the first opening parenthesis - everything after is translations
+    paren_idx = text.find("(")
+    if paren_idx > 0:
+        text = text[:paren_idx]
+
+    # Also check for language markers without parentheses (e.g., ".ITA:" or " ITA:")
+    lang_markers = ["ITA:", "CZ:", "PT:", "ES:", "DE:", "FR:", "(CZ)", "(ITA)"]
+    for marker in lang_markers:
+        marker_idx = text.upper().find(marker.upper())
+        if marker_idx > 0:
+            text = text[:marker_idx]
+
+    # Strip trailing period and whitespace
+    return text.rstrip(". \t")
+
+
+def _is_valid_keyword(kw: str) -> bool:
+    """
+    Validate that a keyword is clean and not a translation fragment.
+
+    Returns False if:
+    - Contains language markers (ITA:, CZ, parentheses)
+    - Is longer than 8 words (likely a fragment/sentence)
+    - Is empty or metadata
+    """
+    if not kw:
+        return False
+
+    # Check for language markers
+    if re.search(r"\b(ITA|CZ|PT|ES|DE|FR)\s*:", kw, re.IGNORECASE):
+        return False
+    if "(" in kw or ")" in kw:
+        return False
+
+    # Check word count - keywords are typically 1-6 words
+    word_count = len(kw.split())
+    if word_count > 8:
+        return False
+
+    # Check for metadata labels
+    if is_metadata_label(kw):
+        return False
+
+    return True
+
+
 def _parse_inline_keywords(text: str) -> list[tuple[str, Optional[int], Optional[int]]]:
     """Parse comma/semicolon/slash-separated keywords with optional quantities."""
     keywords = []
+
+    # BUG 3 FIX: Strip translations before parsing
+    text = _strip_translations(text)
+
     # Split on comma, semicolon, OR forward slash
     parts = re.split(r"[,;/]", text)
 
@@ -112,18 +171,18 @@ def _parse_inline_keywords(text: str) -> list[tuple[str, Optional[int], Optional
         if qty_match:
             kw = clean_keyword(qty_match.group(1).strip())
             qty = int(qty_match.group(2))
-            if kw and not is_metadata_label(kw):
+            if _is_valid_keyword(kw):
                 keywords.append((kw, qty, qty))  # Exact quantity
         else:
             qty_match = re.match(r"(.+?)\s*[x×]\s*(\d+)$", part)
             if qty_match:
                 kw = clean_keyword(qty_match.group(1).strip())
                 qty = int(qty_match.group(2))
-                if kw and not is_metadata_label(kw):
+                if _is_valid_keyword(kw):
                     keywords.append((kw, qty, qty))  # Exact quantity
             else:
                 kw = clean_keyword(part)
-                if kw and not is_metadata_label(kw):
+                if _is_valid_keyword(kw):
                     keywords.append((kw, None, None))  # No quantity constraint
 
     return keywords
@@ -152,6 +211,11 @@ class DocxBriefParser(BriefParser):
             source_path=str(source),
             source_format="docx",
         )
+
+        # BUG 1 FIX: Detect multi-task briefs via Title-styled paragraphs
+        tasks = self._detect_tasks_by_title_style(doc)
+        if tasks:
+            extraction.tasks = tasks
 
         # Extract from tables first (higher confidence)
         table_keywords, table_kw_conf = self._extract_keywords_from_tables(doc)
@@ -404,3 +468,30 @@ class DocxBriefParser(BriefParser):
                             meta[f"{field_name}_confidence"] = 0.65
 
         return meta
+
+    def _detect_tasks_by_title_style(self, doc: DocxDocument) -> list[str]:
+        """
+        BUG 1 FIX: Detect multi-task briefs by Title-styled paragraphs.
+
+        Multi-page docx briefs like "Content task Mar'26 22bet.com.gh - 10 pages.docx"
+        use Title-styled paragraphs to delimit each task/page block.
+
+        Returns list of task names if multiple Title paragraphs found, else empty list.
+        """
+        tasks = []
+
+        for para in doc.paragraphs:
+            # Check paragraph style
+            style_name = para.style.name if para.style else ""
+
+            # Title style marks the start of a new task block
+            if style_name == "Title":
+                task_name = para.text.strip()
+                if task_name and task_name not in tasks:
+                    # Filter out generic titles that aren't task names
+                    # (e.g., document titles like "Content Brief")
+                    if not re.match(r"^(content\s+)?(brief|task|plan)s?$", task_name, re.IGNORECASE):
+                        tasks.append(task_name)
+
+        # Only return if we have multiple tasks (single task = not multi-task)
+        return tasks if len(tasks) > 1 else []
