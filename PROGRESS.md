@@ -4,7 +4,7 @@
 
 **Phase 3: Complete** - Brief Understanding Agent
 
-**Phase 2: Near Complete** - Deterministic Layer (the 95%) - 8/9 checks done
+**Phase 2: Complete** - Deterministic Layer (the 95%) - ALL 9 CHECKS DONE
 
 Checks complete:
 - `deterministic/voice.py` - third-to-second person conversion
@@ -15,6 +15,7 @@ Checks complete:
 - `deterministic/locale_spelling.py` - regional variant enforcement (British/American/Canadian/Australian/NZ)
 - `deterministic/brand_names.py` - own-brand normalization with dominance threshold, competitor detection
 - `deterministic/keywords.py` - keyword coverage/density against brief (exact-phrase matching per §8)
+- `deterministic/structure.py` - article structure vs brief requirements + §10 (fuzzy section matching, hierarchy, intro/outro, word count)
 
 ### Phase 1 Recap
 Voice models built from 270 articles across 17 brands:
@@ -50,7 +51,7 @@ The Check interface with registry:
 |-------|-------------|--------|
 | 0 | Core contracts (Document, Finding, Check) | **Complete** |
 | 1 | Layered Voice Model Builder | **Complete** |
-| 2 | Deterministic Layer (the 95%) | **Near Complete** (8/9 checks) |
+| 2 | Deterministic Layer (the 95%) | **Complete** (9/9 checks) |
 | 3 | Brief agent (confidence-scored extraction) | **Complete** |
 | 4 | Output/redline (Google Doc integration) | Pending |
 | 5 | Judgment layer (the 5%) | Pending |
@@ -132,7 +133,7 @@ The 937 UNCLEAR count in the corpus confirms this middle path matters — silent
 ## Test Status
 
 ```
-684 tests passing (3 skipped)
+735 tests passing (3 skipped)
 ├── 148 tests (Phase 0 - core contracts)
 ├── 51 tests (Phase 1 - voice model)
 ├── 78 tests (Phase 1 - person reference classifier)
@@ -144,6 +145,7 @@ The 937 UNCLEAR count in the corpus confirms this middle path matters — silent
 ├── 55 tests (Phase 2 - locale spelling check)
 ├── 33 tests (Phase 2 - brand names check)
 ├── 40 tests (Phase 2 - keywords check)
+├── 52 tests (Phase 2 - structure check)
 └── 67 tests (Phase 3 - brief agent)
 ```
 
@@ -517,6 +519,51 @@ For `wrong_construction` findings, reasoning includes nearby-text hint showing w
 
 **All 14 missing findings are legitimate** — verified by manual inspection that exact phrases are genuinely absent.
 
+### Structure Check (Complete)
+
+**Files:**
+- `deterministic/structure.py` - Article structure validation (~490 lines)
+- `tests/test_structure_check.py` - 52 comprehensive tests
+- `validate_structure_check.py` - Real article+brief validation script
+
+**Section 10 Compliance:**
+Compares article structure against brief requirements and General Writing Requirements §10.
+
+**Five Sub-Checks:**
+
+| Sub-check | Detection | auto_applicable |
+|-----------|-----------|-----------------|
+| `structure.missing_section` | Required section from brief not found | False (always) |
+| `structure.hierarchy` | Multiple H1 or skipped heading levels | False (always) |
+| `structure.missing_intro` | No paragraph before first heading | False (always) |
+| `structure.missing_outro` | Ends with heading or <20 word paragraph | False (always) |
+| `structure.word_count` | >20% deviation from brief target | False (always) |
+
+**ALL findings auto_applicable=False** — structure fixes require editorial judgment, never auto-applied.
+
+**Key Feature: Fuzzy Section Matching**
+
+Unlike keywords (exact-phrase per §8), section matching uses fuzzy logic:
+- Substring match: "Bonuses" matches "Welcome Bonuses and Promotions"
+- Word overlap: "Payment Methods" matches "Methods of Payment" (≥50% word overlap)
+
+This is intentional — sections represent concepts, not SEO phrases.
+
+**Metadata Label Filter:**
+
+Labels like "Main keywords", "Support keywords", "LSI keywords", "Word Count", "Meta Description" are filtered via `is_metadata_label()` and never treated as required article sections.
+
+**Corpus Validation (Koifortune article + brief):**
+
+| Finding Type | Count | Details |
+|--------------|-------|---------|
+| Missing sections | 0 | All brief sections fuzzy-matched |
+| Hierarchy issues | 0 | Proper H1 → H2 → H3 structure |
+| Intro/outro issues | 0 | Proper intro and conclusion |
+| Word count deviation | 0 | 2091 vs 2000 target (4.5% over, within 20% threshold) |
+
+**Zero false positives** — fuzzy matching correctly identifies present sections without false-flagging.
+
 ### KEY LESSON: Corpus Validation is Essential
 
 **Three wrong canonicals were caught ONLY by corpus-validating against ground truth:**
@@ -548,7 +595,7 @@ The same bar applies to all five completed checks:
 
 This principle ensures the deterministic layer's value: 100% consistency for auto-applies, human review for anything requiring judgment.
 
-### Remaining Phase 2 Checks
+### Phase 2 Check Summary (ALL COMPLETE)
 
 | Check | Description | Status |
 |-------|-------------|--------|
@@ -560,11 +607,13 @@ This principle ensures the deterministic layer's value: 100% consistency for aut
 | `locale_spelling.py` | UK/US/CA/AU/NZ regional variant enforcement | **Complete** |
 | `brand_names.py` | Own-brand normalization with dominance threshold, competitor detection | **Complete** |
 | `keywords.py` | Keyword coverage + density against brief (exact-phrase matching) | **Complete** |
-| `structure.py` | Paragraph-between-headings, other structure rules | Pending (uses same brief+article plumbing) |
+| `structure.py` | Article structure vs brief + §10 (fuzzy section matching, hierarchy, intro/outro, word count) | **Complete** |
 
-**Phase 2 Status:**
-- **DONE & committed**: voice, stop_words, headings, currency, formatting, locale_spelling, brand_names, keywords (8 checks)
-- **REMAINING**: structure.py — last deterministic check, uses same brief+article plumbing as keywords.py
+**PHASE 2 COMPLETE:** All 9 deterministic checks built, corpus-validated, committed. 735 tests passing.
+
+### Tech Debt (Minor)
+
+**Metadata labels in brief sections:** Keyword-group labels ("Main keywords", "Support keywords", etc.) are currently stored as brief sections by the xlsx parser and filtered per-check via `is_metadata_label()`. Cleaner long-term fix: brief parser should not put them in sections at all. Not urgent — filtering works correctly.
 
 ## Phase 3 Deliverables
 
@@ -762,7 +811,7 @@ elif result.state == BriefState.NEEDS_TASK_SELECTION:
 
 Brief parsing was v3's biggest failure source — this discipline is why v4's is solid.
 
-**Phase 2 deterministic checks:** keywords.py complete, structure.py remaining (uses same brief+article plumbing).
+**Next:** Phase 4 (output/redline — Google Docs Compare + writer comments) makes the deterministic layer usable end-to-end. Then Phase 5 (judgment layer), 6 (learning loop), 7 (fact-checker).
 
 ---
-*Last updated: Phase 2 keywords check complete (684 tests). Phase 2 remaining: structure.py (last deterministic check).*
+*Last updated: PHASE 2 COMPLETE — all 9 deterministic checks built (voice, stop_words, headings, currency, formatting, locale_spelling, brand_names, keywords, structure). 735 tests passing. Corpus validated, zero false positives.*
