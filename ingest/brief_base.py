@@ -148,10 +148,13 @@ def clean_keyword(text: str) -> str:
 
     Examples:
         "bonus (bônus)" → "bonus"
+        "(ITA: bonus) bônus" → "bônus"
         "  casino  review  " → "casino review"
     """
+    # Strip leading parenthetical (ITA:, PT:, etc. translations)
+    cleaned = re.sub(r"^\s*\([^)]+\)\s*", "", text)
     # Strip trailing parenthetical (translations)
-    cleaned = re.sub(r"\s*\([^)]+\)\s*$", "", text)
+    cleaned = re.sub(r"\s*\([^)]+\)\s*$", "", cleaned)
     # Normalize whitespace
     cleaned = " ".join(cleaned.split())
     return cleaned.strip()

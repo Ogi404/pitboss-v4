@@ -389,15 +389,18 @@ class DocxBriefParser(BriefParser):
                 if field_name in meta:
                     continue
 
-                # Try "Field: Value" pattern
-                inline_match = re.match(rf"({pattern.pattern})\s*[:=]\s*(.+)", text, re.IGNORECASE)
+                # Try "Field: Value" pattern - use non-capturing wrapper for the field pattern
+                inline_match = re.match(rf"(?:{pattern.pattern})\s*[:=]\s*(.+)", text, re.IGNORECASE)
                 if inline_match:
-                    value = inline_match.group(2).strip()
-                    if field_name == "word_count":
-                        meta[field_name] = _parse_quantity(value)
-                        meta[f"{field_name}_confidence"] = 0.70
-                    else:
-                        meta[field_name] = value
-                        meta[f"{field_name}_confidence"] = 0.65
+                    # The value is in the last group
+                    value = inline_match.group(inline_match.lastindex)
+                    if value:
+                        value = value.strip()
+                        if field_name == "word_count":
+                            meta[field_name] = _parse_quantity(value)
+                            meta[f"{field_name}_confidence"] = 0.70
+                        else:
+                            meta[field_name] = value
+                            meta[f"{field_name}_confidence"] = 0.65
 
         return meta

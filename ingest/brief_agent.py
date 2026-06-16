@@ -289,6 +289,13 @@ class BriefAgent:
         if raw.task_name_confidence > type_confidence:
             type_confidence = raw.task_name_confidence
 
+        # Fallback: infer from keywords when task name gives low confidence
+        if type_confidence < 0.6 and raw.keyword_groups:
+            kw_type, kw_conf = self._infer_article_type_from_keywords(raw.keyword_groups)
+            if kw_conf > type_confidence:
+                article_type = kw_type
+                type_confidence = kw_conf
+
         # Build links
         links = tuple(
             BriefLink(
@@ -357,6 +364,63 @@ class BriefAgent:
             support=tuple(support_kws),
             lsi=tuple(lsi_kws),
         )
+
+    def _infer_article_type_from_keywords(
+        self, groups: list[RawKeywordGroup]
+    ) -> tuple[ArticleType, float]:
+        """
+        Infer article type from keyword content when task name is missing/unclear.
+
+        This is a fallback for docx briefs that may not have explicit task names.
+        """
+        import re
+
+        # Collect all keywords
+        all_keywords = []
+        for group in groups:
+            for kw_tuple in group.keywords:
+                all_keywords.append(kw_tuple[0].lower())
+
+        if not all_keywords:
+            return ArticleType.GENERAL, 0.30
+
+        keyword_text = " ".join(all_keywords)
+
+        # Check for game/slot patterns (high priority)
+        slot_patterns = [
+            r"\bslot\b", r"\bslots\b", r"\brtp\b", r"\bfree\s*spin",
+            r"\bpragmatic", r"\bnetent\b", r"\bdemo\b", r"\bmax\s*win",
+        ]
+        slot_count = sum(1 for p in slot_patterns if re.search(p, keyword_text))
+        if slot_count >= 2:
+            return ArticleType.GAME_REVIEW, 0.75
+
+        # Check for sports/betting patterns
+        sports_patterns = [
+            r"\bbet\b", r"\bbetting\b", r"\bodds\b", r"\bprediction",
+            r"\bboxing\b", r"\bfootball\b", r"\bbasketball\b", r"\btennis\b",
+            r"\bcricket\b", r"\bracing\b", r"\bsports?\b", r"\bmoneyline\b",
+        ]
+        sports_count = sum(1 for p in sports_patterns if re.search(p, keyword_text))
+        if sports_count >= 2:
+            return ArticleType.SPORTS_MARKET, 0.75
+
+        # Check for bonus patterns
+        bonus_patterns = [
+            r"\bbonus\b", r"\bpromo\b", r"\bfree\s*bet\b", r"\bwelcome\b",
+            r"\bdeposit\b", r"\bcashback\b",
+        ]
+        bonus_count = sum(1 for p in bonus_patterns if re.search(p, keyword_text))
+        if bonus_count >= 2:
+            return ArticleType.BONUS_PAGE, 0.70
+
+        # Check for app patterns
+        app_patterns = [r"\bapp\b", r"\bapk\b", r"\bdownload\b", r"\bmobile\b", r"\bandroid\b", r"\bios\b"]
+        app_count = sum(1 for p in app_patterns if re.search(p, keyword_text))
+        if app_count >= 2:
+            return ArticleType.APP_REVIEW, 0.70
+
+        return ArticleType.GENERAL, 0.40
 
     def _build_keywords_from_confirmation(self, kw_data: Any) -> BriefKeywords:
         """Build BriefKeywords from user confirmation."""
