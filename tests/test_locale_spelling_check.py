@@ -710,3 +710,276 @@ class TestSpecialWords:
         assert len(findings) == 1
         assert findings[0].original_text == "skeptic"
         assert findings[0].proposed_text == "sceptic"
+
+
+# =============================================================================
+# CONTEXT-DEPENDENT WORDS - BRITISH TARGET (PROPOSALS)
+# =============================================================================
+
+class TestContextDependentBritishTarget:
+    """Test that American→British conversions for ambiguous words are proposals.
+
+    These words have noun/verb distinctions or context-specific meanings:
+    - check/cheque: verb (verify) vs noun (payment)
+    - license/licence: verb vs noun in British
+    - practice/practise: noun vs verb in British
+    - program/programme: software vs TV/radio
+    - etc.
+
+    For British targets, these should be PROPOSALS (auto_applicable=False).
+    """
+
+    def test_check_to_cheque_is_proposal(self, check, british_standards):
+        """'check' in British context is a proposal, not auto-applied."""
+        doc = make_document("Double-check your balance before paying.")
+        findings = check.run(doc, british_standards)
+
+        check_findings = [f for f in findings if f.original_text.lower() == 'check']
+        assert len(check_findings) == 1
+        assert check_findings[0].auto_applicable is False
+        assert check_findings[0].proposed_text.lower() == 'cheque'
+        assert 'context' in check_findings[0].reasoning.lower() or 'verb' in check_findings[0].reasoning.lower()
+
+    def test_license_to_licence_is_proposal(self, check, british_standards):
+        """'license' in British context is a proposal, not auto-applied."""
+        doc = make_document("You need a license to operate.")
+        findings = check.run(doc, british_standards)
+
+        assert len(findings) == 1
+        assert findings[0].original_text == "license"
+        assert findings[0].proposed_text == "licence"
+        assert findings[0].auto_applicable is False
+
+    def test_practice_to_practise_is_proposal(self, check, british_standards):
+        """'practice' in British context is a proposal (could be noun or verb)."""
+        doc = make_document("You should practice more.")
+        findings = check.run(doc, british_standards)
+
+        assert len(findings) == 1
+        assert findings[0].original_text == "practice"
+        assert findings[0].proposed_text == "practise"
+        assert findings[0].auto_applicable is False
+
+    def test_program_to_programme_is_proposal(self, check, british_standards):
+        """'program' in British context is a proposal (could be software)."""
+        doc = make_document("Run the program to see results.")
+        findings = check.run(doc, british_standards)
+
+        assert len(findings) == 1
+        assert findings[0].original_text == "program"
+        assert findings[0].proposed_text == "programme"
+        assert findings[0].auto_applicable is False
+
+    def test_draft_to_draught_is_proposal(self, check, british_standards):
+        """'draft' in British context is a proposal (document vs air current)."""
+        doc = make_document("Review the draft before submitting.")
+        findings = check.run(doc, british_standards)
+
+        assert len(findings) == 1
+        assert findings[0].original_text == "draft"
+        assert findings[0].proposed_text == "draught"
+        assert findings[0].auto_applicable is False
+
+    def test_story_to_storey_is_proposal(self, check, british_standards):
+        """'story' in British context is a proposal (narrative vs building floor)."""
+        doc = make_document("The building has ten story.")
+        findings = check.run(doc, british_standards)
+
+        assert len(findings) == 1
+        assert findings[0].original_text == "story"
+        assert findings[0].proposed_text == "storey"
+        assert findings[0].auto_applicable is False
+
+    def test_disk_to_disc_is_proposal(self, check, british_standards):
+        """'disk' in British context is a proposal (magnetic vs optical)."""
+        doc = make_document("Insert the disk into the drive.")
+        findings = check.run(doc, british_standards)
+
+        assert len(findings) == 1
+        assert findings[0].original_text == "disk"
+        assert findings[0].proposed_text == "disc"
+        assert findings[0].auto_applicable is False
+
+    def test_multiple_context_dependent_all_proposals(self, check, british_standards):
+        """Multiple context-dependent words all become proposals."""
+        doc = make_document("Check your license and run the program.")
+        findings = check.run(doc, british_standards)
+
+        # Should have 3 findings: check, license, program
+        assert len(findings) == 3
+        for f in findings:
+            assert f.auto_applicable is False
+
+    def test_tire_to_tyre_is_proposal(self, check, british_standards):
+        """'tire' in British context is a proposal (verb vs noun)."""
+        doc = make_document("I tire easily after long drives.")
+        findings = check.run(doc, british_standards)
+
+        assert len(findings) == 1
+        assert findings[0].original_text == "tire"
+        assert findings[0].proposed_text == "tyre"
+        assert findings[0].auto_applicable is False
+        assert "fatigue" in findings[0].reasoning.lower() or "verb" in findings[0].reasoning.lower()
+
+    def test_meter_to_metre_is_proposal(self, check, british_standards):
+        """'meter' in British context is a proposal (device vs unit)."""
+        doc = make_document("Check the parking meter before leaving.")
+        findings = check.run(doc, british_standards)
+
+        assert len(findings) == 2  # "check" and "meter"
+        meter_findings = [f for f in findings if f.original_text.lower() == 'meter']
+        assert len(meter_findings) == 1
+        assert meter_findings[0].proposed_text == "metre"
+        assert meter_findings[0].auto_applicable is False
+
+    def test_curb_to_kerb_is_proposal(self, check, british_standards):
+        """'curb' in British context is a proposal (verb vs noun)."""
+        doc = make_document("Tools to curb impulsive betting are available.")
+        findings = check.run(doc, british_standards)
+
+        assert len(findings) == 1
+        assert findings[0].original_text == "curb"
+        assert findings[0].proposed_text == "kerb"
+        assert findings[0].auto_applicable is False
+        assert "restrain" in findings[0].reasoning.lower() or "verb" in findings[0].reasoning.lower()
+
+
+# =============================================================================
+# CONTEXT-DEPENDENT WORDS - AMERICAN TARGET (AUTO-APPLY)
+# =============================================================================
+
+class TestContextDependentAmericanTarget:
+    """Test that British→American conversions for ambiguous words ARE auto-applied.
+
+    The ambiguity is one-directional: British→American is always safe.
+    - cheque → check: always correct in American
+    - licence → license: always correct in American
+    - practise → practice: always correct in American
+    - programme → program: always correct in American
+    """
+
+    def test_cheque_to_check_is_auto(self, check, american_standards):
+        """'cheque' in American context IS auto-applied."""
+        doc = make_document("Pay by cheque.")
+        findings = check.run(doc, american_standards)
+
+        assert len(findings) == 1
+        assert findings[0].original_text == "cheque"
+        assert findings[0].proposed_text == "check"
+        assert findings[0].auto_applicable is True  # Safe direction
+
+    def test_licence_to_license_is_auto(self, check, american_standards):
+        """'licence' in American context IS auto-applied."""
+        doc = make_document("You need a licence.")
+        findings = check.run(doc, american_standards)
+
+        assert len(findings) == 1
+        assert findings[0].original_text == "licence"
+        assert findings[0].proposed_text == "license"
+        assert findings[0].auto_applicable is True  # Safe direction
+
+    def test_practise_to_practice_is_auto(self, check, american_standards):
+        """'practise' in American context IS auto-applied."""
+        doc = make_document("You should practise more.")
+        findings = check.run(doc, american_standards)
+
+        assert len(findings) == 1
+        assert findings[0].original_text == "practise"
+        assert findings[0].proposed_text == "practice"
+        assert findings[0].auto_applicable is True  # Safe direction
+
+    def test_programme_to_program_is_auto(self, check, american_standards):
+        """'programme' in American context IS auto-applied."""
+        doc = make_document("Watch the programme tonight.")
+        findings = check.run(doc, american_standards)
+
+        assert len(findings) == 1
+        assert findings[0].original_text == "programme"
+        assert findings[0].proposed_text == "program"
+        assert findings[0].auto_applicable is True  # Safe direction
+
+    def test_draught_to_draft_is_auto(self, check, american_standards):
+        """'draught' in American context IS auto-applied."""
+        doc = make_document("Feel the draught from the window.")
+        findings = check.run(doc, american_standards)
+
+        assert len(findings) == 1
+        assert findings[0].original_text == "draught"
+        assert findings[0].proposed_text == "draft"
+        assert findings[0].auto_applicable is True  # Safe direction
+
+    def test_storey_to_story_is_auto(self, check, american_standards):
+        """'storey' in American context IS auto-applied."""
+        doc = make_document("The building has ten storey.")
+        findings = check.run(doc, american_standards)
+
+        assert len(findings) == 1
+        assert findings[0].original_text == "storey"
+        assert findings[0].proposed_text == "story"
+        assert findings[0].auto_applicable is True  # Safe direction
+
+    def test_disc_to_disk_is_auto(self, check, american_standards):
+        """'disc' in American context IS auto-applied."""
+        doc = make_document("Insert the disc into the drive.")
+        findings = check.run(doc, american_standards)
+
+        assert len(findings) == 1
+        assert findings[0].original_text == "disc"
+        assert findings[0].proposed_text == "disk"
+        assert findings[0].auto_applicable is True  # Safe direction
+
+    def test_tyre_to_tire_is_auto(self, check, american_standards):
+        """'tyre' in American context IS auto-applied."""
+        doc = make_document("Change the tyre on the car.")
+        findings = check.run(doc, american_standards)
+
+        assert len(findings) == 1
+        assert findings[0].original_text == "tyre"
+        assert findings[0].proposed_text == "tire"
+        assert findings[0].auto_applicable is True  # Safe direction
+
+    def test_metre_to_meter_is_auto(self, check, american_standards):
+        """'metre' in American context IS auto-applied."""
+        doc = make_document("One metre is about three feet.")
+        findings = check.run(doc, american_standards)
+
+        assert len(findings) == 1
+        assert findings[0].original_text == "metre"
+        assert findings[0].proposed_text == "meter"
+        assert findings[0].auto_applicable is True  # Safe direction
+
+    def test_kerb_to_curb_is_auto(self, check, american_standards):
+        """'kerb' in American context IS auto-applied."""
+        doc = make_document("Park near the kerb.")
+        findings = check.run(doc, american_standards)
+
+        assert len(findings) == 1
+        assert findings[0].original_text == "kerb"
+        assert findings[0].proposed_text == "curb"
+        assert findings[0].auto_applicable is True  # Safe direction
+
+
+# =============================================================================
+# CONTEXT-DEPENDENT WORDS - AUSTRALIAN/NZ (SAME AS BRITISH)
+# =============================================================================
+
+class TestContextDependentAustralianTarget:
+    """Test that Australian also treats ambiguous words as proposals."""
+
+    def test_check_to_cheque_is_proposal_australian(self, check, australian_standards):
+        """'check' in Australian context is a proposal, not auto-applied."""
+        doc = make_document("Double-check your selections before placing a bet.")
+        findings = check.run(doc, australian_standards)
+
+        check_findings = [f for f in findings if f.original_text.lower() == 'check']
+        assert len(check_findings) == 1
+        assert check_findings[0].auto_applicable is False
+
+    def test_license_to_licence_is_proposal_australian(self, check, australian_standards):
+        """'license' in Australian context is a proposal."""
+        doc = make_document("The casino operates under a valid license.")
+        findings = check.run(doc, australian_standards)
+
+        license_findings = [f for f in findings if f.original_text.lower() == 'license']
+        assert len(license_findings) == 1
+        assert license_findings[0].auto_applicable is False

@@ -59,8 +59,9 @@ OUR_OR_WORDS = [
 
 # -re/-er words (British/Canadian use -re, American uses -er)
 # List in British (-re) form
+# NOTE: 'metre' removed - it's context-dependent (unit vs measuring device)
 RE_ER_WORDS = [
-    'centre', 'metre', 'theatre', 'fibre', 'litre',
+    'centre', 'theatre', 'fibre', 'litre',
     'calibre', 'lustre', 'sabre', 'sombre', 'spectre',
     'meagre', 'manoeuvre', 'reconnoitre',
 ]
@@ -90,10 +91,10 @@ OGUE_OG_WORDS = [
 ]
 
 # Other common swaps (British form → American form)
+# These are SAFE to auto-apply in both directions because NO ALTERNATE MEANING EXISTS
+# (not "alternate meaning is rare" - that reasoning is unsafe)
 OTHER_BRITISH_AMERICAN = {
-    'cheque': 'check',  # Financial
     'grey': 'gray',
-    'programme': 'program',  # British programme → American program
     'enrol': 'enroll',
     'skilful': 'skillful',
     'fulfil': 'fulfill',
@@ -106,12 +107,6 @@ OTHER_BRITISH_AMERICAN = {
     'defence': 'defense',
     'offence': 'offense',
     'pretence': 'pretense',
-    'licence': 'license',  # Note: in British, licence=noun, license=verb
-    'practise': 'practice',  # Note: in British, practice=noun, practise=verb
-    'storey': 'story',  # Building floor
-    'tyre': 'tire',  # Vehicle tire
-    'kerb': 'curb',  # Road edge
-    'draught': 'draft',  # Air current
     'plough': 'plow',
     'mould': 'mold',
     'smoulder': 'smolder',
@@ -125,25 +120,87 @@ OTHER_BRITISH_AMERICAN = {
     'chequer': 'checker',
     'chequered': 'checkered',
     'cosy': 'cozy',
-    'doughnut': 'donut',  # Though doughnut is also acceptable in US
-    'gaol': 'jail',  # archaic British
+    'doughnut': 'donut',
+    'gaol': 'jail',
     'moustache': 'mustache',
     'pyjamas': 'pajamas',
     'speciality': 'specialty',
     'encyclopaedia': 'encyclopedia',
-    'mediaeval': 'medieval',  # Though medieval is now standard in British too
+    'mediaeval': 'medieval',
     'omelette': 'omelet',
     'annexe': 'annex',
-    'disc': 'disk',  # Though both used in both regions depending on context
 }
 
-# Context-dependent words that require human review
+# Words where ONLY British → American is safe to auto-apply
+# American → British is AMBIGUOUS (noun/verb distinction or context-dependent)
+# These get auto-applied when target is American, but become PROPOSALS for British targets
+AMBIGUOUS_BRITISH_AMERICAN = {
+    'cheque': 'check',      # British cheque → American check (safe)
+                            # But American check → British cheque is AMBIGUOUS (verb "check" = verify)
+    'programme': 'program', # British programme → American program (safe)
+                            # But American program → British programme is AMBIGUOUS (software = "program")
+    'licence': 'license',   # British licence → American license (safe)
+                            # But American license → British licence is AMBIGUOUS (verb "to license")
+    'practise': 'practice', # British practise → American practice (safe)
+                            # But American practice → British practise is AMBIGUOUS (noun "practice")
+    'storey': 'story',      # British storey → American story (safe)
+                            # But American story → British storey is AMBIGUOUS (narrative vs floor)
+    'draught': 'draft',     # British draught → American draft (safe)
+                            # But American draft → British draught is AMBIGUOUS (document vs air/beer)
+    'disc': 'disk',         # Context-dependent in both directions (optical vs magnetic)
+    'tyre': 'tire',         # British tyre → American tire (safe)
+                            # But American tire → British tyre is AMBIGUOUS (verb "tire" = fatigue)
+    'metre': 'meter',       # British metre → American meter (safe)
+                            # But American meter → British metre is AMBIGUOUS (device vs unit)
+    'kerb': 'curb',         # British kerb → American curb (safe)
+                            # But American curb → British kerb is AMBIGUOUS (verb "curb" = restrain)
+}
+
+# Context-dependent words that require human review (American → British direction)
 # These have noun/verb distinctions or context-specific meanings
-# Note: programme/program is actually in OTHER_BRITISH_AMERICAN for standard swap
-# These are words where context determines correctness
+# When target is British/Australian/NZ and we find the American form,
+# we create a PROPOSAL (auto_applicable=False) instead of auto-applying
 CONTEXT_DEPENDENT = {
-    # Currently empty - programme/program handled in standard swap
-    # licence/license and practice/practise could go here but are complex
+    'check': {
+        'british_form': 'cheque',
+        'note': "'check' (verb: verify) vs 'cheque' (noun: payment). Only use 'cheque' for financial instrument.",
+    },
+    'license': {
+        'british_form': 'licence',
+        'note': "British uses 'licence' (noun) but 'license' (verb). Context determines spelling.",
+    },
+    'practice': {
+        'british_form': 'practise',
+        'note': "British uses 'practice' (noun) but 'practise' (verb). Context determines spelling.",
+    },
+    'story': {
+        'british_form': 'storey',
+        'note': "'story' (narrative) stays as-is. Only use 'storey' for building floors.",
+    },
+    'draft': {
+        'british_form': 'draught',
+        'note': "'draft' (document) stays as-is. Use 'draught' only for air current or beer.",
+    },
+    'program': {
+        'british_form': 'programme',
+        'note': "Computer 'program' stays as-is even in British. Use 'programme' for TV/radio/agenda.",
+    },
+    'disk': {
+        'british_form': 'disc',
+        'note': "'disk' for magnetic media (hard disk). 'disc' for optical media (CD/DVD).",
+    },
+    'tire': {
+        'british_form': 'tyre',
+        'note': "Verb 'tire' (become fatigued) stays as-is. Only use 'tyre' for vehicle wheels.",
+    },
+    'meter': {
+        'british_form': 'metre',
+        'note': "Measuring device 'meter' (parking meter, gas meter) stays as-is. Use 'metre' for unit of length.",
+    },
+    'curb': {
+        'british_form': 'kerb',
+        'note': "Verb 'curb' (restrain, e.g. 'curb your spending') stays as-is. Use 'kerb' only for road edge.",
+    },
 }
 
 
@@ -156,6 +213,10 @@ def _build_swap_maps() -> dict[str, dict[str, str]]:
     Build swap maps for each spelling region.
 
     Each map: {wrong_spelling: correct_spelling}
+
+    IMPORTANT: AMBIGUOUS_BRITISH_AMERICAN words are handled asymmetrically:
+    - British→American direction: auto-apply (safe)
+    - American→British direction: NOT in swap map (handled via CONTEXT_DEPENDENT)
     """
     # British target: American forms → British forms
     british_map: dict[str, str] = {}
@@ -211,18 +272,28 @@ def _build_swap_maps() -> dict[str, dict[str, str]]:
         american = word.replace('ogue', 'og')
         british_map[american] = word
 
-    # Other swaps: American → British
+    # Other swaps: American → British (symmetric, safe both directions)
     for british, american in OTHER_BRITISH_AMERICAN.items():
         british_map[american] = british
 
-    # American target: British forms → American forms (reverse of british_map)
+    # NOTE: AMBIGUOUS_BRITISH_AMERICAN words are NOT added to british_map
+    # They're handled via CONTEXT_DEPENDENT with auto_applicable=False
+
+    # American target: British forms → American forms
     american_map: dict[str, str] = {}
+
+    # Reverse the symmetric swaps from british_map
     for american, british in british_map.items():
         american_map[british] = american
 
+    # Add AMBIGUOUS words for British→American direction (this IS safe)
+    for british, american in AMBIGUOUS_BRITISH_AMERICAN.items():
+        american_map[british] = american  # e.g., programme → program (auto)
+
     # Canadian: HYBRID
-    # Uses British: -our, -re, cheque, grey
+    # Uses British: -our, -re, grey
     # Uses American: -ize
+    # NOTE: Ambiguous words (check/cheque, etc.) handled via CONTEXT_DEPENDENT
     canadian_map: dict[str, str] = {}
 
     # British -our (swap American -or to British -our)
@@ -234,10 +305,6 @@ def _build_swap_maps() -> dict[str, dict[str, str]]:
     for word in RE_ER_WORDS:
         american = word.replace('re', 'er')
         canadian_map[american] = word
-
-    # British cheque (swap American check)
-    # Note: "check" has many meanings, so we'll only flag in context
-    # For now, don't auto-swap check → cheque (too ambiguous)
 
     # British grey (swap American gray)
     canadian_map['gray'] = 'grey'
@@ -253,6 +320,9 @@ def _build_swap_maps() -> dict[str, dict[str, str]]:
         elif 'yse' in word:  # analyse → analyze
             american = word.replace('yse', 'yze')
             canadian_map[word] = american
+
+    # NOTE: Canadian also doesn't auto-swap ambiguous words (check→cheque, etc.)
+    # These are handled via CONTEXT_DEPENDENT
 
     # Australian/NZ follow British
     australian_map = british_map.copy()
@@ -408,19 +478,26 @@ class LocaleSpellingCheck(DeterministicCheck):
                     },
                 ))
 
-            # Check context-dependent words
+            # Check context-dependent words (American→British direction only)
+            # These are ambiguous noun/verb pairs that need human review
             elif word_lower in self._context_dependent:
                 info = self._context_dependent[word_lower]
 
-                # Determine swap based on region
-                if region == 'american' and info.get('swap_american'):
-                    correct = info['swap_american']
-                elif region in ('british', 'australian', 'new_zealand') and info.get('swap_british'):
-                    correct = info['swap_british']
-                else:
-                    continue  # No swap needed for this region
+                # Only flag for British-family regions (where we'd convert American→British)
+                # American region doesn't need these flagged (British→American is handled above)
+                if region not in ('british', 'australian', 'new_zealand', 'canadian'):
+                    continue
+
+                correct = info.get('british_form')
+                if not correct:
+                    continue
+
+                # Don't flag if already the correct form
+                if word_lower == correct:
+                    continue
 
                 correct_cased = self._preserve_case(word, correct)
+                note = info.get('note', 'Context-dependent word requires review.')
 
                 abs_start = element.start_offset + start
                 abs_end = element.start_offset + end
@@ -435,7 +512,7 @@ class LocaleSpellingCheck(DeterministicCheck):
                     original_text=word,
                     proposed_text=correct_cased,
                     reasoning=(
-                        f"'{word}' may need review: {info['note']}"
+                        f"Possible {region} spelling change: '{word}' → '{correct_cased}'. {note}"
                     ),
                     auto_applicable=False,  # Always proposal for context-dependent
                     metadata={
@@ -443,7 +520,7 @@ class LocaleSpellingCheck(DeterministicCheck):
                         "original_word": word_lower,
                         "correct_word": correct,
                         "context_dependent": True,
-                        "note": info['note'],
+                        "note": note,
                     },
                 ))
 
