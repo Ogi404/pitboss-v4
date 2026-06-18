@@ -485,6 +485,56 @@ class TestFormattingPreservation:
         # First run should keep highlight
         assert result_runs[0].highlight_color == "yellow"
 
+    def test_highlight_preserved_exact_match(self):
+        """Highlight is preserved when edit exactly matches a run (BUG 2 regression)."""
+        # This is the exact scenario from artifact verification:
+        # A highlighted run being edited should keep its highlight
+        runs = [
+            TextRun(text="text ", start_offset=0, end_offset=5),
+            TextRun(text="license", start_offset=5, end_offset=12, highlight_color="yellow"),
+            TextRun(text=" more", start_offset=12, end_offset=17),
+        ]
+        doc = make_document_with_runs("text license more", runs)
+
+        # Edit exactly matches the highlighted run
+        finding = make_finding(start=5, end=12, original="license", proposed="licence")
+        result = apply_auto_findings(doc, [finding])
+
+        result_runs = result.document.elements[0].runs()
+
+        # Find the replacement run
+        replacement_run = [r for r in result_runs if r.text == "licence"]
+        assert len(replacement_run) == 1, f"Expected 'licence' run, got: {[r.text for r in result_runs]}"
+        assert replacement_run[0].highlight_color == "yellow", \
+            f"Highlight lost! Run has: {replacement_run[0].highlight_color}"
+
+    def test_bold_highlight_preserved_exact_match(self):
+        """Multiple formatting attributes preserved when edit exactly matches run."""
+        runs = [
+            TextRun(text="prefix ", start_offset=0, end_offset=7),
+            TextRun(
+                text="formatted",
+                start_offset=7,
+                end_offset=16,
+                bold=True,
+                italic=True,
+                highlight_color="yellow",
+            ),
+            TextRun(text=" suffix", start_offset=16, end_offset=23),
+        ]
+        doc = make_document_with_runs("prefix formatted suffix", runs)
+
+        finding = make_finding(start=7, end=16, original="formatted", proposed="changed")
+        result = apply_auto_findings(doc, [finding])
+
+        result_runs = result.document.elements[0].runs()
+        replacement_run = [r for r in result_runs if r.text == "changed"]
+
+        assert len(replacement_run) == 1
+        assert replacement_run[0].bold is True
+        assert replacement_run[0].italic is True
+        assert replacement_run[0].highlight_color == "yellow"
+
 
 class TestDominantFormatting:
     """Tests for _get_dominant_formatting function."""

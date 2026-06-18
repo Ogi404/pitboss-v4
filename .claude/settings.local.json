@@ -20,7 +20,10 @@
       "Bash(Where-Object { $_Name -match \"au|australia\" })",
       "Bash(Select-Object FullName)",
       "Bash(cd:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(xargs cat:*)",
+      "Bash(PYTHONPATH=\"C:/Users/User/Documents/PROJECTS/BUILDS/pitboss_v_4\" python:*)",
+      "Bash(pytest:*)"
     ]
   }
 }

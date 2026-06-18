@@ -95,9 +95,12 @@ def apply_auto_findings(
     doc = deepcopy(document)
 
     # Filter to only auto_applicable findings with proposed_text
+    # Also exclude no-op edits where original == proposed (these damage run structure)
     auto_findings = [
         f for f in findings
-        if f.auto_applicable and f.proposed_text is not None
+        if f.auto_applicable
+        and f.proposed_text is not None
+        and f.proposed_text != f.original_text  # Skip no-op edits
     ]
 
     if not auto_findings:
@@ -584,7 +587,25 @@ def _adjust_runs_for_edit(
                     hyperlink=run.hyperlink,
                 ))
 
-        # else: run is entirely within edit range - it gets replaced
+        elif run.start_offset >= rel_start and run.end_offset <= rel_end:
+            # Run is entirely within edit range (including exact match)
+            # Preserve formatting from first such run for the replacement text
+            if new_text and run.start_offset == rel_start:
+                # This run starts at edit start - use its formatting for replacement
+                new_runs.append(TextRun(
+                    text=new_text,
+                    start_offset=rel_start,
+                    end_offset=rel_start + len(new_text),
+                    bold=run.bold,
+                    italic=run.italic,
+                    underline=run.underline,
+                    strikethrough=run.strikethrough,
+                    highlight_color=run.highlight_color,
+                    hyperlink=run.hyperlink,
+                ))
+            # else: run is subset of edit range not at start - absorbed into replacement
+
+        # else: should not reach here (all cases covered above)
 
     # If we haven't added the replacement text yet (no run spans the edit)
     # add it with the dominant formatting

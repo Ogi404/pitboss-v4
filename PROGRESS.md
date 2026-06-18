@@ -2,6 +2,8 @@
 
 ## Current Phase
 
+**Phase 4a: Complete** - Output Pipeline Core (Local DOCX)
+
 **Phase 3: Complete** - Brief Understanding Agent
 
 **Phase 2: Complete** - Deterministic Layer (the 95%) - ALL 9 CHECKS DONE
@@ -53,7 +55,8 @@ The Check interface with registry:
 | 1 | Layered Voice Model Builder | **Complete** |
 | 2 | Deterministic Layer (the 95%) | **Complete** (9/9 checks) |
 | 3 | Brief agent (confidence-scored extraction) | **Complete** |
-| 4 | Output/redline (Google Doc integration) | Pending |
+| 4a | Output pipeline core (local DOCX) | **Complete** |
+| 4b | Google Docs integration | Pending |
 | 5 | Judgment layer (the 5%) | Pending |
 | 6 | Learning loop (feedback calibration) | Pending |
 | 7 | Fact-checker (claim-driven verification) | Pending |
@@ -133,7 +136,7 @@ The 937 UNCLEAR count in the corpus confirms this middle path matters — silent
 ## Test Status
 
 ```
-735 tests passing (3 skipped)
+792 tests passing (3 skipped)
 ├── 148 tests (Phase 0 - core contracts)
 ├── 51 tests (Phase 1 - voice model)
 ├── 78 tests (Phase 1 - person reference classifier)
@@ -146,7 +149,9 @@ The 937 UNCLEAR count in the corpus confirms this middle path matters — silent
 ├── 33 tests (Phase 2 - brand names check)
 ├── 40 tests (Phase 2 - keywords check)
 ├── 52 tests (Phase 2 - structure check)
-└── 67 tests (Phase 3 - brief agent)
+├── 67 tests (Phase 3 - brief agent)
+├── 17 tests (Phase 4a - orchestrator)
+└── 39 tests (Phase 4a - apply layer)
 ```
 
 ## Phase 2 Deliverables
@@ -811,7 +816,79 @@ elif result.state == BriefState.NEEDS_TASK_SELECTION:
 
 Brief parsing was v3's biggest failure source — this discipline is why v4's is solid.
 
-**Next:** Phase 4 (output/redline — Google Docs Compare + writer comments) makes the deterministic layer usable end-to-end. Then Phase 5 (judgment layer), 6 (learning loop), 7 (fact-checker).
+## Phase 4a Deliverables
+
+### Output Pipeline Core (Complete)
+
+**Files Created:**
+- `core/orchestrator.py` - Run all registered checks, aggregate findings (~270 lines)
+- `output/apply.py` - Apply auto-fixes with offset management and conflict detection (~450 lines)
+- `output/docx_writer.py` - Write Document to .docx with formatting (~200 lines)
+- `output/comments.py` - Draft writer comments from proposals (~180 lines)
+- `output/summary.py` - Generate run summary report (~180 lines)
+- `run_pitboss.py` - Pipeline entry point with CLI (~220 lines)
+- `tests/test_orchestrator.py` - 17 orchestrator tests
+- `tests/test_apply.py` - 39 apply layer tests (critical)
+- `tests/conftest.py` - Test configuration for check registration
+
+**End-to-End Pipeline:**
+```
+.docx article + brief → run all 9 checks → corrected .docx + comments.md + summary.md
+```
+
+**Pipeline Components:**
+
+| Component | Purpose | Key Features |
+|-----------|---------|--------------|
+| `Orchestrator` | Run all checks | Registry iteration, error isolation, finding aggregation |
+| `Apply Layer` | Apply auto-fixes | Descending offset order, conflict detection, formatting preservation |
+| `DOCX Writer` | Output corrected doc | Bold/italic/hyperlinks/highlights preserved |
+| `Comments` | Draft writer feedback | Proposals grouped by section, markdown export |
+| `Summary` | Run statistics | Counts by check, conflicts, errors |
+
+**Critical Apply Layer Design:**
+
+1. **Offset Management**: Sort findings by position DESCENDING (apply last-to-first) so earlier offsets stay valid after edits
+
+2. **Conflict Detection**: When two findings overlap:
+   - First finding (earlier start_offset) wins
+   - Second finding DOWNGRADED to proposal
+   - Conflict pairs tracked in result
+
+3. **Validation**: Original text at location must match finding's `original_text` or finding is skipped
+
+4. **Formatting Preservation**:
+   - TextRuns adjusted around edits
+   - Formatting inherited from most-overlapping run
+   - Hyperlinks preserved via OOXML manipulation
+
+**Real Validation (Koifortune AU article, 2016 words):**
+
+| Metric | Count |
+|--------|-------|
+| Total findings | 53 |
+| Auto-applied | 42 |
+| Proposals | 10 |
+| Downgraded (conflicts) | 1 |
+| Skipped (validation) | 0 |
+| Comments drafted | 11 |
+
+**Breakdown by Check:**
+- headings: 37 auto-applied (capitalization fixes)
+- locale_spelling: 5 auto-applied, 1 downgraded (conflict)
+- voice.third_person: 10 proposals (ambiguous contexts)
+
+**CLI Usage:**
+```bash
+python run_pitboss.py --article article.docx --brief brief.xlsx --brand koifortune
+```
+
+**Outputs:**
+- `corrected_<filename>.docx` - Document with auto-fixes applied
+- `comments.md` - Writer comments from proposals, grouped by section
+- `summary.md` - Run statistics with counts per check
+
+**Next:** Phase 4b (Google Docs integration — read from/write to Google Docs directly). Then Phase 5 (judgment layer), 6 (learning loop), 7 (fact-checker).
 
 ---
-*Last updated: PHASE 2 COMPLETE — all 9 deterministic checks built (voice, stop_words, headings, currency, formatting, locale_spelling, brand_names, keywords, structure). 735 tests passing. Corpus validated, zero false positives.*
+*Last updated: PHASE 4a COMPLETE — end-to-end local pipeline working. 792 tests passing. Validated on real Koifortune article: 42 auto-fixes applied, 11 comments drafted.*

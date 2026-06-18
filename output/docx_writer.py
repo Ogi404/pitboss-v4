@@ -115,12 +115,133 @@ def _write_paragraph(doc: DocxDocument, paragraph: Paragraph) -> None:
 
 
 def _write_list(doc: DocxDocument, lst: List) -> None:
-    """Write a list element."""
-    style = 'List Number' if lst.list_type == ListType.ORDERED else 'List Bullet'
+    """
+    Write a list element with proper Word numbering XML.
+
+    Creates actual Word list paragraphs with w:numPr elements that
+    will be recognized when the document is read back.
+    """
+    # Ensure document has numbering definitions
+    _ensure_numbering_definitions(doc)
+
+    # Get numId based on list type (1=bullets, 2=numbers by our definition)
+    num_id = 2 if lst.list_type == ListType.ORDERED else 1
 
     for item in lst.items:
-        para = doc.add_paragraph(style=style)
+        para = doc.add_paragraph()
         _add_runs_to_paragraph(para, item.runs())
+
+        # Apply proper numbering via XML
+        _apply_list_numbering(para, num_id, item.indent_level)
+
+
+def _ensure_numbering_definitions(doc: DocxDocument) -> None:
+    """
+    Ensure document has numbering definitions for bullets and numbers.
+
+    Creates the numbering.xml part if it doesn't exist, and adds
+    abstract numbering definitions for bullet (numId=1) and numbered (numId=2) lists.
+    """
+    # Check if document already has numbering part
+    numbering_part = doc.part.numbering_part
+
+    # If numbering part exists, assume definitions are present
+    # (this handles documents that already have lists)
+    if numbering_part is not None:
+        return
+
+    # Create numbering definitions
+    # This is done by adding a list item which triggers python-docx to create
+    # the numbering infrastructure, then we can reference it
+    # Note: python-docx creates numbering automatically when styles are used
+    # We just need to ensure our numId values are valid
+
+    # For now, we'll create the numbering XML directly
+    _create_minimal_numbering(doc)
+
+
+def _create_minimal_numbering(doc: DocxDocument) -> None:
+    """
+    Create minimal numbering definitions for bullets and numbers.
+
+    This creates the numbering.xml part with two abstract number definitions:
+    - abstractNumId="0" for bullets (numId=1)
+    - abstractNumId="1" for numbers (numId=2)
+    """
+    from docx.parts.numbering import NumberingPart
+    from docx.oxml.numbering import CT_Numbering
+
+    # Create numbering element
+    numbering_xml = """
+    <w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+        <w:abstractNum w:abstractNumId="0">
+            <w:lvl w:ilvl="0">
+                <w:start w:val="1"/>
+                <w:numFmt w:val="bullet"/>
+                <w:lvlText w:val="●"/>
+                <w:lvlJc w:val="left"/>
+                <w:pPr>
+                    <w:ind w:left="720" w:hanging="360"/>
+                </w:pPr>
+            </w:lvl>
+        </w:abstractNum>
+        <w:abstractNum w:abstractNumId="1">
+            <w:lvl w:ilvl="0">
+                <w:start w:val="1"/>
+                <w:numFmt w:val="decimal"/>
+                <w:lvlText w:val="%1."/>
+                <w:lvlJc w:val="left"/>
+                <w:pPr>
+                    <w:ind w:left="720" w:hanging="360"/>
+                </w:pPr>
+            </w:lvl>
+        </w:abstractNum>
+        <w:num w:numId="1">
+            <w:abstractNumId w:val="0"/>
+        </w:num>
+        <w:num w:numId="2">
+            <w:abstractNumId w:val="1"/>
+        </w:num>
+    </w:numbering>
+    """
+
+    from lxml import etree
+    numbering_elm = etree.fromstring(numbering_xml)
+
+    # Create the numbering part and add to document
+    numbering_part = NumberingPart.new()
+    numbering_part._element = numbering_elm
+
+    # Add relationship from document to numbering part
+    doc.part.relate_to(numbering_part, 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering')
+
+
+def _apply_list_numbering(para, num_id: int, indent_level: int = 0) -> None:
+    """
+    Apply Word numbering XML to make paragraph a proper list item.
+
+    Args:
+        para: The paragraph to modify
+        num_id: The numbering definition ID (1=bullets, 2=numbers)
+        indent_level: The indent level for nested lists (0-based)
+    """
+    # Get or create pPr (paragraph properties)
+    pPr = para._p.get_or_add_pPr()
+
+    # Create numPr (numbering properties)
+    numPr = OxmlElement('w:numPr')
+
+    # Set indent level
+    ilvl = OxmlElement('w:ilvl')
+    ilvl.set(qn('w:val'), str(indent_level))
+    numPr.append(ilvl)
+
+    # Set numId
+    numId_elem = OxmlElement('w:numId')
+    numId_elem.set(qn('w:val'), str(num_id))
+    numPr.append(numId_elem)
+
+    pPr.append(numPr)
 
 
 def _write_table(doc: DocxDocument, table: Table) -> None:
