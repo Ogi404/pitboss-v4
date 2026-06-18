@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-**Phase 4a: Complete** - Output Pipeline Core (Local DOCX)
+**Phase 4a: In Progress** - Output Pipeline Core (Local DOCX) — built and mostly debugged via artifact verification
 
 **Phase 3: Complete** - Brief Understanding Agent
 
@@ -55,7 +55,7 @@ The Check interface with registry:
 | 1 | Layered Voice Model Builder | **Complete** |
 | 2 | Deterministic Layer (the 95%) | **Complete** (9/9 checks) |
 | 3 | Brief agent (confidence-scored extraction) | **Complete** |
-| 4a | Output pipeline core (local DOCX) | **Complete** |
+| 4a | Output pipeline core (local DOCX) | **In Progress** (Bug 5 remaining) |
 | 4b | Google Docs integration | Pending |
 | 5 | Judgment layer (the 5%) | Pending |
 | 6 | Learning loop (feedback calibration) | Pending |
@@ -136,7 +136,7 @@ The 937 UNCLEAR count in the corpus confirms this middle path matters — silent
 ## Test Status
 
 ```
-792 tests passing (3 skipped)
+817 tests passing (3 skipped)
 ├── 148 tests (Phase 0 - core contracts)
 ├── 51 tests (Phase 1 - voice model)
 ├── 78 tests (Phase 1 - person reference classifier)
@@ -145,13 +145,13 @@ The 937 UNCLEAR count in the corpus confirms this middle path matters — silent
 ├── 34 tests (Phase 2 - headings check)
 ├── 41 tests (Phase 2 - currency check)
 ├── 46 tests (Phase 2 - formatting check, 3 skipped)
-├── 55 tests (Phase 2 - locale spelling check)
+├── 78 tests (Phase 2 - locale spelling check)
 ├── 33 tests (Phase 2 - brand names check)
 ├── 40 tests (Phase 2 - keywords check)
 ├── 52 tests (Phase 2 - structure check)
 ├── 67 tests (Phase 3 - brief agent)
 ├── 17 tests (Phase 4a - orchestrator)
-└── 39 tests (Phase 4a - apply layer)
+└── 41 tests (Phase 4a - apply layer)
 ```
 
 ## Phase 2 Deliverables
@@ -888,7 +888,32 @@ python run_pitboss.py --article article.docx --brief brief.xlsx --brand koifortu
 - `comments.md` - Writer comments from proposals, grouped by section
 - `summary.md` - Run statistics with counts per check
 
-**Next:** Phase 4b (Google Docs integration — read from/write to Google Docs directly). Then Phase 5 (judgment layer), 6 (learning loop), 7 (fact-checker).
+### Artifact Verification Bugs (Fixed)
+
+After initial pipeline completion, ran full end-to-end on Koifortune AU article. Artifact inspection found 5 bugs:
+
+| Bug | Severity | Issue | Fix | Status |
+|-----|----------|-------|-----|--------|
+| Bug 3 | CRITICAL | `locale_spelling` converted verb "check" to noun "cheque" | Ambiguity audit: 10 noun/verb pairs (check/cheque, licence/license, kerb/curb, metre/meter +6) route American→British direction to PROPOSAL; auto-apply bar is "no alternate meaning EXISTS" | **FIXED** |
+| Bug 1 | HIGH | DOCX writer flattened lists to paragraphs (102→141 elements) | Create proper `w:numPr` XML with numbering definitions | **FIXED** |
+| Bug 2 | HIGH | Yellow highlights lost (16→12, 25% dropped) | Add explicit handling for "run exactly matches edit" case in apply.py | **FIXED** |
+| Bug 2b/4 | MEDIUM | No-op edits (original==proposed) damaged run structure | Skip findings where `proposed_text == original_text` | **FIXED** |
+| Bug 5 | MEDIUM | Conflict detection lets structural finding block real text edit | Needs fix: only genuine overlapping TEXT-CHANGING edits should conflict | **REMAINING** |
+
+**Bug 5 Details:** Original trigger was License→Licence edit being blocked by a blank-line spacing finding on the same heading. Now moot since License→Licence is a PROPOSAL post-Bug-3 fix. However, the underlying issue remains: a no-op or structural-only finding (like blank_line spacing) shouldn't block a genuine text edit. Fix needed: conflict detection should only fire when BOTH findings would change the actual text.
+
+**Verification Results (Post-Fix):**
+```
+                    Original    Corrected    Match?
+  Headings:               37           37    YES
+  Paragraphs:             51           51    YES
+  Lists:                  10           10    YES
+  Tables:                  4            4    YES
+  TOTAL:                 102          102    YES
+  Highlights:             16           16    YES
+```
+
+**Next:** Fix Bug 5 (conflict detection), then Phase 4a complete. Then Phase 4b (Google Docs integration) or Phase 5 (judgment layer).
 
 ---
-*Last updated: PHASE 4a COMPLETE — end-to-end local pipeline working. 792 tests passing. Validated on real Koifortune article: 42 auto-fixes applied, 11 comments drafted.*
+*Last updated: Phase 4a artifact verification — 4/5 bugs fixed, Bug 5 (conflict detection) remaining. 817 tests passing.*
