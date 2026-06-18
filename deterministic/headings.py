@@ -265,12 +265,12 @@ class HeadingsCheck(DeterministicCheck):
                 confidence=0.95,
                 location=location,
                 original_text=heading.text,
-                proposed_text=heading.text,  # Text unchanged, format change
+                proposed_text=None,  # Structural change - requires paragraph insertion
                 reasoning=(
                     f"Add a blank line before this heading for better readability. "
                     f"Headings should be visually separated from preceding content."
                 ),
-                auto_applicable=True,
+                auto_applicable=False,  # Cannot auto-apply via text replacement
                 metadata={
                     "sub_check": "blank_line",
                     "heading_level": heading.level.value,

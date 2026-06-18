@@ -106,7 +106,8 @@ class TestBlankLineBeforeHeading:
         # Should have blank line finding
         blank_findings = [f for f in findings if f.metadata_dict.get("sub_check") == "blank_line"]
         assert len(blank_findings) == 1
-        assert blank_findings[0].auto_applicable is True
+        assert blank_findings[0].auto_applicable is False  # Structural change, can't auto-apply
+        assert blank_findings[0].proposed_text is None  # No text replacement possible
         assert blank_findings[0].severity == "suggestion"
 
     def test_has_blank_line_no_finding(self, check, standards):

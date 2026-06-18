@@ -258,6 +258,11 @@ def _detect_conflicts(
     occupied_ranges: list[tuple[int, int, Finding]] = []
 
     for finding in sorted_findings:
+        # Defense in depth: skip no-op findings (original == proposed).
+        # These can't block real edits even if they slip past upstream filter.
+        if finding.proposed_text == finding.original_text:
+            continue
+
         start = finding.location.start_offset
         end = finding.location.end_offset
 

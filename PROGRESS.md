@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-**Phase 4a: In Progress** - Output Pipeline Core (Local DOCX) — built and mostly debugged via artifact verification
+**Phase 4a: Complete** - Output Pipeline Core (Local DOCX) — all 5 artifact verification bugs fixed
 
 **Phase 3: Complete** - Brief Understanding Agent
 
@@ -55,7 +55,7 @@ The Check interface with registry:
 | 1 | Layered Voice Model Builder | **Complete** |
 | 2 | Deterministic Layer (the 95%) | **Complete** (9/9 checks) |
 | 3 | Brief agent (confidence-scored extraction) | **Complete** |
-| 4a | Output pipeline core (local DOCX) | **In Progress** (Bug 5 remaining) |
+| 4a | Output pipeline core (local DOCX) | **Complete** |
 | 4b | Google Docs integration | Pending |
 | 5 | Judgment layer (the 5%) | Pending |
 | 6 | Learning loop (feedback calibration) | Pending |
@@ -136,7 +136,7 @@ The 937 UNCLEAR count in the corpus confirms this middle path matters — silent
 ## Test Status
 
 ```
-817 tests passing (3 skipped)
+818 tests passing (3 skipped)
 ├── 148 tests (Phase 0 - core contracts)
 ├── 51 tests (Phase 1 - voice model)
 ├── 78 tests (Phase 1 - person reference classifier)
@@ -151,7 +151,7 @@ The 937 UNCLEAR count in the corpus confirms this middle path matters — silent
 ├── 52 tests (Phase 2 - structure check)
 ├── 67 tests (Phase 3 - brief agent)
 ├── 17 tests (Phase 4a - orchestrator)
-└── 41 tests (Phase 4a - apply layer)
+└── 42 tests (Phase 4a - apply layer)
 ```
 
 ## Phase 2 Deliverables
@@ -898,9 +898,7 @@ After initial pipeline completion, ran full end-to-end on Koifortune AU article.
 | Bug 1 | HIGH | DOCX writer flattened lists to paragraphs (102→141 elements) | Create proper `w:numPr` XML with numbering definitions | **FIXED** |
 | Bug 2 | HIGH | Yellow highlights lost (16→12, 25% dropped) | Add explicit handling for "run exactly matches edit" case in apply.py | **FIXED** |
 | Bug 2b/4 | MEDIUM | No-op edits (original==proposed) damaged run structure | Skip findings where `proposed_text == original_text` | **FIXED** |
-| Bug 5 | MEDIUM | Conflict detection lets structural finding block real text edit | Needs fix: only genuine overlapping TEXT-CHANGING edits should conflict | **REMAINING** |
-
-**Bug 5 Details:** Original trigger was License→Licence edit being blocked by a blank-line spacing finding on the same heading. Now moot since License→Licence is a PROPOSAL post-Bug-3 fix. However, the underlying issue remains: a no-op or structural-only finding (like blank_line spacing) shouldn't block a genuine text edit. Fix needed: conflict detection should only fire when BOTH findings would change the actual text.
+| Bug 5 | MEDIUM | Conflict detection lets structural finding block real text edit | Defense-in-depth: `_detect_conflicts` skips no-ops; `blank_line` changed to proposal (structural changes can't auto-apply via text replacement) | **FIXED** |
 
 **Verification Results (Post-Fix):**
 ```
@@ -913,7 +911,7 @@ After initial pipeline completion, ran full end-to-end on Koifortune AU article.
   Highlights:             16           16    YES
 ```
 
-**Next:** Fix Bug 5 (conflict detection), then Phase 4a complete. Then Phase 4b (Google Docs integration) or Phase 5 (judgment layer).
+**Phase 4a COMPLETE.** All 5 artifact verification bugs fixed. Next: Phase 4b (Google Docs integration) or Phase 5 (judgment layer).
 
 ---
-*Last updated: Phase 4a artifact verification — 4/5 bugs fixed, Bug 5 (conflict detection) remaining. 817 tests passing.*
+*Last updated: Phase 4a complete — all 5 artifact verification bugs fixed. 818 tests passing.*

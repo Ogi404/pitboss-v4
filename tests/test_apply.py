@@ -339,6 +339,37 @@ class TestConflictDetection:
         assert len(result.conflicts) == 1
         assert result.document.elements[0].text == "Hello great world!"
 
+    def test_structural_finding_does_not_block_real_edit(self):
+        """A structural no-op finding should not block a real text edit.
+
+        Bug 5 reproducer: structural findings (like blank_line) that don't
+        change text (original == proposed) should not block real text edits.
+        """
+        doc = make_document("Hello World")
+
+        findings = [
+            # Structural no-op (simulates blank_line: same text, formatting change)
+            make_finding(
+                start=0, end=11,
+                original="Hello World", proposed="Hello World",
+                check_name="headings.blank_line",
+            ),
+            # Real text edit overlapping the same span
+            make_finding(
+                start=6, end=11,
+                original="World", proposed="Universe",
+                check_name="locale_spelling",
+            ),
+        ]
+
+        result = apply_auto_findings(doc, findings)
+
+        # Real edit should apply, structural should be filtered (no-op)
+        assert result.applied_count == 1
+        assert result.document.elements[0].text == "Hello Universe"
+        # No conflict should be recorded (no-op was filtered, not downgraded)
+        assert result.conflict_count == 0
+
 
 # =============================================================================
 # VALIDATION TESTS
