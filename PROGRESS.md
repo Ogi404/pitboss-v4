@@ -911,7 +911,16 @@ After initial pipeline completion, ran full end-to-end on Koifortune AU article.
   Highlights:             16           16    YES
 ```
 
-**Phase 4a COMPLETE.** All 5 artifact verification bugs fixed. Next: Phase 4b (Google Docs integration) or Phase 5 (judgment layer).
+**Final Pipeline Output (Koifortune AU, all bugs fixed):**
+
+| Category | Count | Details |
+|----------|-------|---------|
+| **Auto-fixes applied** | **25** | All `headings.capitalization` — genuine text changes |
+| **Proposals for review** | **61** | 37 `blank_line` (now honest proposals), 8 `capitalization` (proper nouns), 10 `voice` (ambiguous), 6 `locale_spelling` (noun/verb pairs) |
+
+The phantom "42 auto-fixes" count is gone. The old count included 37 `blank_line` no-ops that were marked `auto_applicable=True` but had `proposed_text == original_text` (no actual text change). These are now honest proposals that surface in `comments.md` for writer action.
+
+**Phase 4a COMPLETE and VERIFIED.** All 5 artifact verification bugs fixed. End-to-end pipeline works: article + brief in → faithfully-corrected .docx + drafted comments out. Document structure preserved exactly (102 elements, 16/16 highlights). Next: Phase 4b (Google Docs integration) or Phase 5 (judgment layer).
 
 ---
-*Last updated: Phase 4a complete — all 5 artifact verification bugs fixed. 818 tests passing.*
+*Last updated: Phase 4a complete and verified — 25 real auto-fixes, 61 proposals, structure preserved. 818 tests passing.*

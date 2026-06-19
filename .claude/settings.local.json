@@ -23,7 +23,12 @@
       "Bash(find:*)",
       "Bash(xargs cat:*)",
       "Bash(PYTHONPATH=\"C:/Users/User/Documents/PROJECTS/BUILDS/pitboss_v_4\" python:*)",
-      "Bash(pytest:*)"
+      "Bash(pytest:*)",
+      "Bash(git -C \"C:\\\\Users\\\\User\\\\Documents\\\\PROJECTS\\\\BUILDS\\\\pitboss_v_4\" status)",
+      "Bash(git -C \"C:\\\\Users\\\\User\\\\Documents\\\\PROJECTS\\\\BUILDS\\\\pitboss_v_4\" log --oneline -15)",
+      "Bash(git -C \"C:\\\\Users\\\\User\\\\Documents\\\\PROJECTS\\\\BUILDS\\\\pitboss_v_4\" diff --stat)",
+      "Bash(git -C \"C:\\\\Users\\\\User\\\\Documents\\\\PROJECTS\\\\BUILDS\\\\pitboss_v_4\" log --oneline -3)",
+      "Bash(git -C \"C:\\\\Users\\\\User\\\\Documents\\\\PROJECTS\\\\BUILDS\\\\pitboss_v_4\" push)"
     ]
   }
 }
