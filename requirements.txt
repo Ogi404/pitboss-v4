@@ -5,6 +5,11 @@ pyyaml>=6.0
 python-docx>=0.8.11
 wordfreq>=3.0.0  # Dictionary lookup for proper noun detection
 
+# Google API (Phase 4b - Google Docs integration)
+google-auth>=2.0.0
+google-auth-oauthlib>=1.0.0
+google-api-python-client>=2.0.0
+
 # Testing
 pytest>=7.0
 pytest-cov>=4.0

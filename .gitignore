@@ -33,6 +33,11 @@ Thumbs.db
 .env
 .env.local
 
+# Google API credentials (OAuth) - SECRETS, never commit
+credentials.json
+token.json
+token_v4.json
+
 # Raw source documents in corpora (keep voice_model.json and corpus_index.csv)
 corpora/**/*.docx
 
