@@ -620,6 +620,8 @@ This principle ensures the deterministic layer's value: 100% consistency for aut
 
 **Metadata labels in brief sections:** Keyword-group labels ("Main keywords", "Support keywords", etc.) are currently stored as brief sections by the xlsx parser and filtered per-check via `is_metadata_label()`. Cleaner long-term fix: brief parser should not put them in sections at all. Not urgent — filtering works correctly.
 
+**docx_reader table ordering:** `docx_reader` places all tables at the end of the element list rather than their true document position (due to python-docx iterating `doc.paragraphs` then `doc.tables` separately). `gdoc_reader` preserves correct order. Currently harmless (checks operate per-element), but this could cause offset errors in the apply layer for table-adjacent edits. Revisit if table-boundary edits misbehave.
+
 ## Phase 3 Deliverables
 
 ### Brief Understanding Agent (Complete)
