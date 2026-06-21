@@ -56,7 +56,7 @@ The Check interface with registry:
 | 2 | Deterministic Layer (the 95%) | **Complete** (9/9 checks) |
 | 3 | Brief agent (confidence-scored extraction) | **Complete** |
 | 4a | Output pipeline core (local DOCX) | **Complete** |
-| 4b | Google Docs integration | Pending |
+| 4b | Google Docs integration | **Stage 3 Complete** (read/write/comments) |
 | 5 | Judgment layer (the 5%) | Pending |
 | 6 | Learning loop (feedback calibration) | Pending |
 | 7 | Fact-checker (claim-driven verification) | Pending |
@@ -924,5 +924,103 @@ The phantom "42 auto-fixes" count is gone. The old count included 37 `blank_line
 
 **Phase 4a COMPLETE and VERIFIED.** All 5 artifact verification bugs fixed. End-to-end pipeline works: article + brief in → faithfully-corrected .docx + drafted comments out. Document structure preserved exactly (102 elements, 16/16 highlights). Next: Phase 4b (Google Docs integration) or Phase 5 (judgment layer).
 
+## Phase 4b Deliverables
+
+### Google Docs Integration (Stage 3 Complete)
+
+**Files Created:**
+- `ingest/gdoc_auth.py` - OAuth flow for Google Docs & Drive APIs (~180 lines)
+- `ingest/gdoc_reader.py` - Read Google Doc → Document model (~430 lines)
+- `output/gdoc_writer.py` - Write Document → new Google Doc (~300 lines)
+- `output/gdoc_comments.py` - Post DraftedComments as Drive comments (~180 lines)
+- `scripts/compare_gdoc_docx.py` - Validation script for reader parity (~300 lines)
+- `scripts/run_gdoc_pipeline.py` - End-to-end Google Docs pipeline (~200 lines)
+
+**Key Constraint:** Google Docs API CANNOT write native tracked-change suggestions. Workflow is:
+1. Create corrected COPY of the document
+2. User uses Google Docs "Compare" feature to see diff as redlines
+3. Proposals posted as comments for human review
+
+**Pattern:** ADAPTER ONLY — orchestrator, checks, and apply layer unchanged.
+
+**Stage 1: OAuth (Complete)**
+
+- Standard `google-auth-oauthlib` flow
+- Scopes: `documents` (read/write) + `drive.file` (comments)
+- Token caching in `token.json` (gitignored)
+- Tested: Successfully read doc metadata via API
+
+**Stage 2: Reader (Complete)**
+
+`ingest/gdoc_reader.py` reads Google Docs into the same Document model as `docx_reader.py`.
+
+| Element | Google Docs API | Document Model |
+|---------|-----------------|----------------|
+| Heading | `namedStyleType: HEADING_1` | `Heading(level=H1)` |
+| Paragraph | `paragraph.elements` | `Paragraph` |
+| List | `bullet.listId` + glyph type | `List` + `ListItem` |
+| Table | `tableRows[].tableCells[]` | `Table` |
+| Bold/Italic | `textStyle.bold/italic` | `TextRun` |
+| Highlight | `backgroundColor.rgbColor` | `TextRun.highlight_color` |
+| Hyperlink | `link.url` | `TextRun.hyperlink` |
+
+**Critical Validation (Koifortune article via both readers):**
+```
+                 DOCX    GDOC    Match?
+Headings:          37      37    YES
+Paragraphs:        51      51    YES
+Lists:             10      10    YES
+Tables:             4       4    YES
+Highlights:        16      16    YES
+
+Pipeline findings:  86      86    IDENTICAL
+  Auto-applicable:   25      25    IDENTICAL
+  Proposals:         61      61    IDENTICAL
+```
+
+Both readers produce IDENTICAL findings from the same article content.
+
+**Stage 3: Writer + Comments (Complete)**
+
+`output/gdoc_writer.py` creates new Google Doc via:
+1. `documents.create()` - Create empty doc
+2. `batchUpdate` requests - Insert text, apply styles
+
+Formatting preserved:
+- Heading levels (H1-H4) via `updateParagraphStyle`
+- Bold/italic/underline via `updateTextStyle`
+- Highlights via `backgroundColor` RGB
+- Hyperlinks via `link.url`
+- Lists via `createParagraphBullets`
+
+**Known Limitation:** Tables skipped (complex Google Docs indexing). Placeholder paragraphs inserted: `[Table N omitted - see original document]`. Tables rarely contain text that needs auto-fixes.
+
+`output/gdoc_comments.py` posts proposals as Drive API comments:
+- Anchored to flagged text via `quotedFileContent`
+- Rate-limited batching (10 comments/batch, 1s pause) to avoid Drive API limits
+- Structured format: `[SEVERITY] check_name` + issue + suggestion + location
+
+**Pipeline Test (Koifortune Google Doc):**
+```
+Source doc:       1O4QTUAtkN9LvGFT7iDregCA-F5R5LKQQZTQ8qVX1xDQ
+Title:            Main Page_ Koi Fortune AU
+Word count:       ~2,016
+
+Total findings:   53
+Auto-fixes:       0  (no capitalization standard in defaults)
+Proposals:        53
+Comments posted:  53 (with rate limiting)
+
+Corrected doc:    https://docs.google.com/document/d/12BKDjFG9oSkPdyU-aeUl86iRjlhwxV6Y2cICklWOiZA/edit
+```
+
+**Note:** 0 auto-fixes because default standards don't set `headings.capitalization`. With brand standards (like Koifortune's), capitalization fixes would auto-apply. The pipeline correctly surfaces all 53 findings as proposals.
+
+**Stage 4 (Pending):** Wire into `run_pitboss.py` with `--gdoc` flag.
+
+### Tech Debt Update
+
+**Table support in gdoc_writer:** Google Docs table indexing is complex (cells have internal indices that don't follow sequential text pattern). Current implementation skips tables with placeholders. Enhancement would require reading document structure after table insertion to find cell indices.
+
 ---
-*Last updated: Phase 4a complete and verified — 25 real auto-fixes, 61 proposals, structure preserved. 818 tests passing.*
+*Last updated: Phase 4b Stage 3 complete — Google Docs read/write/comments working. 818 tests passing.*
