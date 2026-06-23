@@ -624,6 +624,8 @@ This principle ensures the deterministic layer's value: 100% consistency for aut
 
 **docx_reader table ordering:** `docx_reader` places all tables at the end of the element list rather than their true document position (due to python-docx iterating `doc.paragraphs` then `doc.tables` separately). `gdoc_reader` preserves correct order. Currently harmless (checks operate per-element), but this could cause offset errors in the apply layer for table-adjacent edits. Revisit if table-boundary edits misbehave.
 
+**Heading capitalization coverage:** 15 of 17 brands have no `headings.capitalization` standard set, so heading-case is unchecked for them (check skips gracefully). This is the safe default — guessing wrong corrupts headings, as the Koifortune `sentence_case` bug showed. If heading-case enforcement is wanted for more brands, derive each brand's standard from its corpus (the 89.5%/83.5% counting method) rather than assuming.
+
 ## Phase 3 Deliverables
 
 ### Brief Understanding Agent (Complete)
