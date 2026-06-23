@@ -95,71 +95,233 @@ def write_gdoc(document: Document, title: Optional[str] = None) -> str:
     doc_id = new_doc['documentId']
     logger.info(f"Created new Google Doc: {doc_id}")
 
-    # 2. Build all content requests
-    requests = _build_content_requests(document)
+    # 2. Build content requests (two phases for tables)
+    phase1_requests, table_info = _build_content_requests_phase1(document)
 
-    # 3. Execute batchUpdate if we have requests
-    if requests:
+    # 3. Execute phase 1 (structure: text, headings, lists, table structures)
+    if phase1_requests:
         service.documents().batchUpdate(
             documentId=doc_id,
-            body={'requests': requests}
+            body={'requests': phase1_requests}
         ).execute()
-        logger.info(f"Inserted {len(requests)} requests into document")
+        logger.info(f"Phase 1: {len(phase1_requests)} requests")
+
+    # 4. If we have tables, populate their cells in phase 2
+    if table_info:
+        # Read document to get actual table structure indices
+        doc_content = service.documents().get(documentId=doc_id).execute()
+        phase2_requests = _build_table_content_requests(doc_content, table_info)
+
+        if phase2_requests:
+            service.documents().batchUpdate(
+                documentId=doc_id,
+                body={'requests': phase2_requests}
+            ).execute()
+            logger.info(f"Phase 2 (tables): {len(phase2_requests)} requests")
 
     url = f"https://docs.google.com/document/d/{doc_id}/edit"
     logger.info(f"Document URL: {url}")
     return url
 
 
-def _build_content_requests(document: Document) -> list[dict]:
+def _build_content_requests_phase1(document: Document) -> tuple[list[dict], list[Table]]:
     """
-    Build all batchUpdate requests for document content.
+    Build phase 1 requests using REVERSE insertion order.
 
-    Uses forward insertion: insert each element in order, tracking the
-    current index position as we go.
+    By inserting elements from last to first at index 1, each new
+    insertion pushes previous content down. This avoids index
+    calculation errors, especially for tables.
 
-    NOTE: Tables are skipped for now due to complex Google Docs indexing.
-    Tables have internal indices that don't follow the sequential pattern
-    of paragraphs. This is acceptable because:
-    1. Text corrections happen in headings/paragraphs/lists, not tables
-    2. Tables rarely need auto-fixes (mostly contain data)
+    Tables are inserted as empty structures. Their cell contents are
+    populated in phase 2 after reading back the actual indices.
+
+    Returns:
+        Tuple of (requests, table_list) where table_list contains
+        the Table objects in DOCUMENT order for phase 2 population.
     """
     requests = []
-    current_index = 1  # Google Docs body starts at index 1
-    skipped_tables = 0
+    tables = []
 
-    for element in document.elements:
+    # Process elements in REVERSE order for insertion at index 1
+    for element in reversed(document.elements):
         if isinstance(element, Heading):
-            reqs, current_index = _build_heading_requests(element, current_index)
+            reqs = _build_heading_requests_rev(element)
             requests.extend(reqs)
         elif isinstance(element, Paragraph):
-            reqs, current_index = _build_paragraph_requests(element, current_index)
+            reqs = _build_paragraph_requests_rev(element)
             requests.extend(reqs)
         elif isinstance(element, List):
-            reqs, current_index = _build_list_requests(element, current_index)
+            reqs = _build_list_requests_rev(element)
             requests.extend(reqs)
         elif isinstance(element, Table):
-            # Skip tables for now - they have complex internal indexing
-            # Insert a placeholder paragraph noting the table location
-            skipped_tables += 1
-            placeholder = f"[Table {skipped_tables} omitted - see original document]\n"
-            requests.append({
-                'insertText': {
-                    'location': {'index': current_index},
-                    'text': placeholder
-                }
-            })
-            current_index += len(placeholder)
-            logger.debug(f"Skipped table {skipped_tables} (complex indexing)")
+            # Phase 1: insert table structure only (no cell content)
+            reqs = _build_table_structure_requests_rev(element)
+            requests.extend(reqs)
+            tables.insert(0, element)  # Prepend to maintain document order
 
-    if skipped_tables:
-        logger.info(f"Skipped {skipped_tables} tables (see original for table content)")
+    return requests, tables
+
+
+def _build_table_structure_requests_rev(table: Table) -> list[dict]:
+    """Build request to insert empty table structure at index 1 (reverse order)."""
+    requests = []
+
+    if not table.rows:
+        return requests
+
+    num_rows = len(table.rows)
+    num_cols = max(len(row.cells) for row in table.rows) if table.rows else 0
+
+    if num_cols == 0:
+        return requests
+
+    # Insert empty table structure at index 1
+    requests.append({
+        'insertTable': {
+            'location': {'index': 1},
+            'rows': num_rows,
+            'columns': num_cols
+        }
+    })
+
+    return requests
+
+
+def _build_table_content_requests(doc_content: dict, tables: list[Table]) -> list[dict]:
+    """
+    Build phase 2 requests: populate table cells with content.
+
+    Reads the actual document structure to find table cell indices,
+    then inserts text and formatting into each cell.
+
+    IMPORTANT: Cells are processed in REVERSE INDEX ORDER to avoid
+    index shifting issues when inserting text.
+    """
+    # Collect all cell insertions with their indices
+    cell_insertions = []  # [(para_start, our_cell), ...]
+
+    # Find all tables in the document body
+    body_content = doc_content.get('body', {}).get('content', [])
+    doc_tables = []
+
+    for content_elem in body_content:
+        if 'table' in content_elem:
+            doc_tables.append(content_elem)
+
+    if len(doc_tables) != len(tables):
+        logger.warning(
+            f"Table count mismatch: expected {len(tables)}, found {len(doc_tables)}. "
+            f"Some tables may not be populated."
+        )
+
+    # Collect all cell insertions
+    for table_idx, (doc_table, our_table) in enumerate(zip(doc_tables, tables)):
+        table_elem = doc_table['table']
+        table_rows = table_elem.get('tableRows', [])
+
+        for row_idx, (doc_row, our_row) in enumerate(zip(table_rows, our_table.rows)):
+            doc_cells = doc_row.get('tableCells', [])
+
+            for col_idx, (doc_cell, our_cell) in enumerate(zip(doc_cells, our_row.cells)):
+                if not our_cell.text:
+                    continue
+
+                # Find the paragraph index inside this cell
+                cell_content = doc_cell.get('content', [])
+                for content_elem in cell_content:
+                    if 'paragraph' in content_elem:
+                        para = content_elem['paragraph']
+                        # Get the start index of the paragraph
+                        para_start = para.get('elements', [{}])[0].get('startIndex', 0)
+
+                        if para_start > 0:
+                            cell_insertions.append((para_start, our_cell))
+                        break  # Only handle first paragraph per cell
+
+    # Sort by index DESCENDING so we insert from end to start
+    # This prevents index shifting issues
+    cell_insertions.sort(key=lambda x: x[0], reverse=True)
+
+    # Build requests in reverse index order
+    requests = []
+    for para_start, our_cell in cell_insertions:
+        # Insert text at the paragraph start
+        requests.append({
+            'insertText': {
+                'location': {'index': para_start},
+                'text': our_cell.text
+            }
+        })
+
+        cell_end = para_start + len(our_cell.text)
+
+        # Apply preserved paragraph spacing
+        spacing_reqs = _build_paragraph_spacing_requests(our_cell, para_start, cell_end)
+        requests.extend(spacing_reqs)
+
+        # Apply formatting for cell runs
+        for run in our_cell.runs():
+            run_reqs = _build_run_formatting_requests(run, para_start)
+            requests.extend(run_reqs)
+
+    return requests
+
+
+def _build_heading_requests_rev(heading: Heading) -> list[dict]:
+    """Build requests for a heading element (reverse insertion at index 1)."""
+    requests = []
+    text = heading.text + '\n'
+    start_idx = 1
+    end_idx = start_idx + len(text)
+
+    # Insert text at index 1
+    requests.append({
+        'insertText': {
+            'location': {'index': start_idx},
+            'text': text
+        }
+    })
+
+    # IMPORTANT: Remove any inherited bullet styling from list content
+    # that was pushed down by this insertion
+    requests.append({
+        'deleteParagraphBullets': {
+            'range': {
+                'startIndex': start_idx,
+                'endIndex': end_idx - 1  # Exclude the newline
+            }
+        }
+    })
+
+    # Apply heading style
+    style_type = HEADING_STYLE_MAP.get(heading.level, 'HEADING_1')
+    requests.append({
+        'updateParagraphStyle': {
+            'range': {
+                'startIndex': start_idx,
+                'endIndex': end_idx - 1  # Exclude the newline from style
+            },
+            'paragraphStyle': {
+                'namedStyleType': style_type
+            },
+            'fields': 'namedStyleType'
+        }
+    })
+
+    # Apply preserved paragraph spacing
+    spacing_reqs = _build_paragraph_spacing_requests(heading, start_idx, end_idx - 1)
+    requests.extend(spacing_reqs)
+
+    # Apply any inline formatting from runs
+    for run in heading.runs():
+        run_reqs = _build_run_formatting_requests(run, start_idx)
+        requests.extend(run_reqs)
 
     return requests
 
 
 def _build_heading_requests(heading: Heading, start_idx: int) -> tuple[list[dict], int]:
-    """Build requests for a heading element."""
+    """Build requests for a heading element (forward insertion - deprecated)."""
     requests = []
     text = heading.text + '\n'
 
@@ -196,8 +358,61 @@ def _build_heading_requests(heading: Heading, start_idx: int) -> tuple[list[dict
     return requests, end_idx
 
 
+def _build_paragraph_requests_rev(para: Paragraph) -> list[dict]:
+    """Build requests for a paragraph element (reverse insertion at index 1)."""
+    requests = []
+    text = para.text + '\n'
+    start_idx = 1
+    end_idx = start_idx + len(text)
+
+    # Insert text at index 1
+    requests.append({
+        'insertText': {
+            'location': {'index': start_idx},
+            'text': text
+        }
+    })
+
+    # IMPORTANT: Remove any inherited bullet styling from list content
+    # that was pushed down by this insertion
+    requests.append({
+        'deleteParagraphBullets': {
+            'range': {
+                'startIndex': start_idx,
+                'endIndex': end_idx - 1  # Exclude the newline
+            }
+        }
+    })
+
+    # Explicitly set NORMAL_TEXT style to prevent inheriting
+    # heading styles from content being pushed down
+    requests.append({
+        'updateParagraphStyle': {
+            'range': {
+                'startIndex': start_idx,
+                'endIndex': end_idx - 1  # Exclude the newline
+            },
+            'paragraphStyle': {
+                'namedStyleType': 'NORMAL_TEXT'
+            },
+            'fields': 'namedStyleType'
+        }
+    })
+
+    # Apply preserved paragraph spacing
+    spacing_reqs = _build_paragraph_spacing_requests(para, start_idx, end_idx - 1)
+    requests.extend(spacing_reqs)
+
+    # Apply formatting for each run
+    for run in para.runs():
+        run_reqs = _build_run_formatting_requests(run, start_idx)
+        requests.extend(run_reqs)
+
+    return requests
+
+
 def _build_paragraph_requests(para: Paragraph, start_idx: int) -> tuple[list[dict], int]:
-    """Build requests for a paragraph element."""
+    """Build requests for a paragraph element (forward insertion - deprecated)."""
     requests = []
     text = para.text + '\n'
 
@@ -219,8 +434,74 @@ def _build_paragraph_requests(para: Paragraph, start_idx: int) -> tuple[list[dic
     return requests, end_idx
 
 
+def _build_list_requests_rev(lst: List) -> list[dict]:
+    """Build requests for a list element (reverse insertion at index 1)."""
+    requests = []
+    start_idx = 1
+
+    # For reverse insertion, we insert ALL list items at once at index 1
+    # The items are in order, so we build the combined text
+    combined_text = ''
+    for item in lst.items:
+        combined_text += item.text + '\n'
+
+    # Insert all list item text at index 1
+    requests.append({
+        'insertText': {
+            'location': {'index': start_idx},
+            'text': combined_text
+        }
+    })
+
+    list_end = start_idx + len(combined_text)
+
+    # IMPORTANT: Explicitly set NORMAL_TEXT style first to prevent inheriting
+    # heading styles from content being pushed down
+    requests.append({
+        'updateParagraphStyle': {
+            'range': {
+                'startIndex': start_idx,
+                'endIndex': list_end - 1  # Exclude final newline
+            },
+            'paragraphStyle': {
+                'namedStyleType': 'NORMAL_TEXT'
+            },
+            'fields': 'namedStyleType'
+        }
+    })
+
+    # Apply bullet/numbering to all list paragraphs
+    bullet_preset = LIST_TYPE_MAP.get(lst.list_type, 'BULLET_DISC_CIRCLE_SQUARE')
+    requests.append({
+        'createParagraphBullets': {
+            'range': {
+                'startIndex': start_idx,
+                'endIndex': list_end - 1  # Exclude final newline
+            },
+            'bulletPreset': bullet_preset
+        }
+    })
+
+    # Apply inline formatting and spacing for each item
+    item_start = start_idx
+    for item in lst.items:
+        item_len = len(item.text)
+        item_end = item_start + item_len
+
+        # Apply preserved spacing for this item
+        spacing_reqs = _build_paragraph_spacing_requests(item, item_start, item_end)
+        requests.extend(spacing_reqs)
+
+        for run in item.runs():
+            run_reqs = _build_run_formatting_requests(run, item_start)
+            requests.extend(run_reqs)
+        item_start += item_len + 1  # +1 for newline
+
+    return requests
+
+
 def _build_list_requests(lst: List, start_idx: int) -> tuple[list[dict], int]:
-    """Build requests for a list element."""
+    """Build requests for a list element (forward insertion - deprecated)."""
     requests = []
     current_idx = start_idx
     list_start = start_idx
@@ -262,71 +543,6 @@ def _build_list_requests(lst: List, start_idx: int) -> tuple[list[dict], int]:
     return requests, current_idx
 
 
-def _build_table_requests(table: Table, start_idx: int) -> tuple[list[dict], int]:
-    """Build requests for a table element."""
-    requests = []
-
-    if not table.rows:
-        return requests, start_idx
-
-    num_rows = len(table.rows)
-    num_cols = max(len(row.cells) for row in table.rows) if table.rows else 0
-
-    if num_cols == 0:
-        return requests, start_idx
-
-    # Insert table
-    requests.append({
-        'insertTable': {
-            'location': {'index': start_idx},
-            'rows': num_rows,
-            'columns': num_cols
-        }
-    })
-
-    # After insertTable, we need to populate cells
-    # The table structure creates indices for each cell
-    # Each cell initially has a paragraph with index
-    #
-    # Table indices work like this:
-    # - Table element itself takes 1 index
-    # - Each row start takes 1 index
-    # - Each cell start takes 1 index
-    # - Cell content starts after cell index
-    # - Each cell has implicit paragraph (1 index for paragraph, 1 for newline)
-
-    # Calculate where cell contents go
-    # This is complex - for now we'll populate cells with text after creation
-    # by reading back the document structure
-
-    # For simplicity in v1: just create empty table, then populate via separate requests
-    # The insertTable creates structure, but we need to find cell indices
-
-    # Estimate end index: table start + structure overhead + cell contents
-    # Each row: 1 (row start) + cols * (1 cell start + 1 para + 1 newline)
-    # Plus 1 for table element
-    structure_overhead = 1 + num_rows * (1 + num_cols * 3)
-    estimated_end = start_idx + structure_overhead
-
-    # For tables, we'll need to do a second pass to populate content
-    # Add placeholder text to cells using updateTextStyle ranges found by reading doc
-    #
-    # Simpler approach: insert the table, then in a separate batch, populate cells
-    # But this requires reading back the doc to find indices
-
-    # For now, collect cell text to insert after table structure is created
-    # We'll add these as a separate batch after the main content
-    cell_texts = []
-    for row in table.rows:
-        for cell in row.cells:
-            cell_texts.append(cell.text)
-
-    # Store table info for later population (handled in main write_gdoc)
-    # For v1: tables will be empty - we'll enhance this if needed
-
-    return requests, estimated_end
-
-
 def _build_run_formatting_requests(run: TextRun, para_start: int) -> list[dict]:
     """Build updateTextStyle requests for a single run's formatting."""
     requests = []
@@ -339,9 +555,10 @@ def _build_run_formatting_requests(run: TextRun, para_start: int) -> list[dict]:
     text_style = {}
     fields = []
 
-    if run.bold:
-        text_style['bold'] = True
-        fields.append('bold')
+    # ALWAYS set bold explicitly to override any inherited styles
+    # (especially important for table cells which may inherit bold from headers)
+    text_style['bold'] = run.bold
+    fields.append('bold')
 
     if run.italic:
         text_style['italic'] = True
@@ -364,6 +581,21 @@ def _build_run_formatting_requests(run: TextRun, para_start: int) -> list[dict]:
     if run.hyperlink:
         text_style['link'] = {'url': run.hyperlink}
         fields.append('link')
+
+    # Preserved font formatting
+    if run.font_name:
+        text_style['weightedFontFamily'] = {
+            'fontFamily': run.font_name,
+            'weight': 400  # normal weight
+        }
+        fields.append('weightedFontFamily')
+
+    if run.font_size_pt is not None:
+        text_style['fontSize'] = {
+            'magnitude': run.font_size_pt,
+            'unit': 'PT'
+        }
+        fields.append('fontSize')
 
     # Only add request if we have formatting to apply
     if fields:
@@ -390,6 +622,50 @@ def _get_highlight_rgb(color_name: str) -> Optional[dict]:
     normalized = color_name.lower().split('(')[0].strip()
 
     return HIGHLIGHT_RGB_MAP.get(normalized)
+
+
+def _build_paragraph_spacing_requests(element, start_idx: int, end_idx: int) -> list[dict]:
+    """
+    Build updateParagraphStyle requests for preserved spacing.
+
+    Works for Paragraph, Heading, or ListItem elements.
+    """
+    requests = []
+
+    spacing_style = {}
+    spacing_fields = []
+
+    if hasattr(element, 'space_before_pt') and element.space_before_pt is not None:
+        spacing_style['spaceAbove'] = {
+            'magnitude': element.space_before_pt,
+            'unit': 'PT'
+        }
+        spacing_fields.append('spaceAbove')
+
+    if hasattr(element, 'space_after_pt') and element.space_after_pt is not None:
+        spacing_style['spaceBelow'] = {
+            'magnitude': element.space_after_pt,
+            'unit': 'PT'
+        }
+        spacing_fields.append('spaceBelow')
+
+    if hasattr(element, 'line_spacing') and element.line_spacing is not None:
+        spacing_style['lineSpacing'] = element.line_spacing * 100  # percentage
+        spacing_fields.append('lineSpacing')
+
+    if spacing_fields:
+        requests.append({
+            'updateParagraphStyle': {
+                'range': {
+                    'startIndex': start_idx,
+                    'endIndex': end_idx
+                },
+                'paragraphStyle': spacing_style,
+                'fields': ','.join(spacing_fields)
+            }
+        })
+
+    return requests
 
 
 def write_gdoc_simple(text: str, title: str) -> str:

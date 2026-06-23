@@ -97,7 +97,7 @@ def write_docx(document: Document, output_path: Path) -> None:
 
 
 def _write_heading(doc: DocxDocument, heading: Heading) -> None:
-    """Write a heading element."""
+    """Write a heading element with preserved formatting."""
     style = HEADING_STYLES.get(heading.level, 'Heading 1')
 
     # Add heading with style
@@ -107,11 +107,17 @@ def _write_heading(doc: DocxDocument, heading: Heading) -> None:
     # Add formatted runs
     _add_runs_to_paragraph(para, heading.runs())
 
+    # Apply preserved paragraph formatting
+    _apply_paragraph_formatting(para, heading)
+
 
 def _write_paragraph(doc: DocxDocument, paragraph: Paragraph) -> None:
-    """Write a paragraph element."""
+    """Write a paragraph element with preserved formatting."""
     para = doc.add_paragraph()
     _add_runs_to_paragraph(para, paragraph.runs())
+
+    # Apply preserved paragraph formatting
+    _apply_paragraph_formatting(para, paragraph)
 
 
 def _write_list(doc: DocxDocument, lst: List) -> None:
@@ -133,6 +139,9 @@ def _write_list(doc: DocxDocument, lst: List) -> None:
 
         # Apply proper numbering via XML
         _apply_list_numbering(para, num_id, item.indent_level)
+
+        # Apply preserved paragraph formatting
+        _apply_paragraph_formatting(para, item)
 
 
 def _ensure_numbering_definitions(doc: DocxDocument) -> None:
@@ -272,6 +281,9 @@ def _write_table(doc: DocxDocument, table: Table) -> None:
 
             _add_runs_to_paragraph(para, cell.runs())
 
+            # Apply preserved paragraph formatting
+            _apply_paragraph_formatting(para, cell)
+
 
 def _add_runs_to_paragraph(para, runs: list[TextRun]) -> None:
     """Add formatted TextRuns to a paragraph."""
@@ -281,6 +293,25 @@ def _add_runs_to_paragraph(para, runs: list[TextRun]) -> None:
             _add_hyperlink(para, run)
         else:
             _add_regular_run(para, run)
+
+
+def _apply_paragraph_formatting(para, element) -> None:
+    """
+    Apply preserved paragraph-level formatting to a docx paragraph.
+
+    Works for Paragraph, Heading, or ListItem elements that have
+    formatting preservation fields.
+    """
+    pf = para.paragraph_format
+
+    if hasattr(element, 'space_before_pt') and element.space_before_pt is not None:
+        pf.space_before = Pt(element.space_before_pt)
+
+    if hasattr(element, 'space_after_pt') and element.space_after_pt is not None:
+        pf.space_after = Pt(element.space_after_pt)
+
+    if hasattr(element, 'line_spacing') and element.line_spacing is not None:
+        pf.line_spacing = element.line_spacing
 
 
 def _add_regular_run(para, text_run: TextRun) -> None:
@@ -306,6 +337,12 @@ def _add_regular_run(para, text_run: TextRun) -> None:
         else:
             # Default to yellow if unknown color
             docx_run.font.highlight_color = WD_COLOR_INDEX.YELLOW
+
+    # Apply preserved font formatting
+    if text_run.font_name:
+        docx_run.font.name = text_run.font_name
+    if text_run.font_size_pt is not None:
+        docx_run.font.size = Pt(text_run.font_size_pt)
 
 
 def _add_hyperlink(para, text_run: TextRun) -> None:
