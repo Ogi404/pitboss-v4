@@ -18,9 +18,9 @@ canonical_dominance: 0.580
 market: "CA"
 locale: "en-CA"
 
-# Headings: Koifortune uses sentence case (observed from corpus analysis)
+# Headings: Koifortune uses title case (corpus: 315/352 = 89.5% title case)
 headings:
-  capitalization: "sentence_case"
+  capitalization: "title_case"
 
 # Currency: Canadian dollar
 currency:

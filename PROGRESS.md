@@ -226,7 +226,7 @@ Reader-reference nouns (punters/bettors/players/users/customers/gamblers) belong
 **Files:**
 - `deterministic/headings.py` - Heading formatting check (~500 lines)
 - `tests/test_headings_check.py` - 34 comprehensive tests
-- `brands/koifortune.yaml` - Brand config for sentence_case testing
+- `brands/koifortune.yaml` - Brand config for title_case (corpus: 89.5% title case)
 
 **Dependencies:**
 - `wordfreq>=3.0.0` - Dictionary lookup for proper noun detection
@@ -255,11 +255,13 @@ Reader-reference nouns (punters/bettors/players/users/customers/gamblers) belong
 5. **Sentence Case Algorithm**: Capitalize first word, preserve acronyms, lowercase others
 
 **Corpus Validation (5 articles, 160 headings):**
-- **52 auto-applicable capitalization** (common dictionary words only)
-- **25 capitalization proposals** (proper nouns, acronyms, question headings)
+- Capitalization findings vary by brand config (title_case vs sentence_case)
+- Proper nouns, acronyms, question headings → routed to proposals (not auto)
 - **158 auto-applicable blank lines** (pure formatting, always safe)
 - FAQ question marks correctly preserved inside FAQ sections (14 preserved)
 - Question mark proposals for ambiguous non-FAQ questions (2 proposals)
+
+**Koifortune Config Corrected:** Corpus analysis (315/352 = 89.5% title case) proved `sentence_case` config was wrong. Changed to `title_case` — now 0 auto-fixes on correct headings.
 
 **Dictionary-Based Proper Noun Detection:**
 Uses `wordfreq` library (word frequency threshold 1e-7) to distinguish common English words from proper nouns:
@@ -913,14 +915,14 @@ After initial pipeline completion, ran full end-to-end on Koifortune AU article.
   Highlights:             16           16    YES
 ```
 
-**Final Pipeline Output (Koifortune AU, all bugs fixed):**
+**Final Pipeline Output (Koifortune AU, all bugs fixed + config corrected):**
 
 | Category | Count | Details |
 |----------|-------|---------|
-| **Auto-fixes applied** | **25** | All `headings.capitalization` — genuine text changes |
-| **Proposals for review** | **61** | 37 `blank_line` (now honest proposals), 8 `capitalization` (proper nouns), 10 `voice` (ambiguous), 6 `locale_spelling` (noun/verb pairs) |
+| **Auto-fixes applied** | **0** | Headings already correct title case — no changes needed |
+| **Proposals for review** | **62** | 37 `blank_line`, 9 `capitalization` (brand name edge cases), 10 `voice` (ambiguous), 6 `locale_spelling` (noun/verb pairs) |
 
-The phantom "42 auto-fixes" count is gone. The old count included 37 `blank_line` no-ops that were marked `auto_applicable=True` but had `proposed_text == original_text` (no actual text change). These are now honest proposals that surface in `comments.md` for writer action.
+The phantom "42 auto-fixes" count is gone. The old 25 auto-fixes were actually BREAKING correct title-case headings by converting them to sentence case (config bug).
 
 **Phase 4a COMPLETE and VERIFIED.** All 5 artifact verification bugs fixed. End-to-end pipeline works: article + brief in → faithfully-corrected .docx + drafted comments out. Document structure preserved exactly (102 elements, 16/16 highlights). Next: Phase 4b (Google Docs integration) or Phase 5 (judgment layer).
 
@@ -982,45 +984,78 @@ Both readers produce IDENTICAL findings from the same article content.
 
 **Stage 3: Writer + Comments (Complete)**
 
-`output/gdoc_writer.py` creates new Google Doc via:
+`output/gdoc_writer.py` creates new Google Doc via two-phase batchUpdate:
 1. `documents.create()` - Create empty doc
-2. `batchUpdate` requests - Insert text, apply styles
+2. **Phase 1**: Insert all text/headings/lists/table structures (reverse order for index stability)
+3. **Phase 2**: Populate table cells after reading back actual indices
 
-Formatting preserved:
+**Reverse Insertion Pattern:** Elements inserted from last to first at index 1. Each insertion pushes previous content down, eliminating index calculation errors. Critical for tables where Google's index structure is complex.
+
+**Formatting preserved:**
 - Heading levels (H1-H4) via `updateParagraphStyle`
 - Bold/italic/underline via `updateTextStyle`
 - Highlights via `backgroundColor` RGB
 - Hyperlinks via `link.url`
 - Lists via `createParagraphBullets`
+- **Tables via two-phase insert** (structure first, content second)
 
-**Known Limitation:** Tables skipped (complex Google Docs indexing). Placeholder paragraphs inserted: `[Table N omitted - see original document]`. Tables rarely contain text that needs auto-fixes.
+**Key Fix: Explicit Style Reset**
+
+When inserting at index 1, content inherits styles from pushed-down content. Fixed by:
+- `deleteParagraphBullets` for headings/paragraphs (prevents bullet inheritance from lists)
+- `updateParagraphStyle: NORMAL_TEXT` for paragraphs (prevents heading style inheritance)
 
 `output/gdoc_comments.py` posts proposals as Drive API comments:
 - Anchored to flagged text via `quotedFileContent`
 - Rate-limited batching (10 comments/batch, 1s pause) to avoid Drive API limits
 - Structured format: `[SEVERITY] check_name` + issue + suggestion + location
 
-**Pipeline Test (Koifortune Google Doc):**
+**Full Pipeline Test (Koifortune Google Doc with brand standards):**
 ```
 Source doc:       1O4QTUAtkN9LvGFT7iDregCA-F5R5LKQQZTQ8qVX1xDQ
 Title:            Main Page_ Koi Fortune AU
 Word count:       ~2,016
 
-Total findings:   53
-Auto-fixes:       0  (no capitalization standard in defaults)
-Proposals:        53
-Comments posted:  53 (with rate limiting)
+Total findings:   62
+Auto-fixes:       0   (headings already correct title case)
+Proposals:        62
+Comments posted:  62 (0 failures)
 
-Corrected doc:    https://docs.google.com/document/d/12BKDjFG9oSkPdyU-aeUl86iRjlhwxV6Y2cICklWOiZA/edit
+Corrected doc:    https://docs.google.com/document/d/1JmQhNfC72sKuPbx5nx_9tM0DYpNePq_0VHXM3xZq3qY/edit
 ```
 
-**Note:** 0 auto-fixes because default standards don't set `headings.capitalization`. With brand standards (like Koifortune's), capitalization fixes would auto-apply. The pipeline correctly surfaces all 53 findings as proposals.
+**Critical Verification (Source vs Corrected):**
+```
+Element comparison (source -> corrected):
+  tables:     4 -> 4   [OK]
+  headings:   37 -> 37 [OK]
+  paragraphs: 51 -> 51 [OK]
+  lists:      10 -> 10 [OK]
+  highlights: 16 -> 16 [OK]
+
+All 4 tables preserved with correct cell content.
+NO heading changes - source headings are already correct Title Case.
+```
+
+**Finding Parity Confirmed:** Google pipeline produces consistent findings with DOCX pipeline when using same brand standards.
+
+**Config Bug Fix (Heading Capitalization):**
+
+Corpus validation revealed `koifortune.yaml` was misconfigured with `sentence_case` when corpus showed 89.5% title case usage (315/352 headings). The 25 "auto-fixes" were converting CORRECT title-case headings INTO incorrect sentence-case.
+
+| Config | Corpus Truth | Pipeline Behavior |
+|--------|--------------|-------------------|
+| `sentence_case` (wrong) | 89.5% title case | 25 auto-fixes (breaking correct headings) |
+| `title_case` (fixed) | 89.5% title case | 0 auto-fixes (headings already correct) |
+
+**Title Case Logic Verified:**
+- Minor words stay lowercase: a, an, the, of, to, for, in, on, at, by, with, and, or, but, nor, as, if, so, yet
+- First/last words always capitalized
+- Test: "how to create an account" → "How to Create an Account" ✓
+
+This is another instance of the KEY LESSON: corpus validation catches config bugs that pass all unit tests.
 
 **Stage 4 (Pending):** Wire into `run_pitboss.py` with `--gdoc` flag.
 
-### Tech Debt Update
-
-**Table support in gdoc_writer:** Google Docs table indexing is complex (cells have internal indices that don't follow sequential text pattern). Current implementation skips tables with placeholders. Enhancement would require reading document structure after table insertion to find cell indices.
-
 ---
-*Last updated: Phase 4b Stage 3 complete — Google Docs read/write/comments working. 818 tests passing.*
+*Last updated: Phase 4b Stage 3 complete — Google Docs read/write/comments + tables working. Koifortune heading config fixed (sentence_case → title_case per corpus). 818 tests passing.*
