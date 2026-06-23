@@ -62,6 +62,9 @@ class TextRun:
     strikethrough: bool = False
     highlight_color: Optional[str] = None  # e.g., "yellow", "green"
     hyperlink: Optional[str] = None        # URL target
+    # Formatting preservation (Optional - populated by readers, used by writers)
+    font_name: Optional[str] = None        # e.g., "Arial"
+    font_size_pt: Optional[float] = None   # Font size in points
 
     def __post_init__(self):
         """Validate that end_offset matches text length."""
@@ -110,6 +113,10 @@ class TextRun:
             result["highlight_color"] = self.highlight_color
         if self.hyperlink:
             result["hyperlink"] = self.hyperlink
+        if self.font_name:
+            result["font_name"] = self.font_name
+        if self.font_size_pt is not None:
+            result["font_size_pt"] = self.font_size_pt
         return result
 
     @classmethod
@@ -125,6 +132,8 @@ class TextRun:
             strikethrough=data.get("strikethrough", False),
             highlight_color=data.get("highlight_color"),
             hyperlink=data.get("hyperlink"),
+            font_name=data.get("font_name"),
+            font_size_pt=data.get("font_size_pt"),
         )
 
 
@@ -222,6 +231,12 @@ class Paragraph:
     start_offset: int
     end_offset: int
     _runs: list[TextRun] = field(default_factory=list)
+    # Formatting preservation (Optional - populated by readers, used by writers)
+    font_name: Optional[str] = None
+    font_size_pt: Optional[float] = None
+    space_before_pt: Optional[float] = None
+    space_after_pt: Optional[float] = None
+    line_spacing: Optional[float] = None  # Multiplier, e.g. 1.15
 
     @property
     def span(self) -> TextSpan:
@@ -261,6 +276,12 @@ class Heading:
     start_offset: int
     end_offset: int
     _runs: list[TextRun] = field(default_factory=list)
+    # Formatting preservation (Optional - populated by readers, used by writers)
+    font_name: Optional[str] = None
+    font_size_pt: Optional[float] = None
+    space_before_pt: Optional[float] = None
+    space_after_pt: Optional[float] = None
+    line_spacing: Optional[float] = None
 
     @property
     def span(self) -> TextSpan:
@@ -287,6 +308,12 @@ class ListItem:
     end_offset: int
     indent_level: int = 0  # For nested lists (0 = top level)
     _runs: list[TextRun] = field(default_factory=list)
+    # Formatting preservation (Optional - populated by readers, used by writers)
+    font_name: Optional[str] = None
+    font_size_pt: Optional[float] = None
+    space_before_pt: Optional[float] = None
+    space_after_pt: Optional[float] = None
+    line_spacing: Optional[float] = None
 
     @property
     def span(self) -> TextSpan:
@@ -333,6 +360,12 @@ class TableCell:
     col_index: int
     is_header: bool = False
     _runs: list[TextRun] = field(default_factory=list)
+    # Formatting preservation (Optional - populated by readers, used by writers)
+    font_name: Optional[str] = None
+    font_size_pt: Optional[float] = None
+    space_before_pt: Optional[float] = None
+    space_after_pt: Optional[float] = None
+    line_spacing: Optional[float] = None
 
     @property
     def span(self) -> TextSpan:
@@ -802,6 +835,17 @@ class Document:
                 runs = serialize_runs(elem.runs())
                 if runs:
                     result["runs"] = runs
+                # Formatting preservation fields
+                if elem.font_name:
+                    result["font_name"] = elem.font_name
+                if elem.font_size_pt is not None:
+                    result["font_size_pt"] = elem.font_size_pt
+                if elem.space_before_pt is not None:
+                    result["space_before_pt"] = elem.space_before_pt
+                if elem.space_after_pt is not None:
+                    result["space_after_pt"] = elem.space_after_pt
+                if elem.line_spacing is not None:
+                    result["line_spacing"] = elem.line_spacing
                 return result
             elif isinstance(elem, Heading):
                 result = {
@@ -814,6 +858,17 @@ class Document:
                 runs = serialize_runs(elem.runs())
                 if runs:
                     result["runs"] = runs
+                # Formatting preservation fields
+                if elem.font_name:
+                    result["font_name"] = elem.font_name
+                if elem.font_size_pt is not None:
+                    result["font_size_pt"] = elem.font_size_pt
+                if elem.space_before_pt is not None:
+                    result["space_before_pt"] = elem.space_before_pt
+                if elem.space_after_pt is not None:
+                    result["space_after_pt"] = elem.space_after_pt
+                if elem.line_spacing is not None:
+                    result["line_spacing"] = elem.line_spacing
                 return result
             elif isinstance(elem, List):
                 items_data = []
@@ -827,6 +882,17 @@ class Document:
                     runs = serialize_runs(item.runs())
                     if runs:
                         item_dict["runs"] = runs
+                    # Formatting preservation fields for list item
+                    if item.font_name:
+                        item_dict["font_name"] = item.font_name
+                    if item.font_size_pt is not None:
+                        item_dict["font_size_pt"] = item.font_size_pt
+                    if item.space_before_pt is not None:
+                        item_dict["space_before_pt"] = item.space_before_pt
+                    if item.space_after_pt is not None:
+                        item_dict["space_after_pt"] = item.space_after_pt
+                    if item.line_spacing is not None:
+                        item_dict["line_spacing"] = item.line_spacing
                     items_data.append(item_dict)
                 return {
                     "type": "list",
@@ -851,6 +917,17 @@ class Document:
                         runs = serialize_runs(cell.runs())
                         if runs:
                             cell_dict["runs"] = runs
+                        # Formatting preservation fields for table cell
+                        if cell.font_name:
+                            cell_dict["font_name"] = cell.font_name
+                        if cell.font_size_pt is not None:
+                            cell_dict["font_size_pt"] = cell.font_size_pt
+                        if cell.space_before_pt is not None:
+                            cell_dict["space_before_pt"] = cell.space_before_pt
+                        if cell.space_after_pt is not None:
+                            cell_dict["space_after_pt"] = cell.space_after_pt
+                        if cell.line_spacing is not None:
+                            cell_dict["line_spacing"] = cell.line_spacing
                         cells_data.append(cell_dict)
                     rows_data.append({
                         "cells": cells_data,
@@ -891,6 +968,11 @@ class Document:
                     start_offset=elem_data["start_offset"],
                     end_offset=elem_data["end_offset"],
                     _runs=runs,
+                    font_name=elem_data.get("font_name"),
+                    font_size_pt=elem_data.get("font_size_pt"),
+                    space_before_pt=elem_data.get("space_before_pt"),
+                    space_after_pt=elem_data.get("space_after_pt"),
+                    line_spacing=elem_data.get("line_spacing"),
                 )
             elif elem_type == "heading":
                 runs = deserialize_runs(elem_data.get("runs", []))
@@ -900,6 +982,11 @@ class Document:
                     start_offset=elem_data["start_offset"],
                     end_offset=elem_data["end_offset"],
                     _runs=runs,
+                    font_name=elem_data.get("font_name"),
+                    font_size_pt=elem_data.get("font_size_pt"),
+                    space_before_pt=elem_data.get("space_before_pt"),
+                    space_after_pt=elem_data.get("space_after_pt"),
+                    line_spacing=elem_data.get("line_spacing"),
                 )
             elif elem_type == "list":
                 items = []
@@ -911,6 +998,11 @@ class Document:
                         end_offset=item["end_offset"],
                         indent_level=item.get("indent_level", 0),
                         _runs=runs,
+                        font_name=item.get("font_name"),
+                        font_size_pt=item.get("font_size_pt"),
+                        space_before_pt=item.get("space_before_pt"),
+                        space_after_pt=item.get("space_after_pt"),
+                        line_spacing=item.get("line_spacing"),
                     ))
                 return List(
                     list_type=ListType(elem_data["list_type"]),
@@ -932,6 +1024,11 @@ class Document:
                             col_index=cell["col_index"],
                             is_header=cell.get("is_header", False),
                             _runs=runs,
+                            font_name=cell.get("font_name"),
+                            font_size_pt=cell.get("font_size_pt"),
+                            space_before_pt=cell.get("space_before_pt"),
+                            space_after_pt=cell.get("space_after_pt"),
+                            line_spacing=cell.get("line_spacing"),
                         ))
                     rows.append(TableRow(
                         cells=cells,
