@@ -85,6 +85,51 @@ def _extract_highlight_color(run) -> Optional[str]:
     return None
 
 
+def _extract_paragraph_formatting(paragraph) -> dict:
+    """
+    Extract paragraph-level formatting for preservation.
+
+    Returns dict with keys: font_name, font_size_pt, space_before_pt, space_after_pt, line_spacing
+    """
+    result = {}
+
+    try:
+        pf = paragraph.paragraph_format
+
+        # Space before/after
+        if pf.space_before:
+            result['space_before_pt'] = pf.space_before.pt
+        if pf.space_after:
+            result['space_after_pt'] = pf.space_after.pt
+
+        # Line spacing (can be a multiplier or absolute)
+        if pf.line_spacing:
+            # If it's a Pt value, convert; otherwise it's a multiplier
+            try:
+                result['line_spacing'] = float(pf.line_spacing)
+            except (TypeError, ValueError):
+                if hasattr(pf.line_spacing, 'pt'):
+                    # Convert absolute to multiplier (assume 12pt base)
+                    result['line_spacing'] = pf.line_spacing.pt / 12.0
+    except Exception:
+        pass
+
+    # Get dominant font from first run with font info
+    try:
+        for run in paragraph.runs:
+            if run.font.name:
+                result['font_name'] = run.font.name
+                break
+        for run in paragraph.runs:
+            if run.font.size:
+                result['font_size_pt'] = run.font.size.pt
+                break
+    except Exception:
+        pass
+
+    return result
+
+
 def _extract_runs(paragraph, start_offset: int = 0) -> list[TextRun]:
     """Extract TextRun objects from a docx paragraph."""
     runs = []
@@ -103,6 +148,13 @@ def _extract_runs(paragraph, start_offset: int = 0) -> list[TextRun]:
         highlight = _extract_highlight_color(run)
         hyperlink = _get_hyperlink_url(run)
 
+        # Extract font info for formatting preservation
+        font_name = run.font.name
+        font_size_pt = None
+        if run.font.size:
+            # python-docx returns size in EMUs, convert to points
+            font_size_pt = run.font.size.pt
+
         runs.append(TextRun(
             text=text,
             start_offset=current_offset,
@@ -113,6 +165,8 @@ def _extract_runs(paragraph, start_offset: int = 0) -> list[TextRun]:
             strikethrough=strikethrough,
             highlight_color=highlight,
             hyperlink=hyperlink,
+            font_name=font_name,
+            font_size_pt=font_size_pt,
         ))
 
         current_offset += len(text)
@@ -215,6 +269,9 @@ def read_docx(filepath: Path) -> Document:
         # Extract formatting runs
         runs = _extract_runs(para, start)
 
+        # Extract paragraph-level formatting
+        para_fmt = _extract_paragraph_formatting(para)
+
         if heading_level:
             # Flush any pending list before heading
             flush_list()
@@ -224,6 +281,11 @@ def read_docx(filepath: Path) -> Document:
                 start_offset=start,
                 end_offset=end,
                 _runs=runs,
+                font_name=para_fmt.get('font_name'),
+                font_size_pt=para_fmt.get('font_size_pt'),
+                space_before_pt=para_fmt.get('space_before_pt'),
+                space_after_pt=para_fmt.get('space_after_pt'),
+                line_spacing=para_fmt.get('line_spacing'),
             ))
         elif is_list:
             # Accumulate list items
@@ -237,6 +299,11 @@ def read_docx(filepath: Path) -> Document:
                 end_offset=end,
                 indent_level=indent_level,
                 _runs=runs,
+                font_name=para_fmt.get('font_name'),
+                font_size_pt=para_fmt.get('font_size_pt'),
+                space_before_pt=para_fmt.get('space_before_pt'),
+                space_after_pt=para_fmt.get('space_after_pt'),
+                line_spacing=para_fmt.get('line_spacing'),
             ))
         else:
             # Regular paragraph
@@ -246,6 +313,11 @@ def read_docx(filepath: Path) -> Document:
                 start_offset=start,
                 end_offset=end,
                 _runs=runs,
+                font_name=para_fmt.get('font_name'),
+                font_size_pt=para_fmt.get('font_size_pt'),
+                space_before_pt=para_fmt.get('space_before_pt'),
+                space_after_pt=para_fmt.get('space_after_pt'),
+                line_spacing=para_fmt.get('line_spacing'),
             ))
 
         current_offset = end + 1  # +1 for newline separator
@@ -269,8 +341,10 @@ def read_docx(filepath: Path) -> Document:
 
                 # Extract runs from first paragraph of cell
                 cell_runs = []
+                cell_fmt = {}
                 if cell.paragraphs:
                     cell_runs = _extract_runs(cell.paragraphs[0], 0)
+                    cell_fmt = _extract_paragraph_formatting(cell.paragraphs[0])
 
                 cells.append(TableCell(
                     text=cell_text,
@@ -280,6 +354,11 @@ def read_docx(filepath: Path) -> Document:
                     col_index=col_idx,
                     is_header=is_header_row,
                     _runs=cell_runs,
+                    font_name=cell_fmt.get('font_name'),
+                    font_size_pt=cell_fmt.get('font_size_pt'),
+                    space_before_pt=cell_fmt.get('space_before_pt'),
+                    space_after_pt=cell_fmt.get('space_after_pt'),
+                    line_spacing=cell_fmt.get('line_spacing'),
                 ))
 
                 current_offset = cell_end + 1

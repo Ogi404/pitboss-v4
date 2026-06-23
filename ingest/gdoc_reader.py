@@ -173,6 +173,55 @@ def _extract_text_from_paragraph(paragraph: dict) -> str:
     return ''.join(text_parts).rstrip()
 
 
+def _extract_paragraph_formatting(paragraph: dict) -> dict:
+    """
+    Extract paragraph-level formatting for preservation.
+
+    Returns dict with keys: font_name, font_size_pt, space_before_pt, space_after_pt, line_spacing
+    """
+    result = {}
+
+    # Paragraph style
+    para_style = paragraph.get('paragraphStyle', {})
+
+    # Space before/after
+    space_above = para_style.get('spaceAbove', {})
+    if space_above:
+        magnitude = space_above.get('magnitude')
+        if magnitude is not None:
+            result['space_before_pt'] = magnitude
+
+    space_below = para_style.get('spaceBelow', {})
+    if space_below:
+        magnitude = space_below.get('magnitude')
+        if magnitude is not None:
+            result['space_after_pt'] = magnitude
+
+    # Line spacing (percentage, convert to multiplier)
+    line_spacing = para_style.get('lineSpacing')
+    if line_spacing is not None:
+        result['line_spacing'] = line_spacing / 100.0
+
+    # Get dominant font from first text run with font info
+    for element in paragraph.get('elements', []):
+        if 'textRun' in element:
+            text_style = element['textRun'].get('textStyle', {})
+            weighted_font = text_style.get('weightedFontFamily', {})
+            if weighted_font and 'fontFamily' in weighted_font:
+                result['font_name'] = weighted_font['fontFamily']
+                break
+
+    for element in paragraph.get('elements', []):
+        if 'textRun' in element:
+            text_style = element['textRun'].get('textStyle', {})
+            font_size = text_style.get('fontSize', {})
+            if font_size and 'magnitude' in font_size:
+                result['font_size_pt'] = font_size['magnitude']
+                break
+
+    return result
+
+
 def _extract_runs(paragraph: dict, start_offset: int = 0) -> list[TextRun]:
     """
     Extract TextRun objects from a Google Docs paragraph.
@@ -211,6 +260,16 @@ def _extract_runs(paragraph: dict, start_offset: int = 0) -> list[TextRun]:
         link = text_style.get('link', {})
         hyperlink = link.get('url')
 
+        # Font info for formatting preservation
+        font_name = None
+        font_size_pt = None
+        weighted_font = text_style.get('weightedFontFamily', {})
+        if weighted_font:
+            font_name = weighted_font.get('fontFamily')
+        font_size = text_style.get('fontSize', {})
+        if font_size:
+            font_size_pt = font_size.get('magnitude')
+
         runs.append(TextRun(
             text=text,
             start_offset=current_offset,
@@ -221,6 +280,8 @@ def _extract_runs(paragraph: dict, start_offset: int = 0) -> list[TextRun]:
             strikethrough=strikethrough,
             highlight_color=highlight,
             hyperlink=hyperlink,
+            font_name=font_name,
+            font_size_pt=font_size_pt,
         ))
 
         current_offset += len(text)
@@ -245,6 +306,7 @@ def _process_table(table: dict, current_offset: int) -> tuple[Table, int]:
             # Extract text from cell's content
             cell_text_parts = []
             cell_runs = []
+            cell_fmt = {}
 
             for content_elem in table_cell.get('content', []):
                 if 'paragraph' in content_elem:
@@ -252,9 +314,10 @@ def _process_table(table: dict, current_offset: int) -> tuple[Table, int]:
                     para_text = _extract_text_from_paragraph(para)
                     if para_text:
                         cell_text_parts.append(para_text)
-                        # Get runs from first paragraph only (like docx_reader)
+                        # Get runs and formatting from first paragraph only (like docx_reader)
                         if not cell_runs:
                             cell_runs = _extract_runs(para, 0)
+                            cell_fmt = _extract_paragraph_formatting(para)
 
             cell_text = ' '.join(cell_text_parts).strip()
             cell_start = current_offset
@@ -268,6 +331,11 @@ def _process_table(table: dict, current_offset: int) -> tuple[Table, int]:
                 col_index=col_idx,
                 is_header=is_header_row,
                 _runs=cell_runs,
+                font_name=cell_fmt.get('font_name'),
+                font_size_pt=cell_fmt.get('font_size_pt'),
+                space_before_pt=cell_fmt.get('space_before_pt'),
+                space_after_pt=cell_fmt.get('space_after_pt'),
+                line_spacing=cell_fmt.get('line_spacing'),
             ))
 
             current_offset = cell_end + 1
@@ -354,6 +422,9 @@ def read_gdoc(doc_id_or_url: str) -> Document:
             # Extract formatting runs
             runs = _extract_runs(para, start)
 
+            # Extract paragraph-level formatting
+            para_fmt = _extract_paragraph_formatting(para)
+
             # Check for heading
             heading_level = _detect_heading_level(para)
 
@@ -369,6 +440,11 @@ def read_gdoc(doc_id_or_url: str) -> Document:
                     start_offset=start,
                     end_offset=end,
                     _runs=runs,
+                    font_name=para_fmt.get('font_name'),
+                    font_size_pt=para_fmt.get('font_size_pt'),
+                    space_before_pt=para_fmt.get('space_before_pt'),
+                    space_after_pt=para_fmt.get('space_after_pt'),
+                    line_spacing=para_fmt.get('line_spacing'),
                 ))
 
             elif is_list:
@@ -385,6 +461,11 @@ def read_gdoc(doc_id_or_url: str) -> Document:
                     end_offset=end,
                     indent_level=indent_level,
                     _runs=runs,
+                    font_name=para_fmt.get('font_name'),
+                    font_size_pt=para_fmt.get('font_size_pt'),
+                    space_before_pt=para_fmt.get('space_before_pt'),
+                    space_after_pt=para_fmt.get('space_after_pt'),
+                    line_spacing=para_fmt.get('line_spacing'),
                 ))
 
             else:
@@ -395,6 +476,11 @@ def read_gdoc(doc_id_or_url: str) -> Document:
                     start_offset=start,
                     end_offset=end,
                     _runs=runs,
+                    font_name=para_fmt.get('font_name'),
+                    font_size_pt=para_fmt.get('font_size_pt'),
+                    space_before_pt=para_fmt.get('space_before_pt'),
+                    space_after_pt=para_fmt.get('space_after_pt'),
+                    line_spacing=para_fmt.get('line_spacing'),
                 ))
 
             current_offset = end + 1  # +1 for newline separator
