@@ -27,6 +27,7 @@ class ArticleType(Enum):
     VIP_LOYALTY = "vip_loyalty"
     PRIVACY_POLICY = "privacy_policy"
     LIVE_CASINO = "live_casino"
+    META_SEO = "meta_seo"  # Meta titles, descriptions, SEO snippets
     GENERAL = "general"  # Fallback for unknown types
 
 
@@ -213,6 +214,11 @@ class BriefModel:
     links: tuple[BriefLink, ...] = field(default_factory=tuple)
     links_confidence: float = 0.5
 
+    # Formatting hints extracted from brief instructions
+    # Keys: "blank_rows" -> "required"|"none"
+    # Only set if brief explicitly states formatting instructions
+    formatting_hints: tuple[tuple[str, str], ...] = field(default_factory=tuple)
+
     # Meta
     brand_name: str = ""
     source_path: str = ""
@@ -220,6 +226,11 @@ class BriefModel:
 
     # Original extracted data for debugging
     raw_data: dict = field(default_factory=dict)
+
+    def get_formatting_hint(self, key: str) -> Optional[str]:
+        """Get a formatting hint value by key, or None if not set."""
+        hints_dict = dict(self.formatting_hints)
+        return hints_dict.get(key)
 
     def __post_init__(self):
         """Validate confidence values."""

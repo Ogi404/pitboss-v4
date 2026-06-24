@@ -307,6 +307,9 @@ class BriefAgent:
             for link in raw.links
         )
 
+        # Convert formatting_hints dict to tuple of tuples for frozen dataclass
+        formatting_hints = tuple(raw.formatting_hints.items())
+
         return BriefModel(
             keywords=keywords,
             keywords_confidence=raw.keywords_confidence,
@@ -322,6 +325,7 @@ class BriefAgent:
             locale_confidence=raw.locale_confidence,
             links=links,
             links_confidence=raw.links_confidence,
+            formatting_hints=formatting_hints,
             brand_name=raw.brand_name or "",
             source_path=raw.source_path,
             source_format=raw.source_format,

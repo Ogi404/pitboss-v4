@@ -27,6 +27,7 @@ from ingest.brief_base import (
     is_metadata_label,
     _parse_quantity_range,
     clean_keyword,
+    extract_formatting_hints,
 )
 
 
@@ -256,7 +257,26 @@ class DocxBriefParser(BriefParser):
             "tables": len(doc.tables),
         }
 
+        # Extract formatting hints from all text content
+        all_text = self._collect_all_text(doc)
+        extraction.formatting_hints = extract_formatting_hints(all_text)
+
         return extraction
+
+    def _collect_all_text(self, doc: DocxDocument) -> str:
+        """Collect all text from document for formatting hint extraction."""
+        text_parts = []
+        # Paragraphs
+        for para in doc.paragraphs:
+            if para.text.strip():
+                text_parts.append(para.text)
+        # Table cells
+        for table in doc.tables:
+            for row in table.rows:
+                for cell in row.cells:
+                    if cell.text.strip():
+                        text_parts.append(cell.text)
+        return " ".join(text_parts)
 
     def _extract_keywords_from_tables(self, doc: DocxDocument) -> tuple[list[RawKeywordGroup], float]:
         """Extract keywords from table format."""

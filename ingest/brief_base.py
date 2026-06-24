@@ -160,6 +160,63 @@ def clean_keyword(text: str) -> str:
     return cleaned.strip()
 
 
+# =============================================================================
+# FORMATTING HINTS EXTRACTION
+# =============================================================================
+
+# Precise patterns for blank_rows detection
+# These phrases indicate explicit formatting instructions in the brief
+BLANK_ROWS_REQUIRED_PATTERNS = [
+    re.compile(r"empty\s+rows?\s+between\s+paragraphs?", re.IGNORECASE),
+    re.compile(r"indents?\s+between\s+paragraphs?\s+and\s+headings?", re.IGNORECASE),
+    re.compile(r"blank\s+(?:lines?|rows?)\s+between\s+(?:paragraphs?|sections?)", re.IGNORECASE),
+    re.compile(r"add\s+(?:empty|blank)\s+(?:lines?|rows?)\s+between", re.IGNORECASE),
+    re.compile(r"separate\s+(?:paragraphs?|sections?)\s+with\s+(?:empty|blank)\s+(?:lines?|rows?)", re.IGNORECASE),
+]
+
+BLANK_ROWS_NONE_PATTERNS = [
+    re.compile(r"no\s+(?:empty|blank)\s+(?:lines?|rows?)\s+between", re.IGNORECASE),
+    re.compile(r"don'?t\s+add\s+(?:empty|blank)\s+(?:lines?|rows?)", re.IGNORECASE),
+    re.compile(r"remove\s+(?:empty|blank)\s+(?:lines?|rows?)", re.IGNORECASE),
+]
+
+
+def extract_formatting_hints(text: str) -> dict:
+    """
+    Extract formatting hints from brief text.
+
+    Uses precise phrase matching to detect explicit formatting instructions.
+    Only matches specific instruction phrases - does NOT match incidental
+    mentions of "indent" or "paragraph" in other contexts.
+
+    Args:
+        text: Full text content from brief
+
+    Returns:
+        Dict of formatting hints, e.g. {"blank_rows": "required"}
+        Empty dict if no explicit hints detected.
+    """
+    hints = {}
+
+    # Normalize text for matching
+    normalized = " ".join(text.split())
+
+    # Check for "none" patterns FIRST (negative instructions take precedence)
+    # "don't add blank rows" contains "blank rows" but should be "none"
+    for pattern in BLANK_ROWS_NONE_PATTERNS:
+        if pattern.search(normalized):
+            hints["blank_rows"] = "none"
+            return hints  # Explicit negative instruction wins
+
+    # Check for "required" patterns
+    for pattern in BLANK_ROWS_REQUIRED_PATTERNS:
+        if pattern.search(normalized):
+            hints["blank_rows"] = "required"
+            break
+
+    return hints
+
+
 @dataclass
 class RawKeywordGroup:
     """Raw extracted keyword group before normalization."""
@@ -230,6 +287,10 @@ class RawBriefExtraction:
     # Links
     links: list[RawLink] = field(default_factory=list)
     links_confidence: float = 0.0
+
+    # Formatting hints extracted from brief instructions
+    # Keys: "blank_rows" -> "required"|"none"
+    formatting_hints: dict = field(default_factory=dict)
 
     # Raw data for debugging
     raw_data: dict = field(default_factory=dict)

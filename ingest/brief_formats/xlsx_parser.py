@@ -28,6 +28,7 @@ from ingest.brief_base import (
     is_metadata_label,
     _parse_quantity_range,
     clean_keyword,
+    extract_formatting_hints,
 )
 
 
@@ -163,8 +164,24 @@ class XlsxBriefParser(BriefParser):
         extraction.links = links
         extraction.links_confidence = links_confidence
 
+        # Extract formatting hints from all text content
+        all_text = self._collect_all_text(wb)
+        extraction.formatting_hints = extract_formatting_hints(all_text)
+
         wb.close()
         return extraction
+
+    def _collect_all_text(self, wb) -> str:
+        """Collect all text from workbook for formatting hint extraction."""
+        text_parts = []
+        for sheet_name in wb.sheetnames:
+            ws = wb[sheet_name]
+            for row in ws.iter_rows(min_row=1, max_row=100, max_col=20):
+                for cell in row:
+                    val = _cell_value(cell)
+                    if val:
+                        text_parts.append(val)
+        return " ".join(text_parts)
 
     def _detect_tasks(self, wb) -> list[str]:
         """Detect task names for multi-task briefs, with row-above fallback."""
