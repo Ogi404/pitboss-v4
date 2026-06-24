@@ -440,6 +440,11 @@ def _build_paragraph_requests_rev(para: Paragraph) -> list[dict]:
         }
     })
 
+    # For empty paragraphs (just newline), skip formatting operations
+    # since there's no text content to format
+    if not para.text:
+        return requests
+
     # IMPORTANT: Remove any inherited bullet styling from list content
     # that was pushed down by this insertion
     requests.append({
