@@ -206,6 +206,61 @@ def _is_list_paragraph(paragraph) -> tuple[bool, Optional[ListType], int]:
     return False, None, 0
 
 
+def _process_table(table, current_offset: int) -> tuple[Table, int]:
+    """
+    Process a python-docx table into a Table element.
+
+    Returns (Table, new_offset) where new_offset is updated past the table.
+    """
+    table_start = current_offset
+    rows = []
+
+    for row_idx, row in enumerate(table.rows):
+        cells = []
+        is_header_row = row_idx == 0  # First row assumed to be header
+
+        for col_idx, cell in enumerate(row.cells):
+            cell_text = cell.text.strip()
+            cell_start = current_offset
+            cell_end = current_offset + len(cell_text)
+
+            # Extract runs from first paragraph of cell
+            cell_runs = []
+            cell_fmt = {}
+            if cell.paragraphs:
+                cell_runs = _extract_runs(cell.paragraphs[0], 0)
+                cell_fmt = _extract_paragraph_formatting(cell.paragraphs[0])
+
+            cells.append(TableCell(
+                text=cell_text,
+                start_offset=cell_start,
+                end_offset=cell_end,
+                row_index=row_idx,
+                col_index=col_idx,
+                is_header=is_header_row,
+                _runs=cell_runs,
+                font_name=cell_fmt.get('font_name'),
+                font_size_pt=cell_fmt.get('font_size_pt'),
+                space_before_pt=cell_fmt.get('space_before_pt'),
+                space_after_pt=cell_fmt.get('space_after_pt'),
+                line_spacing=cell_fmt.get('line_spacing'),
+            ))
+
+            current_offset = cell_end + 1
+
+        rows.append(TableRow(
+            cells=cells,
+            is_header_row=is_header_row,
+        ))
+
+    table_end = current_offset
+    return Table(
+        rows=rows,
+        start_offset=table_start,
+        end_offset=table_end,
+    ), current_offset
+
+
 def read_docx(filepath: Path) -> Document:
     """
     Parse a .docx file into a Document object.
@@ -217,6 +272,9 @@ def read_docx(filepath: Path) -> Document:
     - Tables with cells
     - Basic formatting runs (bold, italic, hyperlinks, highlights)
 
+    All elements are returned in TRUE DOCUMENT ORDER by iterating over
+    the document body children, not separate paragraph/table collections.
+
     Args:
         filepath: Path to the .docx file
 
@@ -226,6 +284,12 @@ def read_docx(filepath: Path) -> Document:
     doc = DocxDocument(str(filepath))
     elements: list[BlockElement] = []
     current_offset = 0
+
+    # Build lookup maps from xml elements to python-docx objects
+    # This allows us to iterate body children in order and find the
+    # corresponding high-level object for each
+    para_map = {para._p: para for para in doc.paragraphs}
+    table_map = {table._tbl: table for table in doc.tables}
 
     # Track list accumulation
     pending_list_items: list[ListItem] = []
@@ -246,142 +310,108 @@ def read_docx(filepath: Path) -> Document:
             pending_list_items = []
             pending_list_type = None
 
-    # Process paragraphs
-    for para in doc.paragraphs:
-        text = para.text.strip()
-        if not text:
-            # Empty paragraph - flush any pending list, then include as empty paragraph
-            # (preserves blank rows for faithful round-trip and idempotent writing)
+    # Iterate body children in TRUE DOCUMENT ORDER
+    for child in doc.element.body:
+        tag = child.tag.split('}')[-1] if '}' in child.tag else child.tag
+
+        if tag == 'p' and child in para_map:
+            # It's a paragraph
+            para = para_map[child]
+            text = para.text.strip()
+
+            if not text:
+                # Empty paragraph - flush any pending list, then include as empty paragraph
+                # (preserves blank rows for faithful round-trip and idempotent writing)
+                flush_list()
+                elements.append(Paragraph(
+                    text="",
+                    start_offset=current_offset,
+                    end_offset=current_offset,
+                    _runs=[],
+                ))
+                current_offset += 1  # +1 for newline separator
+                continue
+
+            # Check for heading
+            style_name = para.style.name if para.style else None
+            heading_level = _detect_heading_level(style_name)
+
+            # Check for list
+            is_list, list_type, indent_level = _is_list_paragraph(para)
+
+            # Calculate offsets
+            text_len = len(text)
+            start = current_offset
+            end = current_offset + text_len
+
+            # Extract formatting runs
+            runs = _extract_runs(para, start)
+
+            # Extract paragraph-level formatting
+            para_fmt = _extract_paragraph_formatting(para)
+
+            if heading_level:
+                # Flush any pending list before heading
+                flush_list()
+                elements.append(Heading(
+                    text=text,
+                    level=heading_level,
+                    start_offset=start,
+                    end_offset=end,
+                    _runs=runs,
+                    font_name=para_fmt.get('font_name'),
+                    font_size_pt=para_fmt.get('font_size_pt'),
+                    space_before_pt=para_fmt.get('space_before_pt'),
+                    space_after_pt=para_fmt.get('space_after_pt'),
+                    line_spacing=para_fmt.get('line_spacing'),
+                ))
+            elif is_list:
+                # Accumulate list items
+                if not pending_list_items:
+                    list_start_offset = start
+                    pending_list_type = list_type
+
+                pending_list_items.append(ListItem(
+                    text=text,
+                    start_offset=start,
+                    end_offset=end,
+                    indent_level=indent_level,
+                    _runs=runs,
+                    font_name=para_fmt.get('font_name'),
+                    font_size_pt=para_fmt.get('font_size_pt'),
+                    space_before_pt=para_fmt.get('space_before_pt'),
+                    space_after_pt=para_fmt.get('space_after_pt'),
+                    line_spacing=para_fmt.get('line_spacing'),
+                ))
+            else:
+                # Regular paragraph
+                flush_list()
+                elements.append(Paragraph(
+                    text=text,
+                    start_offset=start,
+                    end_offset=end,
+                    _runs=runs,
+                    font_name=para_fmt.get('font_name'),
+                    font_size_pt=para_fmt.get('font_size_pt'),
+                    space_before_pt=para_fmt.get('space_before_pt'),
+                    space_after_pt=para_fmt.get('space_after_pt'),
+                    line_spacing=para_fmt.get('line_spacing'),
+                ))
+
+            current_offset = end + 1  # +1 for newline separator
+
+        elif tag == 'tbl' and child in table_map:
+            # It's a table - flush any pending list first
             flush_list()
-            elements.append(Paragraph(
-                text="",
-                start_offset=current_offset,
-                end_offset=current_offset,
-                _runs=[],
-            ))
-            current_offset += 1  # +1 for newline separator
-            continue
 
-        # Check for heading
-        style_name = para.style.name if para.style else None
-        heading_level = _detect_heading_level(style_name)
+            table = table_map[child]
+            table_elem, current_offset = _process_table(table, current_offset)
+            elements.append(table_elem)
 
-        # Check for list
-        is_list, list_type, indent_level = _is_list_paragraph(para)
-
-        # Calculate offsets
-        text_len = len(text)
-        start = current_offset
-        end = current_offset + text_len
-
-        # Extract formatting runs
-        runs = _extract_runs(para, start)
-
-        # Extract paragraph-level formatting
-        para_fmt = _extract_paragraph_formatting(para)
-
-        if heading_level:
-            # Flush any pending list before heading
-            flush_list()
-            elements.append(Heading(
-                text=text,
-                level=heading_level,
-                start_offset=start,
-                end_offset=end,
-                _runs=runs,
-                font_name=para_fmt.get('font_name'),
-                font_size_pt=para_fmt.get('font_size_pt'),
-                space_before_pt=para_fmt.get('space_before_pt'),
-                space_after_pt=para_fmt.get('space_after_pt'),
-                line_spacing=para_fmt.get('line_spacing'),
-            ))
-        elif is_list:
-            # Accumulate list items
-            if not pending_list_items:
-                list_start_offset = start
-                pending_list_type = list_type
-
-            pending_list_items.append(ListItem(
-                text=text,
-                start_offset=start,
-                end_offset=end,
-                indent_level=indent_level,
-                _runs=runs,
-                font_name=para_fmt.get('font_name'),
-                font_size_pt=para_fmt.get('font_size_pt'),
-                space_before_pt=para_fmt.get('space_before_pt'),
-                space_after_pt=para_fmt.get('space_after_pt'),
-                line_spacing=para_fmt.get('line_spacing'),
-            ))
-        else:
-            # Regular paragraph
-            flush_list()
-            elements.append(Paragraph(
-                text=text,
-                start_offset=start,
-                end_offset=end,
-                _runs=runs,
-                font_name=para_fmt.get('font_name'),
-                font_size_pt=para_fmt.get('font_size_pt'),
-                space_before_pt=para_fmt.get('space_before_pt'),
-                space_after_pt=para_fmt.get('space_after_pt'),
-                line_spacing=para_fmt.get('line_spacing'),
-            ))
-
-        current_offset = end + 1  # +1 for newline separator
+        # Other tags (sectPr, etc.) are ignored
 
     # Flush any remaining list
     flush_list()
-
-    # Process tables
-    for table in doc.tables:
-        table_start = current_offset
-        rows = []
-
-        for row_idx, row in enumerate(table.rows):
-            cells = []
-            is_header_row = row_idx == 0  # First row assumed to be header
-
-            for col_idx, cell in enumerate(row.cells):
-                cell_text = cell.text.strip()
-                cell_start = current_offset
-                cell_end = current_offset + len(cell_text)
-
-                # Extract runs from first paragraph of cell
-                cell_runs = []
-                cell_fmt = {}
-                if cell.paragraphs:
-                    cell_runs = _extract_runs(cell.paragraphs[0], 0)
-                    cell_fmt = _extract_paragraph_formatting(cell.paragraphs[0])
-
-                cells.append(TableCell(
-                    text=cell_text,
-                    start_offset=cell_start,
-                    end_offset=cell_end,
-                    row_index=row_idx,
-                    col_index=col_idx,
-                    is_header=is_header_row,
-                    _runs=cell_runs,
-                    font_name=cell_fmt.get('font_name'),
-                    font_size_pt=cell_fmt.get('font_size_pt'),
-                    space_before_pt=cell_fmt.get('space_before_pt'),
-                    space_after_pt=cell_fmt.get('space_after_pt'),
-                    line_spacing=cell_fmt.get('line_spacing'),
-                ))
-
-                current_offset = cell_end + 1
-
-            rows.append(TableRow(
-                cells=cells,
-                is_header_row=is_header_row,
-            ))
-
-        table_end = current_offset
-        elements.append(Table(
-            rows=rows,
-            start_offset=table_start,
-            end_offset=table_end,
-        ))
 
     return Document.from_elements(
         elements=elements,

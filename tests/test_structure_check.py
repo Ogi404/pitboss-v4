@@ -556,6 +556,48 @@ class TestOutro:
         outro = [f for f in findings if f.check_name == "structure.missing_outro"]
         assert len(outro) == 0
 
+    def test_trailing_empty_paragraphs_skipped(self):
+        """
+        Trailing empty paragraphs should be skipped when finding last content element.
+
+        This prevents false positives from:
+        - blank_rows insertion adding trailing empty paragraphs
+        - Google Docs conversion adding trailing newlines
+        - General document cruft
+        """
+        elements = [
+            make_heading("Section", 2, 0),
+            make_paragraph(
+                "This is a proper concluding paragraph that wraps up the article "
+                "with enough words to qualify as a real conclusion section.",
+                100
+            ),
+            make_paragraph("", 200),  # Empty trailing paragraph
+            make_paragraph("", 201),  # Another empty trailing paragraph
+            make_paragraph("   ", 202),  # Whitespace-only paragraph
+        ]
+        doc = make_document(elements=elements)
+        check = StructureCheck()
+        findings = check.run(doc, MockStandards(), brief=None)
+
+        # Should NOT flag missing_outro - the real last content is proper
+        outro = [f for f in findings if f.check_name == "structure.missing_outro"]
+        assert len(outro) == 0, "Trailing empty paragraphs should not trigger missing_outro"
+
+    def test_all_empty_paragraphs_no_crash(self):
+        """Document with only empty paragraphs should not crash."""
+        elements = [
+            make_paragraph("", 0),
+            make_paragraph("", 1),
+            make_paragraph("   ", 2),
+        ]
+        doc = make_document(elements=elements)
+        check = StructureCheck()
+        findings = check.run(doc, MockStandards(), brief=None)
+
+        outro = [f for f in findings if f.check_name == "structure.missing_outro"]
+        assert len(outro) == 0
+
 
 # =============================================================================
 # WORD COUNT TESTS

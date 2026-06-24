@@ -376,13 +376,26 @@ class StructureCheck(DeterministicCheck):
 
         §10: "last paragraph should stand out" - article should have
         a proper conclusion, not end abruptly with a heading or very short text.
+
+        Note: Skips trailing empty paragraphs (conversion cruft, blank_rows insertion)
+        to find the true last content element.
         """
         findings: list[Finding] = []
 
         if not document.elements:
             return findings
 
-        last_element = document.elements[-1]
+        # Find last non-empty element (skip trailing empty paragraphs)
+        last_element = None
+        for element in reversed(document.elements):
+            if isinstance(element, Paragraph) and not element.text.strip():
+                continue  # Skip empty paragraph
+            last_element = element
+            break
+
+        if last_element is None:
+            # Document is all empty paragraphs - no content to check
+            return findings
 
         # Check if last element is a heading (no conclusion at all)
         if isinstance(last_element, Heading):
