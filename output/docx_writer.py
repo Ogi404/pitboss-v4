@@ -60,7 +60,19 @@ HEADING_STYLES = {
 }
 
 
-def write_docx(document: Document, output_path: Path) -> None:
+from typing import Optional
+
+
+def _is_empty_paragraph(element) -> bool:
+    """Check if element is an existing blank row (empty paragraph)."""
+    return isinstance(element, Paragraph) and not element.text.strip()
+
+
+def write_docx(
+    document: Document,
+    output_path: Path,
+    blank_rows: Optional[str] = None,
+) -> None:
     """
     Write a Document object to a .docx file.
 
@@ -76,10 +88,32 @@ def write_docx(document: Document, output_path: Path) -> None:
     Args:
         document: The Document to write
         output_path: Path for the output .docx file
+        blank_rows: Blank row handling mode:
+            - "required": Insert empty paragraphs between content blocks
+              (headings, paragraphs, lists, tables). Idempotent - won't
+              double-insert if source already has empty rows. Lists exempt
+              (no empty rows between list items). Tables exempt from
+              table-to-table insertion (corpus: 100% directly adjacent).
+            - "none": Don't insert blank rows (preserve source as-is)
+            - None: Preserve source as-is (same as "none")
     """
     doc = DocxDocument()
+    elements = document.elements
 
-    for element in document.elements:
+    for i, element in enumerate(elements):
+        # Check if we need to insert empty row BEFORE this element
+        if blank_rows == "required" and i > 0:
+            prev_element = elements[i - 1]
+            needs_empty = (
+                not _is_empty_paragraph(element) and  # Current isn't already empty
+                not _is_empty_paragraph(prev_element) and  # Prev isn't empty
+                # Exempt table-to-table adjacency (corpus: 100% directly adjacent)
+                not (isinstance(element, Table) and isinstance(prev_element, Table))
+            )
+            if needs_empty:
+                doc.add_paragraph()  # Empty paragraph
+
+        # Write the actual element
         if isinstance(element, Heading):
             _write_heading(doc, element)
         elif isinstance(element, Paragraph):

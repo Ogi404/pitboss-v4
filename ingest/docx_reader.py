@@ -250,8 +250,16 @@ def read_docx(filepath: Path) -> Document:
     for para in doc.paragraphs:
         text = para.text.strip()
         if not text:
-            # Empty paragraph - flush any pending list
+            # Empty paragraph - flush any pending list, then include as empty paragraph
+            # (preserves blank rows for faithful round-trip and idempotent writing)
             flush_list()
+            elements.append(Paragraph(
+                text="",
+                start_offset=current_offset,
+                end_offset=current_offset,
+                _runs=[],
+            ))
+            current_offset += 1  # +1 for newline separator
             continue
 
         # Check for heading

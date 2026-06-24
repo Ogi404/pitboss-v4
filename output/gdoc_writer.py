@@ -62,7 +62,39 @@ LIST_TYPE_MAP = {
 }
 
 
-def write_gdoc(document: Document, title: Optional[str] = None) -> str:
+def _is_empty_paragraph(element) -> bool:
+    """Check if element is an existing blank row (empty paragraph)."""
+    return isinstance(element, Paragraph) and not element.text.strip()
+
+
+def _build_empty_paragraph_requests() -> list[dict]:
+    """
+    Build requests to insert an empty paragraph at index 1.
+
+    Used for blank_rows insertion between content blocks.
+    """
+    return [
+        {
+            'insertText': {
+                'location': {'index': 1},
+                'text': '\n'  # Single newline = empty paragraph
+            }
+        },
+        {
+            'updateParagraphStyle': {
+                'range': {'startIndex': 1, 'endIndex': 1},
+                'paragraphStyle': {'namedStyleType': 'NORMAL_TEXT'},
+                'fields': 'namedStyleType'
+            }
+        }
+    ]
+
+
+def write_gdoc(
+    document: Document,
+    title: Optional[str] = None,
+    blank_rows: Optional[str] = None,
+) -> str:
     """
     Write a Document object to a new Google Doc.
 
@@ -78,6 +110,13 @@ def write_gdoc(document: Document, title: Optional[str] = None) -> str:
     Args:
         document: The Document to write
         title: Title for new doc (default: document.title + " - Corrected")
+        blank_rows: Blank row handling mode:
+            - "required": Insert empty paragraphs between content blocks
+              (headings, paragraphs, lists, tables). Idempotent - won't
+              double-insert if source already has empty rows. Lists exempt
+              (no empty rows between list items).
+            - "none": Don't insert blank rows (preserve source as-is)
+            - None: Preserve source as-is (same as "none")
 
     Returns:
         URL of the created Google Doc
@@ -96,7 +135,7 @@ def write_gdoc(document: Document, title: Optional[str] = None) -> str:
     logger.info(f"Created new Google Doc: {doc_id}")
 
     # 2. Build content requests (two phases for tables)
-    phase1_requests, table_info = _build_content_requests_phase1(document)
+    phase1_requests, table_info = _build_content_requests_phase1(document, blank_rows)
 
     # 3. Execute phase 1 (structure: text, headings, lists, table structures)
     if phase1_requests:
@@ -124,7 +163,10 @@ def write_gdoc(document: Document, title: Optional[str] = None) -> str:
     return url
 
 
-def _build_content_requests_phase1(document: Document) -> tuple[list[dict], list[Table]]:
+def _build_content_requests_phase1(
+    document: Document,
+    blank_rows: Optional[str] = None,
+) -> tuple[list[dict], list[Table]]:
     """
     Build phase 1 requests using REVERSE insertion order.
 
@@ -135,15 +177,26 @@ def _build_content_requests_phase1(document: Document) -> tuple[list[dict], list
     Tables are inserted as empty structures. Their cell contents are
     populated in phase 2 after reading back the actual indices.
 
+    Args:
+        document: The Document to write
+        blank_rows: "required" to insert empty paragraphs between blocks,
+                   None/"none" to preserve source as-is
+
     Returns:
         Tuple of (requests, table_list) where table_list contains
         the Table objects in DOCUMENT order for phase 2 population.
     """
     requests = []
     tables = []
+    elements = document.elements
+    num_elements = len(elements)
 
     # Process elements in REVERSE order for insertion at index 1
-    for element in reversed(document.elements):
+    for i, element in enumerate(reversed(elements)):
+        # Original index in document order
+        orig_idx = num_elements - 1 - i
+
+        # Step 1: Insert the actual element
         if isinstance(element, Heading):
             reqs = _build_heading_requests_rev(element)
             requests.extend(reqs)
@@ -158,6 +211,20 @@ def _build_content_requests_phase1(document: Document) -> tuple[list[dict], list
             reqs = _build_table_structure_requests_rev(element)
             requests.extend(reqs)
             tables.insert(0, element)  # Prepend to maintain document order
+
+        # Step 2: Check if we need to insert empty row BEFORE this element
+        # (In reverse insertion, this means inserting AFTER the element request)
+        if blank_rows == "required":
+            prev_element = elements[orig_idx - 1] if orig_idx > 0 else None
+            needs_empty = (
+                not _is_empty_paragraph(element) and  # Current isn't already empty
+                orig_idx > 0 and                       # Not first element
+                not _is_empty_paragraph(prev_element) and  # Prev isn't empty
+                # Exempt table-to-table adjacency (corpus: 100% directly adjacent)
+                not (isinstance(element, Table) and isinstance(prev_element, Table))
+            )
+            if needs_empty:
+                requests.extend(_build_empty_paragraph_requests())
 
     return requests, tables
 

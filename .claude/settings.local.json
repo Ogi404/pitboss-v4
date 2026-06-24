@@ -28,7 +28,9 @@
       "Bash(git -C \"C:\\\\Users\\\\User\\\\Documents\\\\PROJECTS\\\\BUILDS\\\\pitboss_v_4\" log --oneline -15)",
       "Bash(git -C \"C:\\\\Users\\\\User\\\\Documents\\\\PROJECTS\\\\BUILDS\\\\pitboss_v_4\" diff --stat)",
       "Bash(git -C \"C:\\\\Users\\\\User\\\\Documents\\\\PROJECTS\\\\BUILDS\\\\pitboss_v_4\" log --oneline -3)",
-      "Bash(git -C \"C:\\\\Users\\\\User\\\\Documents\\\\PROJECTS\\\\BUILDS\\\\pitboss_v_4\" push)"
+      "Bash(git -C \"C:\\\\Users\\\\User\\\\Documents\\\\PROJECTS\\\\BUILDS\\\\pitboss_v_4\" push)",
+      "Bash(git check-ignore:*)",
+      "Bash(Select-Object -First 20 FullName)"
     ]
   }
 }

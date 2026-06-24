@@ -410,8 +410,16 @@ def read_gdoc(doc_id_or_url: str) -> Document:
             # Extract text
             text = _extract_text_from_paragraph(para)
             if not text:
-                # Empty paragraph - flush any pending list
+                # Empty paragraph - flush any pending list, then include as empty paragraph
+                # (preserves blank rows for faithful round-trip and idempotent writing)
                 flush_list()
+                elements.append(Paragraph(
+                    text="",
+                    start_offset=current_offset,
+                    end_offset=current_offset,
+                    _runs=[],
+                ))
+                current_offset += 1  # +1 for newline separator
                 continue
 
             # Calculate offsets
