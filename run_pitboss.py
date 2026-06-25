@@ -163,6 +163,14 @@ def run_docx_pipeline(
     comments_path.write_text(comments_to_markdown(comments), encoding='utf-8')
     logger.info(f"Wrote {len(comments)} comments to: {comments_path}")
 
+    # Collect all warnings (brand + check warnings)
+    all_warnings = []
+    if brand_warning:
+        all_warnings.append(brand_warning)
+    for check_name, warning in orch_result.warnings.items():
+        all_warnings.append(warning)
+    combined_warning = " | ".join(all_warnings) if all_warnings else None
+
     # 9. Write summary
     summary = generate_summary(
         orch_result,
@@ -172,14 +180,14 @@ def run_docx_pipeline(
         brief,
         str(article_path),
         str(brief_path) if brief_path else None,
-        brand_warning=brand_warning,
+        brand_warning=combined_warning,
     )
     summary_path = output_dir / "summary.md"
     summary_path.write_text(summary_to_markdown(summary), encoding='utf-8')
     logger.info(f"Wrote summary to: {summary_path}")
 
     # Print summary to console
-    _print_docx_summary(article_path, summary, corrected_path, comments_path, summary_path, brand_warning)
+    _print_docx_summary(article_path, summary, corrected_path, comments_path, summary_path, combined_warning)
 
     return corrected_path, comments_path, summary_path
 
@@ -272,8 +280,16 @@ def run_gdoc_pipeline(
     else:
         logger.info("Skipping comment posting (--skip-comments)")
 
+    # Collect all warnings (brand + check warnings)
+    all_warnings = []
+    if brand_warning:
+        all_warnings.append(brand_warning)
+    for check_name, warning in orch_result.warnings.items():
+        all_warnings.append(warning)
+    combined_warning = " | ".join(all_warnings) if all_warnings else None
+
     # Print summary
-    _print_gdoc_summary(doc_id, document, orch_result, apply_result, comment_count, corrected_url, brand_warning)
+    _print_gdoc_summary(doc_id, document, orch_result, apply_result, comment_count, corrected_url, combined_warning)
 
     return corrected_url, apply_result.applied_count, comment_count
 

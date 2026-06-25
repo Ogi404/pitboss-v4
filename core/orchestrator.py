@@ -53,6 +53,9 @@ class OrchestratorResult:
     errors: dict[str, str] = field(default_factory=dict)
     """Check errors: check_name → error message."""
 
+    warnings: dict[str, str] = field(default_factory=dict)
+    """Check warnings: check_name → warning message."""
+
     @property
     def auto_count(self) -> int:
         """Count of auto-applicable findings."""
@@ -135,6 +138,7 @@ def run_all_checks(
     registry = get_registry()
     all_findings: list[Finding] = []
     errors: dict[str, str] = {}
+    warnings: dict[str, str] = {}
 
     # Get all check instances
     checks = registry.all_instances()
@@ -155,6 +159,10 @@ def run_all_checks(
             all_findings.extend(findings)
             logger.debug(f"Check '{check_name}' produced {len(findings)} findings")
 
+            # Collect any warnings from the check
+            if hasattr(check, 'get_warning') and check.get_warning():
+                warnings[check_name] = check.get_warning()
+
         except TypeError as e:
             # Handle checks that don't accept brief parameter
             # Try again without brief
@@ -165,6 +173,9 @@ def run_all_checks(
                     logger.debug(
                         f"Check '{check_name}' (no brief) produced {len(findings)} findings"
                     )
+                    # Collect any warnings from the check
+                    if hasattr(check, 'get_warning') and check.get_warning():
+                        warnings[check_name] = check.get_warning()
                 except Exception as inner_e:
                     errors[check_name] = str(inner_e)
                     logger.warning(f"Check '{check_name}' failed: {inner_e}")
@@ -199,6 +210,7 @@ def run_all_checks(
         proposals=proposals,
         by_check=dict(by_check),
         errors=errors,
+        warnings=warnings,
     )
 
 
@@ -227,6 +239,7 @@ def run_checks_by_name(
     registry = get_registry()
     all_findings: list[Finding] = []
     errors: dict[str, str] = {}
+    warnings: dict[str, str] = {}
 
     for name in check_names:
         check = registry.get_instance(name)
@@ -238,12 +251,18 @@ def run_checks_by_name(
         try:
             findings = check.run(document, standards, voice_model, brief=brief)
             all_findings.extend(findings)
+            # Collect any warnings from the check
+            if hasattr(check, 'get_warning') and check.get_warning():
+                warnings[name] = check.get_warning()
 
         except TypeError as e:
             if "brief" in str(e):
                 try:
                     findings = check.run(document, standards, voice_model)
                     all_findings.extend(findings)
+                    # Collect any warnings from the check
+                    if hasattr(check, 'get_warning') and check.get_warning():
+                        warnings[name] = check.get_warning()
                 except Exception as inner_e:
                     errors[name] = str(inner_e)
                     logger.warning(f"Check '{name}' failed: {inner_e}")
@@ -269,4 +288,5 @@ def run_checks_by_name(
         proposals=proposals,
         by_check=dict(by_check),
         errors=errors,
+        warnings=warnings,
     )

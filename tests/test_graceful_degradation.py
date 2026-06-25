@@ -309,3 +309,131 @@ class TestGetAttrFallbacks:
         findings = check.run(document, standards)
         # May produce findings for spacing/hierarchy, but shouldn't crash
         assert isinstance(findings, list)
+
+
+# =============================================================================
+# TESTS: Mismatch guard for competitor detection
+# =============================================================================
+
+class TestMismatchGuard:
+    """Test that brand mismatch guard prevents false competitor flags."""
+
+    def _create_koifortune_document(self) -> Document:
+        """Create a document that mentions KoiFortune heavily."""
+        texts = [
+            "Welcome to KoiFortune Casino",
+            "KoiFortune offers the best pokies in Australia.",
+            "Play at KoiFortune today for exciting bonuses.",
+            "KoiFortune has over 1000 games available.",
+            "Contact KoiFortune support for help.",
+            "KoiFortune is licensed and regulated.",
+            "Visit KoiFortune now!",
+        ]
+        elements = []
+        offset = 0
+        for text in texts:
+            elements.append(_make_paragraph(text, offset))
+            offset += len(text) + 1
+        return Document(elements=elements, title="KoiFortune Casino Review")
+
+    def test_mismatch_detected_warns_and_protects(self):
+        """Mismatch guard should warn and NOT flag dominant as competitor."""
+        _ensure_checks_registered()
+
+        from deterministic.brand_names import BrandNamesCheck
+        from core.standards_engine import Standards
+
+        # Create standards with mismatched brand_name
+        standards = Standards()
+        standards.brand_name = "TestBroken"  # Does NOT match article
+
+        document = self._create_koifortune_document()
+        check = BrandNamesCheck()
+
+        findings = check.run(document, standards)
+
+        # KoiFortune should NOT be flagged as competitor
+        competitor_findings = [
+            f for f in findings
+            if f.metadata.get("sub_check") == "competitor"
+            and "KoiFortune" in (f.original_text or "")
+        ]
+        assert len(competitor_findings) == 0, (
+            f"KoiFortune was flagged as competitor {len(competitor_findings)} times "
+            "despite being the article's dominant brand"
+        )
+
+        # Warning should be set
+        assert check.get_warning() is not None
+        assert "KoiFortune" in check.get_warning()
+        assert "TestBroken" in check.get_warning()
+
+    def test_correct_brand_no_warning(self):
+        """Correct brand should not trigger warning."""
+        _ensure_checks_registered()
+
+        from deterministic.brand_names import BrandNamesCheck
+        from core.standards_engine import Standards
+
+        # Create standards with CORRECT brand_name
+        standards = Standards()
+        standards.brand_name = "KoiFortune"  # Matches article
+
+        document = self._create_koifortune_document()
+        check = BrandNamesCheck()
+
+        findings = check.run(document, standards)
+
+        # No warning should be set
+        assert check.get_warning() is None
+
+    def test_no_dominant_runs_normally(self):
+        """No dominant operator should run competitor detection normally."""
+        _ensure_checks_registered()
+
+        from deterministic.brand_names import BrandNamesCheck
+        from core.standards_engine import Standards
+
+        # Create standards for a new brand (not in known_operators)
+        standards = Standards()
+        standards.brand_name = "BrandNewCasino"
+
+        # Document doesn't mention any known operators heavily
+        document = _create_test_document()  # Generic content
+        check = BrandNamesCheck()
+
+        findings = check.run(document, standards)
+
+        # No warning (no mismatch detected)
+        assert check.get_warning() is None
+
+    def test_ambiguous_no_suppression(self):
+        """Near-tie operators should not trigger suppression."""
+        _ensure_checks_registered()
+
+        from deterministic.brand_names import BrandNamesCheck
+        from core.standards_engine import Standards
+
+        # Create document mentioning multiple operators roughly equally
+        texts = [
+            "Compare KoiFortune vs PlayAmo casinos.",
+            "KoiFortune has great slots. PlayAmo has table games.",
+            "Both KoiFortune and PlayAmo offer bonuses.",
+            "PlayAmo and KoiFortune are popular choices.",
+        ]
+        elements = []
+        offset = 0
+        for text in texts:
+            elements.append(_make_paragraph(text, offset))
+            offset += len(text) + 1
+        document = Document(elements=elements, title="Casino Comparison")
+
+        standards = Standards()
+        standards.brand_name = "TestBrand"
+
+        check = BrandNamesCheck()
+        findings = check.run(document, standards)
+
+        # With near-tie, no suppression should happen
+        # (either no warning, or both are flagged as competitors)
+        # The key is that we don't wrongly protect one over the other

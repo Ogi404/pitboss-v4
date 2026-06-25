@@ -89,7 +89,13 @@ class BrandNamesCheck(DeterministicCheck):
         super().__init__()
         self._known_operators: set[str] = set()
         self._operators_normalized: dict[str, str] = {}
+        self._warning: Optional[str] = None
+        self._protected_operator: Optional[str] = None  # Don't flag this as competitor
         self._load_known_operators()
+
+    def get_warning(self) -> Optional[str]:
+        """Return any warning generated during the check."""
+        return self._warning
 
     def _load_known_operators(self) -> None:
         """Load known operators from config file."""
@@ -106,6 +112,85 @@ class BrandNamesCheck(DeterministicCheck):
                     if normalized not in self._operators_normalized:
                         self._known_operators.add(line)
                         self._operators_normalized[normalized] = line
+
+    def _detect_dominant_operator(
+        self,
+        document: Document,
+        configured_brand: str,
+    ) -> Optional[str]:
+        """
+        Detect the dominant known-operator in the article.
+
+        Scans for all known operators, counts mentions, weights title/H1.
+        Returns the dominant operator if clearly dominant AND different
+        from configured brand. Returns None if no clear dominant or
+        dominant matches configured brand.
+
+        Args:
+            document: The document to scan
+            configured_brand: The configured brand_name
+
+        Returns:
+            Dominant operator name if mismatch detected, None otherwise
+        """
+        if not self._known_operators:
+            return None
+
+        text = document.full_text()
+        title = document.title or ""
+
+        # Get title/H1 text for weighting
+        h1_text = ""
+        for el in document.elements[:5]:
+            if hasattr(el, 'text'):
+                h1_text += el.text + " "
+
+        # Count operator mentions
+        counts: dict[str, int] = {}
+        in_title: set[str] = set()
+
+        for operator in self._known_operators:
+            pattern = re.compile(rf'\b{re.escape(operator)}\b', re.IGNORECASE)
+            matches = pattern.findall(text)
+            if matches:
+                counts[operator] = len(matches)
+                # Check if in title/H1
+                if pattern.search(title) or pattern.search(h1_text):
+                    in_title.add(operator)
+
+        if not counts:
+            return None
+
+        # Sort by count descending
+        sorted_ops = sorted(counts.items(), key=lambda x: -x[1])
+        top_op, top_count = sorted_ops[0]
+
+        # Check for clear dominance:
+        # - Must have significant mentions (at least 5)
+        # - Must be clearly ahead of runner-up (2x or 10+ more)
+        if top_count < 5:
+            return None
+
+        if len(sorted_ops) > 1:
+            runner_up_count = sorted_ops[1][1]
+            margin = top_count - runner_up_count
+            # Not dominant if runner-up is close
+            if runner_up_count > 0 and top_count < runner_up_count * 2 and margin < 10:
+                return None
+
+        # Bonus confidence if in title
+        # (we don't require it, but it confirms dominance)
+
+        # Check if dominant matches configured brand
+        configured_normalized = configured_brand.lower().replace(' ', '').replace('-', '')
+        top_normalized = top_op.lower().replace(' ', '').replace('-', '')
+
+        if top_normalized == configured_normalized:
+            # No mismatch - dominant IS the configured brand
+            return None
+
+        # Mismatch detected: dominant operator differs from configured brand
+        return top_op
 
     def _validate_canonical_against_corpus(
         self,
@@ -207,10 +292,25 @@ class BrandNamesCheck(DeterministicCheck):
         """Find brand name issues in the document."""
         findings: list[Finding] = []
 
+        # Reset per-run state
+        self._warning = None
+        self._protected_operator = None
+
         # Get canonical brand name
         canonical = getattr(standards, 'brand_name', None)
         if not canonical:
             return findings
+
+        # Mismatch guard: detect if article's dominant operator differs from configured brand
+        dominant_op = self._detect_dominant_operator(document, canonical)
+        if dominant_op:
+            # Mismatch detected - don't flag dominant as competitor, emit warning
+            self._protected_operator = dominant_op
+            self._warning = (
+                f"Configured brand '{canonical}' but article appears to be about "
+                f"'{dominant_op}' - check the --brand setting"
+            )
+            logger.warning(self._warning)
 
         # Get brand normalization mappings if available
         brand_norm = getattr(standards, 'brand_normalization', None)
@@ -478,11 +578,20 @@ class BrandNamesCheck(DeterministicCheck):
         # Normalize own brand for comparison
         own_normalized = own_brand.lower().replace(' ', '').replace('-', '')
 
+        # Normalize protected operator (mismatch guard)
+        protected_normalized = None
+        if self._protected_operator:
+            protected_normalized = self._protected_operator.lower().replace(' ', '').replace('-', '')
+
         # Check each known operator
         for operator in self._known_operators:
             # Skip own brand
             op_normalized = operator.lower().replace(' ', '').replace('-', '')
             if op_normalized == own_normalized:
+                continue
+
+            # Skip protected operator (mismatch guard - article's actual brand)
+            if protected_normalized and op_normalized == protected_normalized:
                 continue
 
             # Find mentions of this operator
