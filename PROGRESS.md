@@ -2,6 +2,8 @@
 
 ## Current Phase
 
+**Phase 4b: Complete** - Google Docs Integration — unified CLI, parity verified, 878 tests
+
 **Phase 4a: Complete** - Output Pipeline Core (Local DOCX) — all 5 artifact verification bugs fixed
 
 **Phase 3: Complete** - Brief Understanding Agent
@@ -56,7 +58,7 @@ The Check interface with registry:
 | 2 | Deterministic Layer (the 95%) | **Complete** (9/9 checks) |
 | 3 | Brief agent (confidence-scored extraction) | **Complete** |
 | 4a | Output pipeline core (local DOCX) | **Complete** |
-| 4b | Google Docs integration | **Stage 3 Complete** (read/write/comments) |
+| 4b | Google Docs integration | **Complete** (unified CLI, parity verified) |
 | 5 | Judgment layer (the 5%) | Pending |
 | 6 | Learning loop (feedback calibration) | Pending |
 | 7 | Fact-checker (claim-driven verification) | Pending |
@@ -136,7 +138,7 @@ The 937 UNCLEAR count in the corpus confirms this middle path matters — silent
 ## Test Status
 
 ```
-818 tests passing (3 skipped)
+878 tests passing (3 skipped)
 ├── 148 tests (Phase 0 - core contracts)
 ├── 51 tests (Phase 1 - voice model)
 ├── 78 tests (Phase 1 - person reference classifier)
@@ -148,10 +150,11 @@ The 937 UNCLEAR count in the corpus confirms this middle path matters — silent
 ├── 78 tests (Phase 2 - locale spelling check)
 ├── 33 tests (Phase 2 - brand names check)
 ├── 40 tests (Phase 2 - keywords check)
-├── 52 tests (Phase 2 - structure check)
+├── 54 tests (Phase 2 - structure check)
 ├── 67 tests (Phase 3 - brief agent)
 ├── 17 tests (Phase 4a - orchestrator)
-└── 42 tests (Phase 4a - apply layer)
+├── 42 tests (Phase 4a - apply layer)
+└── 58 tests (Phase 4b - formatting resolver + hints)
 ```
 
 ## Phase 2 Deliverables
@@ -622,9 +625,11 @@ This principle ensures the deterministic layer's value: 100% consistency for aut
 
 **Metadata labels in brief sections:** Keyword-group labels ("Main keywords", "Support keywords", etc.) are currently stored as brief sections by the xlsx parser and filtered per-check via `is_metadata_label()`. Cleaner long-term fix: brief parser should not put them in sections at all. Not urgent — filtering works correctly.
 
-**docx_reader table ordering:** `docx_reader` places all tables at the end of the element list rather than their true document position (due to python-docx iterating `doc.paragraphs` then `doc.tables` separately). `gdoc_reader` preserves correct order. Currently harmless (checks operate per-element), but this could cause offset errors in the apply layer for table-adjacent edits. Revisit if table-boundary edits misbehave.
-
 **Heading capitalization coverage:** 15 of 17 brands have no `headings.capitalization` standard set, so heading-case is unchecked for them (check skips gracefully). This is the safe default — guessing wrong corrupts headings, as the Koifortune `sentence_case` bug showed. If heading-case enforcement is wanted for more brands, derive each brand's standard from its corpus (the 89.5%/83.5% counting method) rather than assuming.
+
+### Known Edge Cases (Documented Behavior)
+
+**Brand + title-case coordination gap (1.8% of headings, 7/382 in corpus):** When a heading has BOTH a wrong brand casing AND other lowercase words (e.g., "How to Download Koifortune on iOS"), `brand_names` auto-fixes the brand (Koifortune→KoiFortune) but the title-case fix becomes a PROPOSAL (the headings check backs off when it detects a brand, because its own title-casing would produce "Koi Fortune" not "KoiFortune"). Result: brand fixed, other words flagged for manual title-casing. This is correct conservative behavior, not a bug — the editor applies the title-case proposal. Fixing it would require order-dependent cross-check coordination (title-case re-runs on post-brand text), not worth it for 1.8%.
 
 ## Phase 3 Deliverables
 
@@ -1057,7 +1062,32 @@ Corpus validation revealed `koifortune.yaml` was misconfigured with `sentence_ca
 
 This is another instance of the KEY LESSON: corpus validation catches config bugs that pass all unit tests.
 
-**Stage 4 (Pending):** Wire into `run_pitboss.py` with `--gdoc` flag.
+**Stage 4: Unified CLI (Complete)**
+
+`run_pitboss.py` now supports both local .docx and Google Docs via unified entry point:
+```bash
+python run_pitboss.py --article article.docx --brand koifortune
+python run_pitboss.py --gdoc "1abc123..." --brand koifortune
+```
+
+**Key fixes during Stage 4:**
+- **docx_reader true table ordering**: Fixed to iterate `doc.element.body` children in document order (was processing `doc.paragraphs` then `doc.tables` separately, placing tables at end). Tables now at correct indices matching gdoc_reader.
+- **_check_outro trailing empty paragraphs**: Now skips trailing empty paragraphs when finding last content element. Prevents false positives from blank_rows insertion or conversion cruft.
+
+**Parity Verification (same source through both paths):**
+```
+                 DOCX    GDOC    Match?
+Elements:         212     212    YES
+Table indices:   [12, 56, 72, 180]  [12, 56, 72, 180]  YES
+Findings:          62      62    YES
+  headings:        46      46    YES
+  locale_spelling:  6       6    YES
+  voice.third_person: 10    10   YES
+```
+
+**Auto-fix path verified**: Created test doc with 5 lowercase headings + 3 brand misspellings → both paths applied 7 auto-fixes identically, producing identical corrected output.
+
+**PHASE 4b COMPLETE.** Google Docs fully integrated: read/write/comments, unified CLI, parity verified across both paths. 878 tests passing.
 
 ---
-*Last updated: Phase 4b Stage 3 complete — Google Docs read/write/comments + tables working. Koifortune heading config fixed (sentence_case → title_case per corpus). 818 tests passing.*
+*Last updated: Phase 4b complete — unified CLI (--article / --gdoc), docx_reader true table ordering fixed, parity verified (62/62 findings, identical structure). 878 tests passing.*
