@@ -1,0 +1,885 @@
+# Writer Comments
+
+
+## KoiFortune Australia: Detailed Casino and Sportsbook Review
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 3
+
+**Original:** "KoiFortune Australia: Detailed Casino and Sportsbook Review"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 3
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 5
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 7
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [WARNING] locale_spelling
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 9
+
+**Original:** "license"
+
+**Issue:** Possible british spelling change: 'license' → 'licence'. British uses 'licence' (noun) but 'license' (verb). Context determines spelling.
+
+**Suggestion:** "licence"
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 9
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 11
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 11
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [WARNING] locale_spelling
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 13
+
+**Original:** "License"
+
+**Issue:** Possible british spelling change: 'License' → 'Licence'. British uses 'licence' (noun) but 'license' (verb). Context determines spelling.
+
+**Suggestion:** "Licence"
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 13
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 15
+
+**Original:** "Bonus Banner Info"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 17
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 19
+
+**Original:** "For Games Section"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 21
+
+**Original:** "Registration Process"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 23
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 25
+
+**Original:** "How to Create an Account"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 27
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 29
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 33
+
+**Original:** "Account Verification"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 35
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 39
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 41
+
+**Original:** "KoiFortune Login Process"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 41
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 43
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 45
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 49
+
+**Original:** "Promotions at KoiFortune AU"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 49
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 51
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 53
+
+**Original:** "Casino Welcome Bonus"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 55
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 59
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 63
+
+**Original:** "Betting Welcome Bonus"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 65
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 69
+
+**Original:** "Other Bonuses"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 71
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 75
+
+**Original:** "Mobile App"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 77
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 77
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 79
+
+**Original:** "App for iOS"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 81
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 83
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 85
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 87
+
+**Original:** "App for Android"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 89
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 91
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 93
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 95
+
+**Original:** "KoiFortune Online Casino Games"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 95
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 97
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 97
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 99
+
+**Original:** "Online Pokies"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 101
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 101
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 105
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 107
+
+**Original:** "Providers"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 109
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 113
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 115
+
+**Original:** "Sports Betting"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 117
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 119
+
+**Original:** "Popular Betting Options"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 121
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 123
+
+**Original:** "Types of Bets"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 125
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 127
+
+**Original:** "Popular Sports"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 129
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 131
+
+**Original:** "Betting Odds"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 133
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 135
+
+**Original:** "How to Place a Bet"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 137
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [WARNING] locale_spelling
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 139
+
+**Original:** "check"
+
+**Issue:** Possible british spelling change: 'check' → 'cheque'. 'check' (verb: verify) vs 'cheque' (noun: payment). Only use 'cheque' for financial instrument.
+
+**Suggestion:** "cheque"
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 139
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 141
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 143
+
+**Original:** "Live Section"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 145
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 147
+
+**Original:** "Live Dealers"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 149
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 149
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 153
+
+**Original:** "Live Betting"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 155
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 155
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 157
+
+**Original:** "KoiFortune AU Banking Options"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 157
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 159
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 161
+
+**Original:** "Deposit Methods"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 163
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 165
+
+**Original:** "Withdrawal Methods"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 167
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 169
+
+**Original:** "How to Deposit"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 171
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [WARNING] locale_spelling
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 175
+
+**Original:** "check"
+
+**Issue:** Possible british spelling change: 'check' → 'cheque'. 'check' (verb: verify) vs 'cheque' (noun: payment). Only use 'cheque' for financial instrument.
+
+**Suggestion:** "cheque"
+
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 177
+
+**Original:** "Customer Support"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 179
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 183
+
+**Original:** "KoiFortune Brand License"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [WARNING] locale_spelling
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 183
+
+**Original:** "License"
+
+**Issue:** Possible british spelling change: 'License' → 'Licence'. British uses 'licence' (noun) but 'license' (verb). Context determines spelling.
+
+**Suggestion:** "Licence"
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 183
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 185
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 187
+
+**Original:** "Responsible Gaming"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 189
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 191
+
+**Original:** "Safety & Fair Play"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 193
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 195
+
+**Original:** "KoiFortune FAQ"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 195
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 197
+
+**Original:** "Can I Join KoiFortune.com in Australia?"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 199
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [SUGGESTION] headings
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 201
+
+**Original:** "Is KoiFortune Legit?"
+
+**Issue:** Add a blank line before this heading for better readability. Headings should be visually separated from preceding content.
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 201
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+### [WARNING] locale_spelling
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 203
+
+**Original:** "license"
+
+**Issue:** Possible british spelling change: 'license' → 'licence'. British uses 'licence' (noun) but 'license' (verb). Context determines spelling.
+
+**Suggestion:** "licence"
+
+
+### [WARNING] brand_names
+**Location:** In section 'KoiFortune Australia: Detailed Casino and Sportsbook Review', element 203
+
+**Original:** "KoiFortune"
+
+**Issue:** Competitor brand 'KoiFortune' mentioned. Per §9, other operators should not appear unless in brief keywords.
+
+
+---
+**Total:** 108 comments
+- Warnings: 71
+- Suggestions: 37

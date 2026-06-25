@@ -9,11 +9,14 @@ No auto-fix or proposed replacements - detection only.
 """
 
 from __future__ import annotations
+import logging
 import re
 from dataclasses import dataclass
 from typing import Any, Optional
 
 from core.check_base import DeterministicCheck, register_check
+
+logger = logging.getLogger(__name__)
 from core.document import Document, Paragraph
 from core.finding import Finding, FindingFactory, Category
 
@@ -145,12 +148,18 @@ class StopWordsCheck(DeterministicCheck):
         # Get stop_words config with fallback to empty object
         stop_words_cfg = getattr(standards, 'stop_words', None)
 
-        # Build hard patterns (fallback to empty list if not configured)
+        # Build hard patterns (validate type - must be list, fallback to empty)
         hard_list = getattr(stop_words_cfg, 'hard', []) if stop_words_cfg else []
+        if not isinstance(hard_list, list):
+            logger.warning(f"stop_words.hard is {type(hard_list).__name__}, expected list - ignoring")
+            hard_list = []
         self._hard_patterns = self._compile_patterns(hard_list)
 
-        # Build soft patterns (fallback to empty list if not configured)
+        # Build soft patterns (validate type - must be list, fallback to empty)
         soft_list = getattr(stop_words_cfg, 'soft', []) if stop_words_cfg else []
+        if not isinstance(soft_list, list):
+            logger.warning(f"stop_words.soft is {type(soft_list).__name__}, expected list - ignoring")
+            soft_list = []
         self._soft_patterns = self._compile_patterns(soft_list)
 
         self._patterns_built = True
