@@ -186,6 +186,11 @@ class HeadingsCheck(DeterministicCheck):
         h1_count = 0
         prev_level: Optional[int] = None
 
+        # Get headings config with fallback
+        headings_cfg = getattr(standards, 'headings', None)
+        no_question_marks = getattr(headings_cfg, 'no_question_marks', True) if headings_cfg else True
+        descriptive_required = getattr(headings_cfg, 'descriptive_required', False) if headings_cfg else False
+
         for element in document.elements:
             if isinstance(element, Heading):
                 # Sub-check 1: Blank line before heading
@@ -194,7 +199,7 @@ class HeadingsCheck(DeterministicCheck):
                 )
 
                 # Sub-check 2: Question mark
-                if standards.headings.no_question_marks:
+                if no_question_marks:
                     findings.extend(
                         self._check_question_mark(element, faq_section_offsets, document)
                     )
@@ -205,7 +210,7 @@ class HeadingsCheck(DeterministicCheck):
                 )
 
                 # Sub-check 4: Descriptive heading
-                if standards.headings.descriptive_required:
+                if descriptive_required:
                     findings.extend(
                         self._check_descriptive(element, document)
                     )

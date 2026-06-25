@@ -136,7 +136,7 @@ def run_docx_pipeline(
 
     # 4. Load standards
     logger.info(f"Loading standards for brand: {brand_id or '_defaults'}")
-    standards = _load_standards(brand_id)
+    standards, brand_warning = _load_standards(brand_id)
 
     # 5. Run core pipeline
     orch_result, apply_result = _run_pipeline_core(document, standards, brief)
@@ -172,13 +172,14 @@ def run_docx_pipeline(
         brief,
         str(article_path),
         str(brief_path) if brief_path else None,
+        brand_warning=brand_warning,
     )
     summary_path = output_dir / "summary.md"
     summary_path.write_text(summary_to_markdown(summary), encoding='utf-8')
     logger.info(f"Wrote summary to: {summary_path}")
 
     # Print summary to console
-    _print_docx_summary(article_path, summary, corrected_path, comments_path, summary_path)
+    _print_docx_summary(article_path, summary, corrected_path, comments_path, summary_path, brand_warning)
 
     return corrected_path, comments_path, summary_path
 
@@ -224,7 +225,7 @@ def run_gdoc_pipeline(
 
     # 3. Load standards
     logger.info(f"Loading standards for brand: {brand_id or '_defaults'}")
-    standards = _load_standards(brand_id)
+    standards, brand_warning = _load_standards(brand_id)
 
     # 4. Run core pipeline
     orch_result, apply_result = _run_pipeline_core(document, standards, brief)
@@ -272,7 +273,7 @@ def run_gdoc_pipeline(
         logger.info("Skipping comment posting (--skip-comments)")
 
     # Print summary
-    _print_gdoc_summary(doc_id, document, orch_result, apply_result, comment_count, corrected_url)
+    _print_gdoc_summary(doc_id, document, orch_result, apply_result, comment_count, corrected_url, brand_warning)
 
     return corrected_url, apply_result.applied_count, comment_count
 
@@ -323,23 +324,33 @@ def _parse_brief(
         return brief
 
 
-def _load_standards(brand_id: Optional[str]) -> Standards:
-    """Load standards for a brand (or defaults)."""
+def _load_standards(brand_id: Optional[str]) -> tuple[Standards, Optional[str]]:
+    """
+    Load standards for a brand (or defaults).
+
+    Returns:
+        Tuple of (Standards, warning_message or None).
+        Warning is set when brand was requested but config doesn't exist.
+    """
     brands_dir = Path("brands")
     if not brands_dir.exists():
         logger.warning("brands/ directory not found, using default standards")
-        return Standards()
+        return Standards(), "brands/ directory not found - using defaults"
 
     engine = StandardsEngine(brands_dir=brands_dir)
 
     if brand_id:
-        try:
-            return engine.load(brand_id)
-        except FileNotFoundError:
-            logger.warning(f"Brand '{brand_id}' not found, using defaults")
-            return engine.load_defaults()
+        if engine.has_brand(brand_id):
+            # Brand config exists - load it
+            return engine.load(brand_id), None
+        else:
+            # Brand requested but not configured - use defaults, warn user
+            warning = f"Brand '{brand_id}' not configured - using defaults"
+            logger.warning(warning)
+            return engine.load_defaults(), warning
     else:
-        return engine.load_defaults()
+        # No brand specified - intentional use of defaults
+        return engine.load_defaults(), None
 
 
 def _print_docx_summary(
@@ -348,11 +359,15 @@ def _print_docx_summary(
     corrected_path: Path,
     comments_path: Path,
     summary_path: Path,
+    brand_warning: Optional[str] = None,
 ) -> None:
     """Print summary for .docx pipeline."""
     print("\n" + "=" * 60)
     print("PITBOSS RUN COMPLETE")
     print("=" * 60)
+    if brand_warning:
+        print(f"WARNING: {brand_warning}")
+        print()
     print(f"Article: {article_path.name}")
     print(f"Word count: ~{summary.word_count:,}")
     print(f"\nAuto-fixes applied: {summary.total_auto_applied}")
@@ -372,11 +387,15 @@ def _print_gdoc_summary(
     apply_result: ApplyResult,
     comment_count: int,
     corrected_url: str,
+    brand_warning: Optional[str] = None,
 ) -> None:
     """Print summary for Google Docs pipeline."""
     print("\n" + "=" * 70)
     print("GOOGLE DOCS PIPELINE COMPLETE")
     print("=" * 70)
+    if brand_warning:
+        print(f"WARNING: {brand_warning}")
+        print()
     print(f"Source doc:       {doc_id}")
     print(f"Title:            {document.title}")
     print(f"Word count:       ~{len(document.full_text().split()):,}")

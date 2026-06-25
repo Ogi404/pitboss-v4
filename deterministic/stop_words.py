@@ -142,12 +142,15 @@ class StopWordsCheck(DeterministicCheck):
         if self._patterns_built:
             return
 
-        # Build hard patterns
-        hard_list = standards.stop_words.hard
+        # Get stop_words config with fallback to empty object
+        stop_words_cfg = getattr(standards, 'stop_words', None)
+
+        # Build hard patterns (fallback to empty list if not configured)
+        hard_list = getattr(stop_words_cfg, 'hard', []) if stop_words_cfg else []
         self._hard_patterns = self._compile_patterns(hard_list)
 
-        # Build soft patterns
-        soft_list = standards.stop_words.soft
+        # Build soft patterns (fallback to empty list if not configured)
+        soft_list = getattr(stop_words_cfg, 'soft', []) if stop_words_cfg else []
         self._soft_patterns = self._compile_patterns(soft_list)
 
         self._patterns_built = True

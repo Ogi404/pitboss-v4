@@ -76,6 +76,10 @@ class RunSummary:
     run_timestamp: str = ""
     """ISO timestamp of the run."""
 
+    # Warnings
+    brand_warning: Optional[str] = None
+    """Warning about brand config (e.g., brand not configured)."""
+
     @property
     def total_findings(self) -> int:
         """Total findings (auto + proposals)."""
@@ -95,6 +99,7 @@ def generate_summary(
     brief: Optional[Any],
     article_path: str,
     brief_path: Optional[str] = None,
+    brand_warning: Optional[str] = None,
 ) -> RunSummary:
     """
     Generate a run summary from pipeline results.
@@ -159,6 +164,7 @@ def generate_summary(
         brief_task=brief_task,
         brief_type=brief_type,
         run_timestamp=timestamp,
+        brand_warning=brand_warning,
     )
 
 
@@ -181,6 +187,8 @@ def summary_to_markdown(summary: RunSummary) -> str:
     lines.append(f"**Word Count:** {summary.word_count:,}")
     lines.append(f"**Elements:** {summary.element_count}")
     lines.append(f"**Run Time:** {summary.run_timestamp}")
+    if summary.brand_warning:
+        lines.append(f"**Warning:** {summary.brand_warning}")
     lines.append("")
 
     # Brief info
@@ -267,4 +275,5 @@ def summary_to_dict(summary: RunSummary) -> dict:
         "brief_task": summary.brief_task,
         "brief_type": summary.brief_type,
         "run_timestamp": summary.run_timestamp,
+        "brand_warning": summary.brand_warning,
     }
