@@ -2,7 +2,9 @@
 
 ## Current Phase
 
-**Phase 4b: Complete** - Google Docs Integration — unified CLI, parity verified, 878 tests
+**Phase 5: Complete** - Judgment Layer — consistency.py only (validated, shipped), sentence_complexity.py (attempted, cut)
+
+**Phase 4b: Complete** - Google Docs Integration — unified CLI, parity verified
 
 **Phase 4a: Complete** - Output Pipeline Core (Local DOCX) — all 5 artifact verification bugs fixed
 
@@ -59,7 +61,7 @@ The Check interface with registry:
 | 3 | Brief agent (confidence-scored extraction) | **Complete** |
 | 4a | Output pipeline core (local DOCX) | **Complete** |
 | 4b | Google Docs integration | **Complete** (unified CLI, parity verified) |
-| 5 | Judgment layer (the 5%) | Pending |
+| 5 | Judgment layer (the 5%) | **Complete** (consistency.py shipped, sentence_complexity cut) |
 | 6 | Learning loop (feedback calibration) | Pending |
 | 7 | Fact-checker (claim-driven verification) | Pending |
 
@@ -138,7 +140,7 @@ The 937 UNCLEAR count in the corpus confirms this middle path matters — silent
 ## Test Status
 
 ```
-878 tests passing (3 skipped)
+914 tests passing (3 skipped)
 ├── 148 tests (Phase 0 - core contracts)
 ├── 51 tests (Phase 1 - voice model)
 ├── 78 tests (Phase 1 - person reference classifier)
@@ -154,7 +156,8 @@ The 937 UNCLEAR count in the corpus confirms this middle path matters — silent
 ├── 67 tests (Phase 3 - brief agent)
 ├── 17 tests (Phase 4a - orchestrator)
 ├── 42 tests (Phase 4a - apply layer)
-└── 58 tests (Phase 4b - formatting resolver + hints)
+├── 58 tests (Phase 4b - formatting resolver + hints)
+└── 23 tests (Phase 5 - consistency check)
 ```
 
 ## Phase 2 Deliverables
@@ -1087,7 +1090,111 @@ Findings:          62      62    YES
 
 **Auto-fix path verified**: Created test doc with 5 lowercase headings + 3 brand misspellings → both paths applied 7 auto-fixes identically, producing identical corrected output.
 
-**PHASE 4b COMPLETE.** Google Docs fully integrated: read/write/comments, unified CLI, parity verified across both paths. 878 tests passing.
+**PHASE 4b COMPLETE.** Google Docs fully integrated: read/write/comments, unified CLI, parity verified across both paths.
+
+## Phase 5 Deliverables
+
+### Judgment Layer (Complete — consistency.py only)
+
+**Files Created:**
+- `judgment/__init__.py` - Package init
+- `judgment/llm_client.py` - Shared, provider-agnostic LLM client (~245 lines)
+- `judgment/consistency.py` - Numerical claim consistency check (~390 lines)
+- `tests/test_consistency.py` - 23 comprehensive tests
+
+**Shipped: `consistency.py` — Numerical Claim Consistency**
+
+Detects internal contradictions where the same claim is stated with different values (e.g., "$4000 welcome bonus" in intro vs "$5000" in spec table).
+
+**Design:**
+
+| Component | Purpose |
+|-----------|---------|
+| **Pre-filter** | Extract claims with category+subtype (BONUS_AMOUNT.welcome, WAGERING.generic, etc.). Only pairs same-type + different-value. Avoids false pairs (welcome bonus vs reload bonus). |
+| **LLM Gate** | Pairs that pass pre-filter sent to LLM for final verdict: CONFLICT (same claim, inconsistent) or DIFFERENT (legitimately separate claims). |
+| **Output** | CONFLICT → proposal with reasoning. DIFFERENT/UNCLEAR → dropped. |
+
+**Key Feature: Subtype Clustering**
+
+Claims are extracted with fine-grained subtypes to prevent false pairing:
+
+| Category | Subtypes |
+|----------|----------|
+| BONUS_AMOUNT | welcome, reload, no_deposit, cashback, generic |
+| BONUS_PERCENT | welcome, reload, generic |
+| WAGERING | slots, table_games, generic |
+| GAME_COUNT | slots, table_games, live, total |
+| MIN_MAX | deposit_min, deposit_max, withdrawal_min, withdrawal_max |
+
+"100% welcome bonus" and "50% reload bonus" → different subtypes → NOT paired → no LLM call.
+
+**Live Validation Triad (Real gpt-4o-mini calls):**
+
+| Test | Input | Expected | Result |
+|------|-------|----------|--------|
+| True Positive | $4000 vs $5000 welcome bonus | CONFLICT | **CONFLICT** ✓ |
+| True Negative | $100 min vs $500 max welcome | DIFFERENT | **DIFFERENT** ✓ |
+| Clean Article | Consistent values throughout | No pairs, no LLM call | **$0.00** ✓ |
+
+**Cost:** ~$0.00006 per LLM call (gpt-4o-mini). Most articles: $0 (no potential conflicts detected by pre-filter).
+
+**Shared LLM Client (`judgment/llm_client.py`):**
+
+Provider-agnostic client reusable by Phase 7 fact-checker and future judgment checks.
+
+| Config | Env Var | Default |
+|--------|---------|---------|
+| Provider | `PITBOSS_LLM_PROVIDER` | `openai` |
+| Model | `PITBOSS_LLM_MODEL` | `gpt-4o-mini` |
+| Timeout | `PITBOSS_LLM_TIMEOUT` | 30s |
+| API Key | `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` | (required) |
+
+**Graceful Degradation:** API errors → return `None` → calling check drops findings rather than crashing pipeline.
+
+**.env Discipline:** API keys stored in `.env` file (gitignored, loaded automatically by `llm_client.py`). Never committed to repo.
 
 ---
-*Last updated: Phase 4b complete — unified CLI (--article / --gdoc), docx_reader true table ordering fixed, parity verified (62/62 findings, identical structure). 878 tests passing.*
+
+### Cut: `sentence_complexity.py` — Regex Clause-Counting Doesn't Work
+
+**Attempted:** Statistical sentence complexity outlier detection. Flag sentences >2.0 std devs above article mean AND (>=40 words OR >=3 clause markers).
+
+**Why It Was Cut:**
+
+Eyeball validation on real corpus revealed **all 3 triggered sentences were false alarms**:
+
+| Sentence | Words | "Clauses" | Actual Problem |
+|----------|-------|-----------|----------------|
+| "...fast, reliable, and every bit **as** sharp **as** the desktop — only with..." | 27 | 3 | "as...as" comparative counted as 2 clauses (0 real subordinate clauses) |
+| "That's where 20Bet's live betting section shines, giving players a chance to place wagers **while** the match is unfolding." | 19 | 3 | "That's" demonstrative counted as relative pronoun. 19 words flagged as "outlier"! |
+| "20Bet Casino brings together what most punters look for: [list of 4 features] **that** works just **as** well **as** on desktop." | 39 | 3 | Colon-list structure is easy to read. "as...as" comparative counted as 2 clauses. |
+
+**Root Cause:** Regex can't distinguish grammatical roles:
+- `as X as Y` (comparative, trivial to parse) vs `as he walked` (subordinate clause)
+- `, though,` (adverb/interjection) vs `though it was late` (subordinating conjunction)
+- `That's where` (demonstrative) vs `thing that broke` (relative pronoun)
+
+**Fix Would Require:** NLP dependency parsing (spaCy or similar) to identify true subordinate clause boundaries. Not a quick regex fix.
+
+**Decision:** Cut the check. A check that flags a 19-word sentence as a "complexity outlier" would erode trust in the tool. Better no check than a false-alarming one.
+
+**If Revisited:** Only worth building if real usage shows run-on sentences are a frequent miss AND we're willing to add spaCy dependency for proper clause detection.
+
+---
+
+### KEY LESSON: Validate Judgment Checks on Actual Text, Not Statistics
+
+**Unit tests passed. Trigger-rate stats (0.7%, 0.8 per article) looked right. Reading the actual flagged sentences revealed the failure.**
+
+The eyeball test caught what the numbers hid:
+- A 19-word sentence was flagged because the article's OTHER sentences were short, making 19 words a "statistical outlier"
+- Clean marketing prose with parallel structure was flagged because commas and "as...as" comparatives matched clause-marker regex
+
+**Principle for all judgment checks:** Surface actual triggered text for human review before shipping. Summary statistics can hide systematic misfires.
+
+---
+
+**PHASE 5 COMPLETE.** Judgment layer ships with `consistency.py` only — validated and trustworthy. `sentence_complexity.py` attempted, eyeball-tested, cut (regex clause-counting misfires on clean prose). 914 tests passing.
+
+---
+*Last updated: Phase 5 complete — consistency.py shipped (numerical claim conflicts, LLM-gated, ~$0.00006/call), sentence_complexity.py cut (regex clause-counting doesn't distinguish grammatical roles). 914 tests. Active checks: 9 deterministic + 1 judgment.*
