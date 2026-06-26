@@ -46,6 +46,7 @@ nul
 
 # Run outputs (per-run artifacts, not code)
 output_runs/
+verify_findings.py
 
 # Pip install artifacts
 =*
