@@ -16,6 +16,7 @@ Usage:
 
 from __future__ import annotations
 import argparse
+import json
 import logging
 import sys
 from datetime import datetime
@@ -186,6 +187,20 @@ def run_docx_pipeline(
     summary_path.write_text(summary_to_markdown(summary), encoding='utf-8')
     logger.info(f"Wrote summary to: {summary_path}")
 
+    # 10. Write findings.json (Phase 6 learning loop data)
+    timestamp = output_dir.name  # Already a timestamp string
+    findings_path = output_dir / "findings.json"
+    _write_findings_json(
+        output_path=findings_path,
+        orch_result=orch_result,
+        apply_result=apply_result,
+        doc_id=str(article_path),
+        timestamp=timestamp,
+        brand_id=brand_id,
+        brand_warning=combined_warning,
+    )
+    logger.info(f"Wrote findings to: {findings_path}")
+
     # Print summary to console
     _print_docx_summary(article_path, summary, corrected_path, comments_path, summary_path, combined_warning)
 
@@ -257,27 +272,24 @@ def run_gdoc_pipeline(
     )
     logger.info(f"Corrected document: {corrected_url}")
 
-    # 7. Post comments for proposals
-    comment_count = 0
-    if not skip_comments:
-        all_proposals = list(orch_result.proposals) + list(apply_result.downgraded)
-        if all_proposals:
-            logger.info(f"Drafting {len(all_proposals)} comments...")
-            drafted = draft_comments(all_proposals, document)
+    # 7. Draft comments for proposals (once, reused for posting + saving)
+    all_proposals = list(orch_result.proposals) + list(apply_result.downgraded)
+    drafted = draft_comments(all_proposals, document) if all_proposals else []
 
-            # Post to the CORRECTED doc
-            corrected_doc_id = extract_doc_id(corrected_url)
-            logger.info(f"Posting comments to corrected doc...")
+    # 8. Post comments to Google Doc
+    comment_id_map: dict[str, str] = {}
+    if not skip_comments and drafted:
+        corrected_doc_id = extract_doc_id(corrected_url)
+        logger.info(f"Posting {len(drafted)} comments to corrected doc...")
 
-            # Use batch for efficiency
-            if len(drafted) > 10:
-                comment_count = post_comments_batch(corrected_doc_id, drafted)
-            else:
-                comment_ids = post_comments(corrected_doc_id, drafted)
-                comment_count = len(comment_ids)
+        # Use batch for efficiency (returns finding_id -> comment_id mapping)
+        if len(drafted) > 10:
+            comment_id_map = post_comments_batch(corrected_doc_id, drafted)
+        else:
+            comment_id_map = post_comments(corrected_doc_id, drafted)
 
-            logger.info(f"Posted {comment_count} comments")
-    else:
+        logger.info(f"Posted {len(comment_id_map)} comments")
+    elif skip_comments:
         logger.info("Skipping comment posting (--skip-comments)")
 
     # Collect all warnings (brand + check warnings)
@@ -288,8 +300,49 @@ def run_gdoc_pipeline(
         all_warnings.append(warning)
     combined_warning = " | ".join(all_warnings) if all_warnings else None
 
+    # 9. Create local output directory and write artifacts
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    output_dir = Path("output_runs") / f"gdoc_{timestamp}"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    logger.info(f"Output directory: {output_dir}")
+
+    # Write comments.md
+    comments_path = output_dir / "comments.md"
+    comments_path.write_text(comments_to_markdown(drafted), encoding='utf-8')
+    logger.info(f"Wrote {len(drafted)} comments to: {comments_path}")
+
+    # Write summary.md
+    summary = generate_summary(
+        orch_result,
+        apply_result,
+        drafted,
+        document,
+        brief,
+        doc_id,
+        str(brief_path) if brief_path else None,
+        brand_warning=combined_warning,
+    )
+    summary_path = output_dir / "summary.md"
+    summary_path.write_text(summary_to_markdown(summary), encoding='utf-8')
+    logger.info(f"Wrote summary to: {summary_path}")
+
+    # Write findings.json (Phase 6 learning loop data with comment_ids)
+    findings_path = output_dir / "findings.json"
+    _write_findings_json(
+        output_path=findings_path,
+        orch_result=orch_result,
+        apply_result=apply_result,
+        doc_id=doc_id,
+        timestamp=timestamp,
+        brand_id=brand_id,
+        brand_warning=combined_warning,
+        comment_id_map=comment_id_map,
+    )
+    logger.info(f"Wrote findings to: {findings_path}")
+
     # Print summary
-    _print_gdoc_summary(doc_id, document, orch_result, apply_result, comment_count, corrected_url, combined_warning)
+    comment_count = len(comment_id_map)
+    _print_gdoc_summary(doc_id, document, orch_result, apply_result, comment_count, corrected_url, combined_warning, output_dir)
 
     return corrected_url, apply_result.applied_count, comment_count
 
@@ -297,6 +350,68 @@ def run_gdoc_pipeline(
 # =============================================================================
 # SHARED HELPERS
 # =============================================================================
+
+def _write_findings_json(
+    output_path: Path,
+    orch_result: OrchestratorResult,
+    apply_result: ApplyResult,
+    doc_id: str,
+    timestamp: str,
+    brand_id: Optional[str],
+    brand_warning: Optional[str],
+    comment_id_map: Optional[dict[str, str]] = None,
+) -> None:
+    """
+    Write findings.json with run header and all findings.
+
+    This persists the raw signal for Phase 6 learning loop:
+    - All findings with stable IDs
+    - Run metadata for correlation
+    - comment_id for proposals posted to Google Docs (enables comment resolution tracking)
+
+    Args:
+        output_path: Where to write findings.json
+        orch_result: Orchestrator result with all findings
+        apply_result: Apply result with application stats
+        doc_id: Document identifier (file path or Google Doc ID)
+        timestamp: Run timestamp
+        brand_id: Brand used (if any)
+        brand_warning: Brand warning message (if any)
+        comment_id_map: Optional dict mapping finding_id -> Drive comment_id
+    """
+    # Combine all findings
+    all_findings = list(orch_result.findings)
+    comment_id_map = comment_id_map or {}
+
+    # Serialize findings with comment_id where available
+    findings_data = []
+    for f in all_findings:
+        f_dict = f.to_dict()
+        # Add comment_id if this finding was posted as a comment
+        f_dict["comment_id"] = comment_id_map.get(f.finding_id)
+        findings_data.append(f_dict)
+
+    run_data = {
+        "run_header": {
+            "doc_id": doc_id,
+            "timestamp": timestamp,
+            "brand": brand_id,
+            "brand_warning": brand_warning,
+            "schema_version": "1.0",
+        },
+        "stats": {
+            "total_findings": len(all_findings),
+            "auto_applied": apply_result.applied_count,
+            "proposals": len(orch_result.proposals),
+            "downgraded": apply_result.downgraded_count,
+            "skipped": apply_result.skipped_count,
+            "comments_posted": len(comment_id_map),
+        },
+        "findings": findings_data,
+    }
+
+    output_path.write_text(json.dumps(run_data, indent=2), encoding='utf-8')
+
 
 def _parse_brief(
     brief_path: Optional[Path],
@@ -404,6 +519,7 @@ def _print_gdoc_summary(
     comment_count: int,
     corrected_url: str,
     brand_warning: Optional[str] = None,
+    output_dir: Optional[Path] = None,
 ) -> None:
     """Print summary for Google Docs pipeline."""
     print("\n" + "=" * 70)
@@ -422,6 +538,8 @@ def _print_gdoc_summary(
     print(f"Comments posted:  {comment_count}")
     print()
     print(f"Corrected doc:    {corrected_url}")
+    if output_dir:
+        print(f"Local artifacts:  {output_dir}/")
     print()
     print("Next steps:")
     print("  1. Open the corrected doc in Google Docs")

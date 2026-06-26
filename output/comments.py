@@ -21,6 +21,9 @@ logger = logging.getLogger(__name__)
 class DraftedComment:
     """A drafted writer comment."""
 
+    finding_id: str
+    """Stable ID of the source Finding (for linking back to comment_id)."""
+
     section: Optional[str]
     """Section heading title (if identifiable)."""
 
@@ -104,6 +107,7 @@ def draft_comments(
             issue = f"Flagged by {finding.check_name}"
 
         comments.append(DraftedComment(
+            finding_id=finding.finding_id,
             section=section_title,
             paragraph_index=para_idx if para_idx is not None else 0,
             location_desc=loc_desc,
@@ -196,6 +200,7 @@ def comments_to_json(comments: list[DraftedComment]) -> list[dict]:
     """
     return [
         {
+            "finding_id": c.finding_id,
             "section": c.section,
             "paragraph_index": c.paragraph_index,
             "location_desc": c.location_desc,

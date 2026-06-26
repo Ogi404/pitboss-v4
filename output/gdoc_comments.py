@@ -31,7 +31,7 @@ MAX_ANCHOR_LENGTH = 100
 def post_comments(
     doc_id: str,
     comments: list[DraftedComment],
-) -> list[str]:
+) -> dict[str, str]:
     """
     Post DraftedComments as Google Drive comments.
 
@@ -43,10 +43,10 @@ def post_comments(
         comments: List of DraftedComment objects from draft_comments()
 
     Returns:
-        List of created comment IDs
+        Dict mapping finding_id -> comment_id for successfully posted comments
     """
     service = get_drive_service()
-    posted_ids = []
+    finding_to_comment: dict[str, str] = {}
 
     for comment in comments:
         body = {
@@ -68,21 +68,21 @@ def post_comments(
                 fields='id'
             ).execute()
 
-            posted_ids.append(result['id'])
+            finding_to_comment[comment.finding_id] = result['id']
 
         except Exception as e:
             logger.warning(f"Failed to post comment for {comment.check_name}: {e}")
             # Continue with other comments
 
-    logger.info(f"Posted {len(posted_ids)}/{len(comments)} comments to doc {doc_id}")
-    return posted_ids
+    logger.info(f"Posted {len(finding_to_comment)}/{len(comments)} comments to doc {doc_id}")
+    return finding_to_comment
 
 
 def post_comments_batch(
     doc_id: str,
     comments: list[DraftedComment],
     batch_size: int = 10,
-) -> int:
+) -> dict[str, str]:
     """
     Post comments using batch API with rate limiting.
 
@@ -95,29 +95,29 @@ def post_comments_batch(
         batch_size: Number of comments per batch (default 10)
 
     Returns:
-        Number of comments successfully posted
+        Dict mapping finding_id -> comment_id for successfully posted comments
     """
     import time
 
     service = get_drive_service()
-    total_success = 0
-    total_failure = 0
+    finding_to_comment: dict[str, str] = {}
 
     # Split into batches
     for batch_start in range(0, len(comments), batch_size):
         batch_comments = comments[batch_start:batch_start + batch_size]
 
-        # Track success/failure for this batch
-        success_count = 0
-        failure_count = 0
+        # Map request_id to finding_id for callback
+        request_id_to_finding: dict[str, str] = {}
+        for i, comment in enumerate(batch_comments):
+            request_id_to_finding[str(i)] = comment.finding_id
 
         def callback(request_id, response, exception):
-            nonlocal success_count, failure_count
             if exception:
                 logger.warning(f"Batch comment failed: {exception}")
-                failure_count += 1
             else:
-                success_count += 1
+                finding_id = request_id_to_finding.get(request_id)
+                if finding_id and response:
+                    finding_to_comment[finding_id] = response.get('id', '')
 
         # Create batch request
         batch = service.new_batch_http_request(callback=callback)
@@ -146,18 +146,15 @@ def post_comments_batch(
         # Execute batch
         batch.execute()
 
-        total_success += success_count
-        total_failure += failure_count
-
         # Rate limit: wait between batches to avoid hitting API limits
         if batch_start + batch_size < len(comments):
             time.sleep(1.0)  # 1 second pause between batches
 
     logger.info(
-        f"Batch posted {total_success} comments, {total_failure} failures "
+        f"Batch posted {len(finding_to_comment)}/{len(comments)} comments "
         f"to doc {doc_id}"
     )
-    return total_success
+    return finding_to_comment
 
 
 def _format_comment_content(comment: DraftedComment) -> str:

@@ -44,5 +44,8 @@ corpora/**/*.docx
 # Windows reserved names (cannot be added to git)
 nul
 
+# Run outputs (per-run artifacts, not code)
+output_runs/
+
 # Pip install artifacts
 =*
