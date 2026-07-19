@@ -1197,4 +1197,39 @@ The eyeball test caught what the numbers hid:
 **PHASE 5 COMPLETE.** Judgment layer ships with `consistency.py` only — validated and trustworthy. `sentence_complexity.py` attempted, eyeball-tested, cut (regex clause-counting misfires on clean prose). 914 tests passing.
 
 ---
-*Last updated: Phase 5 complete — consistency.py shipped (numerical claim conflicts, LLM-gated, ~$0.00006/call), sentence_complexity.py cut (regex clause-counting doesn't distinguish grammatical roles). 914 tests. Active checks: 9 deterministic + 1 judgment.*
+
+## Pre-Expansion Baseline (2026-07-18)
+
+**Tag:** `pre-expansion-baseline`
+
+**Commit:** `cce6a16` — Baseline before editorial expansion
+
+**New in this baseline:**
+
+### Flask Web UI (`app.py` + `templates/`)
+Two-phase web interface for Pitboss v4:
+- Phase 1: Upload brief → extract keywords, sections, metadata
+- Phase 2: Submit Google Doc ID → run full pipeline, display findings
+- Brief caching for multi-article workflow
+
+### Keyword Check Fixes (Critical Accuracy Bugs)
+Validated against real HellSpin brief + article:
+
+| Bug | Fix | Verified |
+|-----|-----|----------|
+| **Phantom sections** (8 extracted, 0 in brief) | Filter sections matching extracted keywords or keyword table headers | 0 sections (correct) |
+| **"HellSpin MISSING"** (0 count, 28 actual) | Independent word-boundary counting per keyword, `exact_match=True` | 28 occurrences (correct) |
+| **Wrong brand** ("HellSpin login" instead of "HellSpin") | Validate brand against keywords, extract true brand from prefix | "HellSpin" (correct) |
+
+**Keyword counts now exact:**
+- "HellSpin" = 28 (word boundary, not substring)
+- "HellSpins" = 1 (exact match, not variant-inflated 17)
+- All 7 keywords with true counts, correct over/under limit flags
+
+### Tooling
+- `dump_brief.py` — Reusable brief structure dump for debugging
+
+**914 tests passing.** Editorial expansion (Phases 1-6) begins next.
+
+---
+*Last updated: Pre-expansion baseline — Flask web UI, keyword check fixes (independent counting, phantom-section fix, brand-name fix), verified on real HellSpin brief. 914 tests. Editorial expansion begins next.*
