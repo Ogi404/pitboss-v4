@@ -270,7 +270,30 @@ class BriefAgent:
         # Build keywords
         keywords = self._build_keywords(raw.keyword_groups)
 
-        # Build sections
+        # Build sections, filtering out phantom sections that are actually keywords
+        # BUG FIX: Section parser sometimes grabs keyword table rows as sections.
+        # Filter out any "section" that matches an extracted keyword.
+        keyword_strings = {kw.keyword.lower() for kw in keywords.all_keywords}
+
+        # Also filter out keyword table headers that got extracted as sections
+        keyword_header_patterns = {
+            "main keyword", "main keywords", "primary keyword", "primary keywords",
+            "support keyword", "support keywords", "supporting keyword", "supporting keywords",
+            "lsi keyword", "lsi keywords", "secondary keyword", "secondary keywords",
+            "related keyword", "related keywords", "keyword", "keywords",
+        }
+
+        filtered_sections = []
+        for s in raw.sections:
+            heading_lower = s.heading.lower().strip()
+            # Skip if heading matches a keyword
+            if heading_lower in keyword_strings:
+                continue
+            # Skip if heading is a keyword table header
+            if heading_lower in keyword_header_patterns:
+                continue
+            filtered_sections.append(s)
+
         sections = tuple(
             BriefSection(
                 heading=s.heading,
@@ -278,7 +301,7 @@ class BriefAgent:
                 is_required=True,
                 confidence=s.confidence,
             )
-            for s in raw.sections
+            for s in filtered_sections
         )
 
         # Map task to article type
@@ -310,6 +333,10 @@ class BriefAgent:
         # Convert formatting_hints dict to tuple of tuples for frozen dataclass
         formatting_hints = tuple(raw.formatting_hints.items())
 
+        # BUG FIX: Validate brand_name - if it matches a keyword, extract the true brand.
+        # E.g., "HellSpin login" (a keyword) -> "HellSpin" (the brand)
+        brand_name = self._validate_brand_name(raw.brand_name, keywords)
+
         return BriefModel(
             keywords=keywords,
             keywords_confidence=raw.keywords_confidence,
@@ -326,7 +353,7 @@ class BriefAgent:
             links=links,
             links_confidence=raw.links_confidence,
             formatting_hints=formatting_hints,
-            brand_name=raw.brand_name or "",
+            brand_name=brand_name,
             source_path=raw.source_path,
             source_format=raw.source_format,
             raw_data=raw.raw_data,
@@ -368,6 +395,54 @@ class BriefAgent:
             support=tuple(support_kws),
             lsi=tuple(lsi_kws),
         )
+
+    def _validate_brand_name(
+        self,
+        raw_brand: Optional[str],
+        keywords: BriefKeywords,
+    ) -> str:
+        """
+        Validate and clean brand name.
+
+        BUG FIX: If extracted brand matches a keyword (e.g., "HellSpin login"),
+        extract the true brand by finding the common prefix across keywords,
+        or use the first word if it's a multi-word keyword-like brand.
+
+        Args:
+            raw_brand: The raw brand name extracted from brief
+            keywords: The extracted keywords
+
+        Returns:
+            Cleaned brand name
+        """
+        if not raw_brand:
+            return ""
+
+        raw_brand = raw_brand.strip()
+        keyword_strings = {kw.keyword.lower() for kw in keywords.all_keywords}
+
+        # Check if raw brand matches a keyword exactly
+        if raw_brand.lower() in keyword_strings:
+            # Brand is a keyword - try to find the true brand
+            # Strategy: find the common prefix among all keywords that start with
+            # the same word as the raw brand
+            first_word = raw_brand.split()[0]
+
+            # If the first word is also a keyword by itself, use it as brand
+            if first_word.lower() in keyword_strings:
+                return first_word
+
+            # Otherwise, just use the first word (brand names are typically 1 word)
+            return first_word
+
+        # Check if brand contains action words that suggest it's a keyword
+        action_words = {"login", "casino", "online", "app", "bonus", "review", "register"}
+        brand_words = raw_brand.lower().split()
+        if len(brand_words) > 1 and any(w in action_words for w in brand_words[1:]):
+            # Multi-word brand with action word - likely a keyword, use first word
+            return brand_words[0].title()  # Title case for brand
+
+        return raw_brand
 
     def _infer_article_type_from_keywords(
         self, groups: list[RawKeywordGroup]

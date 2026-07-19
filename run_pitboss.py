@@ -19,6 +19,7 @@ import argparse
 import json
 import logging
 import sys
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Any, Union
@@ -27,14 +28,15 @@ from typing import Optional, Any, Union
 import deterministic  # noqa: F401
 
 from core.document import Document
-from core.orchestrator import run_all_checks, OrchestratorResult
+from core.finding import Finding
+from core.orchestrator import run_all_checks, run_checks_by_name, OrchestratorResult
 from core.standards_engine import StandardsEngine, Standards
 from ingest.docx_reader import read_docx
 from ingest.gdoc_reader import read_gdoc
 from ingest.gdoc_auth import extract_doc_id
 from ingest.brief_agent import BriefAgent
 from ingest.brief_model import BriefState, BriefModel
-from output.apply import apply_auto_findings, ApplyResult
+from output.apply import apply_auto_findings, apply_selected_findings, ApplyResult, SelectionApplyResult, SkipReason
 from output.docx_writer import write_docx
 from output.gdoc_writer import write_gdoc
 from output.gdoc_comments import post_comments, post_comments_batch
@@ -58,6 +60,7 @@ def _run_pipeline_core(
     document: Document,
     standards: Standards,
     brief: Optional[BriefModel] = None,
+    enabled_checks: Optional[list[str]] = None,
 ) -> tuple[OrchestratorResult, ApplyResult]:
     """
     Run the core pipeline: checks → apply auto-fixes.
@@ -68,13 +71,18 @@ def _run_pipeline_core(
         document: The document to check
         standards: Brand standards to apply
         brief: Optional brief model
+        enabled_checks: Optional list of check names to run. If None, runs all checks.
 
     Returns:
         Tuple of (orchestrator_result, apply_result)
     """
-    # Run orchestrator (all checks)
-    logger.info("Running checks...")
-    orch_result = run_all_checks(document, standards, voice_model=None, brief=brief)
+    # Run orchestrator (selected checks or all)
+    if enabled_checks:
+        logger.info(f"Running {len(enabled_checks)} selected checks...")
+        orch_result = run_checks_by_name(document, standards, enabled_checks, voice_model=None, brief=brief)
+    else:
+        logger.info("Running all checks...")
+        orch_result = run_all_checks(document, standards, voice_model=None, brief=brief)
     logger.info(
         f"Checks complete: {len(orch_result.findings)} findings "
         f"({len(orch_result.auto_applicable)} auto, {len(orch_result.proposals)} proposals)"
@@ -105,6 +113,7 @@ def run_docx_pipeline(
     brand_id: Optional[str] = None,
     output_dir: Optional[Path] = None,
     task_selection: Optional[str] = None,
+    enabled_checks: Optional[list[str]] = None,
 ) -> tuple[Path, Path, Path]:
     """
     Run the full Pitboss pipeline on a local .docx file.
@@ -115,6 +124,7 @@ def run_docx_pipeline(
         brand_id: Brand identifier for standards (optional)
         output_dir: Output directory (optional, auto-generated if not provided)
         task_selection: Task to select if brief has multiple tasks (optional)
+        enabled_checks: Optional list of check names to run. If None, runs all checks.
 
     Returns:
         Tuple of (corrected_docx_path, comments_path, summary_path)
@@ -140,7 +150,7 @@ def run_docx_pipeline(
     standards, brand_warning = _load_standards(brand_id)
 
     # 5. Run core pipeline
-    orch_result, apply_result = _run_pipeline_core(document, standards, brief)
+    orch_result, apply_result = _run_pipeline_core(document, standards, brief, enabled_checks)
 
     # 6. Resolve blank_rows formatting
     brand_config = {"brand_name": brand_id} if brand_id else None
@@ -158,8 +168,9 @@ def run_docx_pipeline(
     write_docx(apply_result.document, corrected_path, blank_rows=blank_rows)
 
     # 8. Draft comments (from proposals + downgraded)
+    # Pass corrected_document so anchors reflect post-auto-fix text
     all_proposals = list(orch_result.proposals) + list(apply_result.downgraded)
-    comments = draft_comments(all_proposals, document)
+    comments = draft_comments(all_proposals, document, corrected_document=apply_result.document)
     comments_path = output_dir / "comments.md"
     comments_path.write_text(comments_to_markdown(comments), encoding='utf-8')
     logger.info(f"Wrote {len(comments)} comments to: {comments_path}")
@@ -217,7 +228,8 @@ def run_gdoc_pipeline(
     brand_id: Optional[str] = None,
     task_selection: Optional[str] = None,
     skip_comments: bool = False,
-) -> tuple[str, int, int]:
+    enabled_checks: Optional[list[str]] = None,
+) -> tuple[str, int, int, Path]:
     """
     Run the full Pitboss pipeline on a Google Doc.
 
@@ -227,9 +239,10 @@ def run_gdoc_pipeline(
         brand_id: Brand identifier for standards (optional)
         task_selection: Task to select if brief has multiple tasks (optional)
         skip_comments: If True, skip posting comments to the doc
+        enabled_checks: Optional list of check names to run. If None, runs all checks.
 
     Returns:
-        Tuple of (corrected_doc_url, auto_fix_count, comment_count)
+        Tuple of (corrected_doc_url, auto_fix_count, comment_count, output_dir)
     """
     # Extract doc ID
     doc_id = extract_doc_id(gdoc_id_or_url)
@@ -251,7 +264,7 @@ def run_gdoc_pipeline(
     standards, brand_warning = _load_standards(brand_id)
 
     # 4. Run core pipeline
-    orch_result, apply_result = _run_pipeline_core(document, standards, brief)
+    orch_result, apply_result = _run_pipeline_core(document, standards, brief, enabled_checks)
 
     # 5. Resolve blank_rows formatting
     # For Google Docs, use document title as filename proxy
@@ -273,8 +286,13 @@ def run_gdoc_pipeline(
     logger.info(f"Corrected document: {corrected_url}")
 
     # 7. Draft comments for proposals (once, reused for posting + saving)
+    # Pass corrected_document so anchors are reconciled with post-auto-fix text.
+    # This prevents "Original content deleted" when a proposal's anchor text
+    # was modified by an overlapping auto-fix.
     all_proposals = list(orch_result.proposals) + list(apply_result.downgraded)
-    drafted = draft_comments(all_proposals, document) if all_proposals else []
+    drafted = draft_comments(
+        all_proposals, document, corrected_document=apply_result.document
+    ) if all_proposals else []
 
     # 8. Post comments to Google Doc
     comment_id_map: dict[str, str] = {}
@@ -344,7 +362,217 @@ def run_gdoc_pipeline(
     comment_count = len(comment_id_map)
     _print_gdoc_summary(doc_id, document, orch_result, apply_result, comment_count, corrected_url, combined_warning, output_dir)
 
-    return corrected_url, apply_result.applied_count, comment_count
+    return corrected_url, apply_result.applied_count, comment_count, output_dir
+
+
+# =============================================================================
+# TWO-PHASE FLOW (UI-as-review-surface)
+# =============================================================================
+
+@dataclass
+class CheckOnlyResult:
+    """Result of Phase 1: check only, no apply."""
+    findings: list[Finding]
+    output_dir: Path
+    doc_id: str
+    document: Document  # For title, word count, etc.
+
+    @property
+    def findings_by_check(self) -> dict[str, list[Finding]]:
+        """Group findings by check name."""
+        result: dict[str, list[Finding]] = {}
+        for f in self.findings:
+            result.setdefault(f.check_name, []).append(f)
+        return result
+
+
+@dataclass
+class ApplySelectedResult:
+    """Result of Phase 2: apply user-selected findings."""
+    applied: list[Finding]
+    skipped: list[SkipReason]
+    downgraded: list[SkipReason]
+    corrected_url: str  # URL for gdoc, path for docx
+    output_dir: Path
+
+    @property
+    def applied_count(self) -> int:
+        return len(self.applied)
+
+    @property
+    def skipped_count(self) -> int:
+        return len(self.skipped)
+
+    @property
+    def downgraded_count(self) -> int:
+        return len(self.downgraded)
+
+
+def run_check_only_gdoc(
+    gdoc_id_or_url: str,
+    brief_path: Optional[Path] = None,
+    brand_id: Optional[str] = None,
+    enabled_checks: Optional[list[str]] = None,
+) -> CheckOnlyResult:
+    """
+    Phase 1: Read doc, run checks, return findings. NO apply, NO write.
+
+    Args:
+        gdoc_id_or_url: Google Doc ID or URL
+        brief_path: Optional brief file
+        brand_id: Optional brand ID
+        enabled_checks: Optional list of check names to run
+
+    Returns:
+        CheckOnlyResult with all findings and output_dir
+    """
+    # Extract doc ID
+    doc_id = extract_doc_id(gdoc_id_or_url)
+    logger.info(f"[Phase 1] Reading Google Doc: {doc_id}")
+
+    # 1. Read document
+    document = read_gdoc(doc_id)
+    logger.info(
+        f"Document loaded: {len(document.elements)} elements, "
+        f"~{len(document.full_text().split())} words"
+    )
+
+    # 2. Parse brief
+    brief = _parse_brief(brief_path, task_selection=None)
+
+    # 3. Load standards
+    logger.info(f"Loading standards for brand: {brand_id or '_defaults'}")
+    standards, brand_warning = _load_standards(brand_id)
+
+    # 4. Run checks ONLY (no apply)
+    if enabled_checks:
+        logger.info(f"Running {len(enabled_checks)} selected checks...")
+        orch_result = run_checks_by_name(document, standards, enabled_checks, voice_model=None, brief=brief)
+    else:
+        logger.info("Running all checks...")
+        orch_result = run_all_checks(document, standards, voice_model=None, brief=brief)
+
+    logger.info(
+        f"[Phase 1] Complete: {len(orch_result.findings)} findings "
+        f"({len(orch_result.auto_applicable)} auto-applicable, "
+        f"{len(orch_result.proposals)} proposals)"
+    )
+
+    # 5. Create output directory and save findings.json
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    output_dir = Path("output_runs") / f"gdoc_check_{timestamp}"
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    # Collect warnings
+    all_warnings = []
+    if brand_warning:
+        all_warnings.append(brand_warning)
+    for check_name, warning in orch_result.warnings.items():
+        all_warnings.append(warning)
+    combined_warning = " | ".join(all_warnings) if all_warnings else None
+
+    # Write findings.json (for persistence between phases)
+    findings_path = output_dir / "findings.json"
+    _write_findings_json(
+        output_path=findings_path,
+        orch_result=orch_result,
+        apply_result=ApplyResult(),  # Empty - no apply in Phase 1
+        doc_id=doc_id,
+        timestamp=timestamp,
+        brand_id=brand_id,
+        brand_warning=combined_warning,
+    )
+    logger.info(f"Wrote findings to: {findings_path}")
+
+    return CheckOnlyResult(
+        findings=list(orch_result.findings),
+        output_dir=output_dir,
+        doc_id=doc_id,
+        document=document,
+    )
+
+
+def run_apply_selected_gdoc(
+    gdoc_id_or_url: str,
+    findings: list[Finding],
+    selected_ids: list[str],
+    output_dir: Optional[Path] = None,
+) -> ApplySelectedResult:
+    """
+    Phase 2: Re-read doc, apply only user-selected findings, write corrected doc.
+
+    IMPORTANT: Re-reads the document fresh to catch any changes since Phase 1.
+    If text has changed, those findings will be reported as skipped with reason.
+
+    Args:
+        gdoc_id_or_url: Google Doc ID or URL
+        findings: All findings from Phase 1
+        selected_ids: finding_ids the user selected to apply
+        output_dir: Optional output dir (reuse from Phase 1 if provided)
+
+    Returns:
+        ApplySelectedResult with applied/skipped/downgraded details
+    """
+    # Extract doc ID
+    doc_id = extract_doc_id(gdoc_id_or_url)
+    logger.info(f"[Phase 2] Re-reading Google Doc: {doc_id}")
+
+    # 1. RE-READ document fresh
+    document = read_gdoc(doc_id)
+    logger.info(
+        f"Document re-read: {len(document.elements)} elements, "
+        f"~{len(document.full_text().split())} words"
+    )
+
+    # 2. Apply selected findings
+    logger.info(f"Applying {len(selected_ids)} user-selected findings...")
+    result = apply_selected_findings(document, findings, selected_ids)
+
+    logger.info(
+        f"[Phase 2] Applied: {result.applied_count}, "
+        f"skipped: {result.skipped_count}, "
+        f"downgraded: {result.downgraded_count}"
+    )
+
+    # 3. Write corrected Google Doc
+    logger.info("Creating corrected Google Doc...")
+    corrected_url = write_gdoc(
+        result.document,
+        title=f"{document.title} - Corrected",
+        blank_rows=None,  # Default for now
+    )
+    logger.info(f"Corrected document: {corrected_url}")
+
+    # 4. Setup output dir if not provided
+    if output_dir is None:
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_dir = Path("output_runs") / f"gdoc_apply_{timestamp}"
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+    # 5. Write apply results JSON (for debugging/audit)
+    apply_log_path = output_dir / "apply_result.json"
+    apply_log = {
+        "applied": [f.finding_id for f in result.applied],
+        "skipped": [
+            {"finding_id": s.finding_id, "reason": s.reason, "detail": s.detail}
+            for s in result.skipped
+        ],
+        "downgraded": [
+            {"finding_id": d.finding_id, "reason": d.reason, "detail": d.detail, "conflicting_with": d.conflicting_with}
+            for d in result.downgraded
+        ],
+        "corrected_url": corrected_url,
+    }
+    apply_log_path.write_text(json.dumps(apply_log, indent=2), encoding='utf-8')
+    logger.info(f"Wrote apply log to: {apply_log_path}")
+
+    return ApplySelectedResult(
+        applied=list(result.applied),
+        skipped=list(result.skipped),
+        downgraded=list(result.downgraded),
+        corrected_url=corrected_url,
+        output_dir=output_dir,
+    )
 
 
 # =============================================================================

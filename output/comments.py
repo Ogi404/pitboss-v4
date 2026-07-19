@@ -65,6 +65,7 @@ class DraftedComment:
 def draft_comments(
     proposals: list[Finding],
     document: Document,
+    corrected_document: Optional[Document] = None,
 ) -> list[DraftedComment]:
     """
     Turn proposal findings into structured comments.
@@ -73,12 +74,20 @@ def draft_comments(
 
     Args:
         proposals: List of findings (should be auto_applicable=False)
-        document: The document for context lookup
+        document: The original document for context lookup
+        corrected_document: The corrected document (after auto-fixes) for anchor
+            reconciliation. If provided, anchor text will be verified against
+            this document, and updated if the original text was modified by
+            an auto-fix. This prevents "Original content deleted" errors when
+            posting comments to the corrected document.
 
     Returns:
         List of DraftedComment objects, sorted by position
     """
     comments = []
+
+    # Build corrected doc full text for anchor verification
+    corrected_text = corrected_document.full_text() if corrected_document else None
 
     for finding in proposals:
         # Find section context
@@ -106,6 +115,19 @@ def draft_comments(
         if not issue:
             issue = f"Flagged by {finding.check_name}"
 
+        # Reconcile anchor text with corrected document
+        anchor_text = finding.original_text
+        if corrected_text is not None and anchor_text not in corrected_text:
+            # Original text was modified by auto-fix, find fallback anchor
+            anchor_text = _find_fallback_anchor(
+                finding, corrected_document, para_idx
+            )
+            if anchor_text != finding.original_text:
+                logger.debug(
+                    f"Anchor reconciled for {finding.check_name}: "
+                    f"'{finding.original_text[:30]}...' -> '{anchor_text[:30]}...'"
+                )
+
         comments.append(DraftedComment(
             finding_id=finding.finding_id,
             section=section_title,
@@ -116,7 +138,7 @@ def draft_comments(
             reasoning=finding.reasoning,
             severity=finding.severity,
             check_name=finding.check_name,
-            original_text=finding.original_text,
+            original_text=anchor_text,  # Use reconciled anchor
         ))
 
     # Sort by section, then by paragraph index
@@ -124,6 +146,32 @@ def draft_comments(
 
     logger.info(f"Drafted {len(comments)} comments from {len(proposals)} proposals")
     return comments
+
+
+def _find_fallback_anchor(
+    finding: Finding,
+    corrected_document: Document,
+    para_idx: Optional[int],
+) -> str:
+    """
+    Find fallback anchor text when original was modified by auto-fix.
+
+    Strategy:
+    1. Try to find the element at paragraph_index in corrected doc
+    2. Use that element's text as anchor (truncated if needed)
+    3. If element not found, return original (will likely orphan)
+    """
+    if para_idx is None or para_idx >= len(corrected_document.elements):
+        return finding.original_text
+
+    element = corrected_document.elements[para_idx]
+    element_text = element.text if hasattr(element, 'text') else ''
+
+    if not element_text:
+        return finding.original_text
+
+    # Use element text as anchor (will be truncated to 100 chars by gdoc_comments)
+    return element_text
 
 
 def comments_to_markdown(comments: list[DraftedComment]) -> str:

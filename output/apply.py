@@ -74,6 +74,47 @@ class ApplyResult:
         return len(self.conflicts)
 
 
+@dataclass
+class SkipReason:
+    """Detailed reason why a finding was skipped."""
+    finding_id: str
+    check_name: str
+    reason: str  # "text_mismatch" | "no_proposed_text" | "conflict" | "not_found"
+    detail: str  # Human-readable explanation
+    original_text: str | None = None
+    actual_text: str | None = None  # For text_mismatch
+    conflicting_with: str | None = None  # For conflict (finding_id of winner)
+
+
+@dataclass
+class SelectionApplyResult:
+    """Result of applying user-selected findings (two-phase flow)."""
+
+    applied: list[Finding] = field(default_factory=list)
+    """Successfully applied findings."""
+
+    skipped: list[SkipReason] = field(default_factory=list)
+    """Skipped with detailed reasons."""
+
+    downgraded: list[SkipReason] = field(default_factory=list)
+    """Downgraded to proposal with reasons (conflict)."""
+
+    document: Document = field(default_factory=lambda: Document(elements=[]))
+    """Modified document with edits applied."""
+
+    @property
+    def applied_count(self) -> int:
+        return len(self.applied)
+
+    @property
+    def skipped_count(self) -> int:
+        return len(self.skipped)
+
+    @property
+    def downgraded_count(self) -> int:
+        return len(self.downgraded)
+
+
 def apply_auto_findings(
     document: Document,
     findings: list[Finding],
@@ -150,6 +191,164 @@ def apply_auto_findings(
         skipped=skipped,
         downgraded=downgraded,
         conflicts=conflicts,
+        document=doc,
+    )
+
+
+def apply_selected_findings(
+    document: Document,
+    all_findings: list[Finding],
+    selected_ids: list[str],
+) -> SelectionApplyResult:
+    """
+    Apply user-selected findings (two-phase flow).
+
+    Unlike apply_auto_findings(), this does NOT filter by auto_applicable.
+    The user has explicitly chosen which findings to apply.
+
+    Args:
+        document: The CURRENT document to modify (re-read in Phase 2)
+        all_findings: All findings from Phase 1
+        selected_ids: finding_ids the user selected to apply
+
+    Returns:
+        SelectionApplyResult with applied findings and detailed skip reasons
+    """
+    # Deep copy document to avoid mutating original
+    doc = deepcopy(document)
+
+    # Build lookup for selected findings
+    findings_by_id = {f.finding_id: f for f in all_findings}
+
+    # Step 1: Gather selected findings, track not-found
+    selected_findings: list[Finding] = []
+    skipped: list[SkipReason] = []
+
+    for fid in selected_ids:
+        if fid not in findings_by_id:
+            skipped.append(SkipReason(
+                finding_id=fid,
+                check_name="unknown",
+                reason="not_found",
+                detail=f"Finding ID '{fid}' not found in Phase 1 results",
+            ))
+            continue
+
+        finding = findings_by_id[fid]
+
+        # Check: has proposed_text?
+        if finding.proposed_text is None:
+            skipped.append(SkipReason(
+                finding_id=fid,
+                check_name=finding.check_name,
+                reason="no_proposed_text",
+                detail="This finding is advisory-only (no suggested fix)",
+                original_text=finding.original_text,
+            ))
+            continue
+
+        # Check: no-op edit?
+        if finding.proposed_text == finding.original_text:
+            skipped.append(SkipReason(
+                finding_id=fid,
+                check_name=finding.check_name,
+                reason="no_proposed_text",
+                detail="No change needed (proposed text matches original)",
+                original_text=finding.original_text,
+            ))
+            continue
+
+        selected_findings.append(finding)
+
+    if not selected_findings:
+        logger.info("No selected findings with valid proposed_text to apply")
+        return SelectionApplyResult(document=doc, skipped=skipped)
+
+    logger.info(f"Processing {len(selected_findings)} user-selected findings")
+
+    # Step 2: Validate original_text matches CURRENT document
+    validated: list[Finding] = []
+    for finding in selected_findings:
+        actual_text = _get_text_at_location(doc, finding)
+
+        if actual_text is None:
+            skipped.append(SkipReason(
+                finding_id=finding.finding_id,
+                check_name=finding.check_name,
+                reason="text_mismatch",
+                detail=f"Could not find text at offset {finding.location.start_offset}-{finding.location.end_offset}",
+                original_text=finding.original_text,
+                actual_text=None,
+            ))
+            continue
+
+        if actual_text != finding.original_text:
+            skipped.append(SkipReason(
+                finding_id=finding.finding_id,
+                check_name=finding.check_name,
+                reason="text_mismatch",
+                detail="Document text changed since Phase 1 - re-run check to get fresh findings",
+                original_text=finding.original_text,
+                actual_text=actual_text,
+            ))
+            continue
+
+        validated.append(finding)
+
+    if skipped:
+        logger.warning(f"Skipped {len(skipped)} findings due to validation failures")
+
+    # Step 3: Detect conflicts (overlapping spans)
+    to_apply, conflict_findings, conflicts = _detect_conflicts(validated)
+
+    downgraded: list[SkipReason] = []
+    for winner, loser in conflicts:
+        downgraded.append(SkipReason(
+            finding_id=loser.finding_id,
+            check_name=loser.check_name,
+            reason="conflict",
+            detail=f"Overlaps with '{winner.check_name}' which was applied first",
+            original_text=loser.original_text,
+            conflicting_with=winner.finding_id,
+        ))
+
+    if conflicts:
+        logger.info(f"Detected {len(conflicts)} conflicts, downgraded {len(downgraded)} findings")
+
+    # Step 4: Sort by position DESCENDING (apply last-to-first)
+    sorted_findings = sorted(
+        to_apply,
+        key=lambda f: f.location.start_offset,
+        reverse=True,
+    )
+
+    # Step 5: Apply each finding
+    applied: list[Finding] = []
+    for finding in sorted_findings:
+        success = _apply_single_finding(doc, finding)
+        if success:
+            applied.append(finding)
+        else:
+            skipped.append(SkipReason(
+                finding_id=finding.finding_id,
+                check_name=finding.check_name,
+                reason="text_mismatch",
+                detail="Failed to apply edit (element not found)",
+                original_text=finding.original_text,
+            ))
+
+    logger.info(
+        f"Applied {len(applied)} findings, "
+        f"skipped {len(skipped)}, downgraded {len(downgraded)}"
+    )
+
+    # Step 6: Recalculate element offsets
+    _recalculate_offsets(doc)
+
+    return SelectionApplyResult(
+        applied=applied,
+        skipped=skipped,
+        downgraded=downgraded,
         document=doc,
     )
 

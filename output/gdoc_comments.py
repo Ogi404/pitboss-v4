@@ -2,7 +2,12 @@
 Pitboss v4 - Google Docs Comments
 
 Posts proposal findings as Google Drive API comments.
-Drive comments appear in the right sidebar and can anchor to quoted text.
+Comments appear in the right sidebar with embedded location context.
+
+NOTE: Google Docs ignores quotedFileContent anchors for API-created comments
+(known limitation since 2016 - issuetracker.google.com/issues/36763384).
+Instead, we embed the quoted text and section info directly in the comment
+body so reviewers can find the exact location by searching the doc.
 
 Usage:
     from output.gdoc_comments import post_comments
@@ -35,8 +40,9 @@ def post_comments(
     """
     Post DraftedComments as Google Drive comments.
 
-    Each comment is anchored to the original flagged text (if available)
-    using Drive's quotedFileContent feature.
+    Comments include embedded location context (section, element number,
+    quoted text) in the body since Google Docs doesn't support API-based
+    text anchoring.
 
     Args:
         doc_id: Google Doc ID (not URL)
@@ -49,17 +55,14 @@ def post_comments(
     finding_to_comment: dict[str, str] = {}
 
     for comment in comments:
+        # NOTE: We intentionally DO NOT use quotedFileContent here.
+        # Google Docs ignores anchor fields for API-created comments
+        # (known limitation since 2016 - see issuetracker #36763384).
+        # Instead, we embed the quoted text in the comment body itself
+        # so reviewers can find the exact location.
         body = {
             'content': _format_comment_content(comment),
         }
-
-        # Add text anchor if we have original text
-        if comment.original_text:
-            anchor_text = comment.original_text[:MAX_ANCHOR_LENGTH]
-            body['quotedFileContent'] = {
-                'value': anchor_text,
-                'mimeType': 'text/plain'
-            }
 
         try:
             result = service.comments().create(
@@ -123,16 +126,10 @@ def post_comments_batch(
         batch = service.new_batch_http_request(callback=callback)
 
         for i, comment in enumerate(batch_comments):
+            # No quotedFileContent - see note in post_comments()
             body = {
                 'content': _format_comment_content(comment),
             }
-
-            if comment.original_text:
-                anchor_text = comment.original_text[:MAX_ANCHOR_LENGTH]
-                body['quotedFileContent'] = {
-                    'value': anchor_text,
-                    'mimeType': 'text/plain'
-                }
 
             batch.add(
                 service.comments().create(
@@ -162,13 +159,28 @@ def _format_comment_content(comment: DraftedComment) -> str:
     Format a DraftedComment as comment text for Drive.
 
     Creates a structured, readable comment with severity, issue,
-    suggestion (if any), and location context.
+    suggestion (if any), location context, and QUOTED TEXT.
+
+    NOTE: Since Google Docs ignores quotedFileContent anchors for API-created
+    comments (known limitation since 2016), we embed the quoted text directly
+    in the comment body so reviewers can find the exact location.
     """
     lines = []
 
     # Header with severity badge and check name
     severity_badge = f"[{comment.severity.upper()}]"
     lines.append(f"{severity_badge} {comment.check_name}")
+
+    # Location context FIRST (helps find the issue)
+    lines.append(f"@ {comment.location_desc}")
+
+    # Quoted text - THE KEY for finding the exact spot
+    if comment.original_text:
+        quoted = comment.original_text
+        if len(quoted) > 80:
+            quoted = quoted[:80] + "..."
+        lines.append(f'> "{quoted}"')
+
     lines.append("")
 
     # Issue description
@@ -177,15 +189,10 @@ def _format_comment_content(comment: DraftedComment) -> str:
     # Suggestion if present
     if comment.suggestion:
         lines.append("")
-        # Truncate very long suggestions
         suggestion = comment.suggestion
-        if len(suggestion) > 200:
-            suggestion = suggestion[:200] + "..."
-        lines.append(f"Suggested: \"{suggestion}\"")
-
-    # Location context (helps find the issue in long docs)
-    lines.append("")
-    lines.append(f"Location: {comment.location_desc}")
+        if len(suggestion) > 150:
+            suggestion = suggestion[:150] + "..."
+        lines.append(f'Fix: "{suggestion}"')
 
     return "\n".join(lines)
 

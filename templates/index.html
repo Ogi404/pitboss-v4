@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pitboss v4</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a2e;
+            color: #e8e8e8;
+        }
+        h1 {
+            color: #4ecca3;
+            border-bottom: 2px solid #0f3460;
+            padding-bottom: 10px;
+        }
+        .card {
+            background: #16213e;
+            border: 1px solid #0f3460;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .card h2 {
+            margin-top: 0;
+            color: #4ecca3;
+            font-size: 1.1em;
+        }
+        input[type="file"] {
+            background: #0f3460;
+            border: 1px solid #4ecca3;
+            border-radius: 4px;
+            padding: 10px;
+            color: #e8e8e8;
+            width: 100%;
+            cursor: pointer;
+        }
+        button {
+            background: #4ecca3;
+            color: #1a1a2e;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background: #3db892;
+        }
+        button:disabled {
+            background: #555;
+            cursor: not-allowed;
+        }
+        .btn-secondary {
+            background: #0f3460;
+            color: #4ecca3;
+        }
+        .btn-secondary:hover {
+            background: #1a3a6e;
+        }
+        .spinner {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        .spinner.active {
+            display: block;
+        }
+        .results {
+            display: none;
+        }
+        .results.active {
+            display: block;
+        }
+        .error {
+            background: #ff6b6b22;
+            border: 1px solid #ff6b6b;
+            color: #ff6b6b;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+        .success {
+            background: #6bcb7722;
+            border: 1px solid #6bcb77;
+            color: #6bcb77;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+        .warning {
+            background: #ffd93d22;
+            border: 1px solid #ffd93d;
+            color: #ffd93d;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        .summary-table th, .summary-table td {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid #0f3460;
+        }
+        .summary-table th {
+            color: #4ecca3;
+        }
+        .download-links a {
+            display: inline-block;
+            background: #0f3460;
+            color: #4ecca3;
+            padding: 8px 16px;
+            border-radius: 4px;
+            text-decoration: none;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .download-links a:hover {
+            background: #1a3a6e;
+        }
+        pre {
+            background: #0f3460;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 13px;
+        }
+        .check-name {
+            font-family: monospace;
+            color: #a0a0a0;
+        }
+        .checks-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .check-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .check-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #4ecca3;
+        }
+        .check-item label {
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .check-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .check-buttons button {
+            width: auto;
+            padding: 6px 12px;
+            font-size: 12px;
+            background: #0f3460;
+            color: #4ecca3;
+        }
+        .check-buttons button:hover {
+            background: #1a3a6e;
+        }
+        .source-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .source-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #4ecca3;
+        }
+        .source-option label {
+            font-weight: bold;
+            color: #e8e8e8;
+        }
+        .source-input {
+            display: none;
+            margin-left: 28px;
+            margin-bottom: 15px;
+        }
+        .source-input.active {
+            display: block;
+        }
+        input[type="text"] {
+            background: #0f3460;
+            border: 1px solid #4ecca3;
+            border-radius: 4px;
+            padding: 10px;
+            color: #e8e8e8;
+            width: 100%;
+            font-size: 14px;
+        }
+        input[type="text"]::placeholder {
+            color: #666;
+        }
+
+        /* Two-phase flow styles */
+        .phase-indicator {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .phase-step {
+            padding: 10px 20px;
+            background: #0f3460;
+            border-radius: 6px;
+            opacity: 0.5;
+        }
+        .phase-step.active {
+            opacity: 1;
+            border: 2px solid #4ecca3;
+        }
+        .phase-step.completed {
+            opacity: 1;
+            background: #4ecca322;
+        }
+
+        /* Findings list styles */
+        .findings-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .finding-group {
+            margin-bottom: 15px;
+        }
+        .finding-group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #0f3460;
+            padding: 10px 15px;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+        }
+        .finding-group-header:hover {
+            background: #1a3a6e;
+        }
+        .finding-group-items {
+            background: #0d1b2a;
+            padding: 10px;
+            border-radius: 0 0 6px 6px;
+            border: 1px solid #0f3460;
+            border-top: none;
+        }
+        .finding-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 8px;
+            margin-bottom: 5px;
+            background: #16213e;
+            border-radius: 4px;
+        }
+        .finding-item:last-child {
+            margin-bottom: 0;
+        }
+        .finding-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-top: 2px;
+            accent-color: #4ecca3;
+        }
+        .finding-item input[type="checkbox"]:disabled {
+            opacity: 0.3;
+        }
+        .finding-content {
+            flex: 1;
+        }
+        .finding-severity {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .finding-severity.error {
+            background: #ff6b6b44;
+            color: #ff6b6b;
+        }
+        .finding-severity.warning {
+            background: #ffd93d44;
+            color: #ffd93d;
+        }
+        .finding-severity.info {
+            background: #4ecca344;
+            color: #4ecca3;
+        }
+        .finding-text {
+            font-size: 12px;
+            color: #a0a0a0;
+            margin-top: 4px;
+        }
+        .finding-message {
+            font-size: 13px;
+            margin-top: 4px;
+        }
+        .finding-proposed {
+            font-size: 12px;
+            color: #6bcb77;
+            margin-top: 4px;
+        }
+        .finding-tag {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            margin-left: 8px;
+        }
+        .finding-tag.auto {
+            background: #4ecca344;
+            color: #4ecca3;
+        }
+        .finding-tag.info-only {
+            background: #a0a0a044;
+            color: #a0a0a0;
+        }
+
+        /* Skipped/downgraded items */
+        .skip-item {
+            padding: 10px;
+            background: #ff6b6b11;
+            border-left: 3px solid #ff6b6b;
+            margin-bottom: 8px;
+            border-radius: 0 4px 4px 0;
+        }
+        .downgrade-item {
+            padding: 10px;
+            background: #ffd93d11;
+            border-left: 3px solid #ffd93d;
+            margin-bottom: 8px;
+            border-radius: 0 4px 4px 0;
+        }
+
+        /* Button row */
+        .button-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .button-row button {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <h1>PITBOSS v4</h1>
+
+    <!-- Phase Indicator (shown for Google Docs two-phase flow) -->
+    <div class="phase-indicator" id="phase-indicator" style="display: none;">
+        <div class="phase-step active" id="phase-1-step">
+            <strong>Phase 1:</strong> Check
+        </div>
+        <div class="phase-step" id="phase-2-step">
+            <strong>Phase 2:</strong> Apply Selected
+        </div>
+    </div>
+
+    <!-- Phase 1: Input Form -->
+    <div id="phase-1-form">
+        <form id="pitboss-form" enctype="multipart/form-data">
+            <!-- Article Source -->
+            <div class="card">
+                <h2>ARTICLE SOURCE</h2>
+
+                <div class="source-option">
+                    <input type="radio" name="source_type" value="file" id="source-file" checked>
+                    <label for="source-file">Upload .docx</label>
+                </div>
+                <div class="source-input active" id="file-input-container">
+                    <input type="file" name="article" id="article" accept=".docx">
+                </div>
+
+                <div class="source-option">
+                    <input type="radio" name="source_type" value="gdoc" id="source-gdoc">
+                    <label for="source-gdoc">Google Doc URL</label>
+                </div>
+                <div class="source-input" id="gdoc-input-container">
+                    <input type="text" name="gdoc_url" id="gdoc-url"
+                           placeholder="https://docs.google.com/document/d/...">
+                    <p style="color: #a0a0a0; font-size: 12px; margin-top: 6px;">
+                        Two-phase flow: Check first, review findings, then apply selected.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Brief Upload (optional) -->
+            <div class="card">
+                <h2>BRIEF (OPTIONAL)</h2>
+                <p style="color: #a0a0a0; font-size: 13px; margin-bottom: 12px;">
+                    Upload a brief (.docx or .xlsx) to enable Keywords and Structure checks.
+                </p>
+                <input type="file" name="brief" id="brief" accept=".docx,.xlsx">
+            </div>
+
+            <!-- Checks to Run -->
+            <div class="card">
+                <h2>CHECKS TO RUN</h2>
+                <input type="hidden" name="checks_present" value="1">
+                <div class="checks-grid">
+                    <div class="check-item">
+                        <input type="checkbox" name="checks" value="voice.third_person" id="check-voice" checked>
+                        <label for="check-voice">Voice (3rd-2nd person)</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" name="checks" value="stop_words" id="check-stop" checked>
+                        <label for="check-stop">Stop Words</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" name="checks" value="headings" id="check-headings" checked>
+                        <label for="check-headings">Headings</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" name="checks" value="currency" id="check-currency" checked>
+                        <label for="check-currency">Currency</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" name="checks" value="formatting" id="check-formatting" checked>
+                        <label for="check-formatting">Formatting</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" name="checks" value="locale_spelling" id="check-spelling" checked>
+                        <label for="check-spelling">Spelling (locale)</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" name="checks" value="brand_names" id="check-brand" checked>
+                        <label for="check-brand">Brand Names</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" name="checks" value="keywords" id="check-keywords" checked>
+                        <label for="check-keywords">Keywords (vs brief)</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" name="checks" value="structure" id="check-structure" checked>
+                        <label for="check-structure">Structure (vs brief)</label>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" name="checks" value="consistency" id="check-consistency" checked>
+                        <label for="check-consistency">Consistency (numerical)</label>
+                    </div>
+                </div>
+                <div class="check-buttons">
+                    <button type="button" id="select-all">Select All</button>
+                    <button type="button" id="select-none">Select None</button>
+                </div>
+            </div>
+
+            <!-- Run Button -->
+            <button type="submit" id="run-btn">RUN CHECKS</button>
+        </form>
+    </div>
+
+    <!-- Spinner -->
+    <div class="spinner" id="spinner">
+        <p style="color: #4ecca3;" id="spinner-text">Running checks... this may take a moment.</p>
+    </div>
+
+    <!-- Phase 1 Results: Findings Review (Google Docs only) -->
+    <div class="results" id="findings-review">
+        <div class="card">
+            <h2>DOCUMENT INFO</h2>
+            <table class="summary-table">
+                <tr><td>Title</td><td id="doc-title"></td></tr>
+                <tr><td>Word count</td><td id="doc-words"></td></tr>
+                <tr><td>Total findings</td><td id="total-findings"></td></tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>REVIEW FINDINGS</h2>
+            <p style="color: #a0a0a0; font-size: 13px; margin-bottom: 15px;">
+                Select which findings to apply. Auto-applicable fixes are pre-checked.
+                Info-only items (no suggested fix) are disabled.
+            </p>
+            <div class="button-row" style="margin-bottom: 15px;">
+                <button type="button" id="select-all-findings" class="btn-secondary">Select All</button>
+                <button type="button" id="select-none-findings" class="btn-secondary">Select None</button>
+                <button type="button" id="select-auto-only" class="btn-secondary">Auto-applicable Only</button>
+            </div>
+            <div class="findings-list" id="findings-list"></div>
+        </div>
+
+        <div class="button-row">
+            <button type="button" id="back-btn" class="btn-secondary">Back</button>
+            <button type="button" id="apply-btn">APPLY SELECTED (<span id="selected-count">0</span>)</button>
+        </div>
+    </div>
+
+    <!-- Phase 2 Results: Apply Results -->
+    <div class="results" id="apply-results">
+        <div class="error" id="apply-error-box" style="display: none;"></div>
+
+        <div id="apply-success-box" style="display: none;">
+            <div class="success" id="apply-success-message"></div>
+
+            <div class="card">
+                <h2>CORRECTED DOCUMENT</h2>
+                <div class="download-links" id="corrected-link"></div>
+            </div>
+
+            <!-- Skipped findings -->
+            <div class="card" id="skipped-section" style="display: none;">
+                <h2>SKIPPED FINDINGS</h2>
+                <p style="color: #a0a0a0; font-size: 13px; margin-bottom: 15px;">
+                    These findings could not be applied. Re-run check to get fresh findings.
+                </p>
+                <div id="skipped-list"></div>
+            </div>
+
+            <!-- Downgraded findings -->
+            <div class="card" id="downgraded-section" style="display: none;">
+                <h2>CONFLICT DOWNGRADES</h2>
+                <p style="color: #a0a0a0; font-size: 13px; margin-bottom: 15px;">
+                    These findings overlapped with another and were skipped (first one wins).
+                </p>
+                <div id="downgraded-list"></div>
+            </div>
+        </div>
+
+        <div class="button-row">
+            <button type="button" id="new-run-btn">NEW RUN</button>
+        </div>
+    </div>
+
+    <!-- Legacy Results (for .docx path) -->
+    <div class="results" id="docx-results">
+        <div class="error" id="error-box" style="display: none;"></div>
+
+        <div id="success-box" style="display: none;">
+            <div class="success">Pipeline completed successfully!</div>
+
+            <div class="card">
+                <h2>SUMMARY</h2>
+                <div id="summary-content"></div>
+            </div>
+
+            <div class="card">
+                <h2>OUTPUT FILES</h2>
+                <div class="download-links" id="download-links"></div>
+            </div>
+
+            <div class="card">
+                <h2>FINDINGS BY CHECK</h2>
+                <table class="summary-table" id="findings-table">
+                    <thead>
+                        <tr>
+                            <th>Check</th>
+                            <th>Auto-applied</th>
+                            <th>Proposals</th>
+                        </tr>
+                    </thead>
+                    <tbody id="findings-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let phase1Data = null;  // Stores Phase 1 response for Phase 2
+
+        // DOM Elements
+        const form = document.getElementById('pitboss-form');
+        const runBtn = document.getElementById('run-btn');
+        const spinner = document.getElementById('spinner');
+        const spinnerText = document.getElementById('spinner-text');
+        const phaseIndicator = document.getElementById('phase-indicator');
+        const phase1Step = document.getElementById('phase-1-step');
+        const phase2Step = document.getElementById('phase-2-step');
+        const phase1Form = document.getElementById('phase-1-form');
+        const findingsReview = document.getElementById('findings-review');
+        const applyResults = document.getElementById('apply-results');
+        const docxResults = document.getElementById('docx-results');
+
+        // Source type toggle
+        const sourceRadios = document.querySelectorAll('input[name="source_type"]');
+        const fileInputContainer = document.getElementById('file-input-container');
+        const gdocInputContainer = document.getElementById('gdoc-input-container');
+
+        sourceRadios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                if (radio.value === 'file') {
+                    fileInputContainer.classList.add('active');
+                    gdocInputContainer.classList.remove('active');
+                } else {
+                    fileInputContainer.classList.remove('active');
+                    gdocInputContainer.classList.add('active');
+                }
+            });
+        });
+
+        // Check selection buttons
+        document.getElementById('select-all').addEventListener('click', () => {
+            document.querySelectorAll('input[name="checks"]').forEach(cb => cb.checked = true);
+        });
+        document.getElementById('select-none').addEventListener('click', () => {
+            document.querySelectorAll('input[name="checks"]').forEach(cb => cb.checked = false);
+        });
+
+        // Finding selection buttons
+        document.getElementById('select-all-findings').addEventListener('click', () => {
+            document.querySelectorAll('.finding-checkbox:not(:disabled)').forEach(cb => cb.checked = true);
+            updateSelectedCount();
+        });
+        document.getElementById('select-none-findings').addEventListener('click', () => {
+            document.querySelectorAll('.finding-checkbox').forEach(cb => cb.checked = false);
+            updateSelectedCount();
+        });
+        document.getElementById('select-auto-only').addEventListener('click', () => {
+            document.querySelectorAll('.finding-checkbox').forEach(cb => {
+                cb.checked = cb.dataset.auto === 'true';
+            });
+            updateSelectedCount();
+        });
+
+        // Back button
+        document.getElementById('back-btn').addEventListener('click', () => {
+            findingsReview.classList.remove('active');
+            phase1Form.style.display = 'block';
+            phaseIndicator.style.display = 'none';
+            phase1Data = null;
+        });
+
+        // New run button
+        document.getElementById('new-run-btn').addEventListener('click', () => {
+            applyResults.classList.remove('active');
+            phase1Form.style.display = 'block';
+            phaseIndicator.style.display = 'none';
+            phase1Data = null;
+        });
+
+        // Form submit
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const sourceType = document.querySelector('input[name="source_type"]:checked').value;
+            const fileInput = document.getElementById('article');
+            const gdocInput = document.getElementById('gdoc-url');
+
+            if (sourceType === 'file' && !fileInput.files.length) {
+                alert('Please select a .docx file to upload.');
+                return;
+            }
+            if (sourceType === 'gdoc' && !gdocInput.value.trim()) {
+                alert('Please enter a Google Doc URL.');
+                return;
+            }
+
+            // Reset UI
+            runBtn.disabled = true;
+            runBtn.textContent = 'Running...';
+            spinner.classList.add('active');
+            findingsReview.classList.remove('active');
+            applyResults.classList.remove('active');
+            docxResults.classList.remove('active');
+
+            try {
+                const formData = new FormData(form);
+
+                if (sourceType === 'gdoc') {
+                    // Google Docs: Two-phase flow
+                    spinnerText.textContent = 'Phase 1: Running checks...';
+                    phaseIndicator.style.display = 'flex';
+                    phase1Step.classList.add('active');
+                    phase2Step.classList.remove('active', 'completed');
+
+                    const response = await fetch('/check', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+
+                    if (data.status === 'error') {
+                        throw new Error(data.error);
+                    }
+
+                    // Store Phase 1 data
+                    phase1Data = data;
+
+                    // Show findings review
+                    phase1Form.style.display = 'none';
+                    showFindingsReview(data);
+                    phase1Step.classList.add('completed');
+
+                } else {
+                    // .docx: Legacy single-phase flow
+                    spinnerText.textContent = 'Running pipeline...';
+                    phaseIndicator.style.display = 'none';
+
+                    const response = await fetch('/run', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+                    showDocxResults(data);
+                }
+
+            } catch (err) {
+                docxResults.classList.add('active');
+                document.getElementById('error-box').style.display = 'block';
+                document.getElementById('error-box').innerHTML = `
+                    <strong>Error:</strong> ${err.message}<br>
+                    <span style="color: #a0a0a0; font-size: 12px;">Check that the server is running.</span>
+                `;
+            } finally {
+                runBtn.disabled = false;
+                runBtn.textContent = 'RUN CHECKS';
+                spinner.classList.remove('active');
+            }
+        });
+
+        // Apply button
+        document.getElementById('apply-btn').addEventListener('click', async () => {
+            if (!phase1Data) return;
+
+            const selectedCheckboxes = document.querySelectorAll('.finding-checkbox:checked');
+            const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
+
+            if (selectedIds.length === 0) {
+                alert('No findings selected. Select at least one finding to apply.');
+                return;
+            }
+
+            // Show spinner
+            spinner.classList.add('active');
+            spinnerText.textContent = 'Phase 2: Applying selected findings...';
+            findingsReview.classList.remove('active');
+            phase2Step.classList.add('active');
+
+            try {
+                const response = await fetch('/apply', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        gdoc_url: document.getElementById('gdoc-url').value.trim(),
+                        selected_ids: selectedIds,
+                        findings_raw: phase1Data.findings_raw,
+                        output_dir: phase1Data.output_dir,
+                    })
+                });
+
+                const data = await response.json();
+                showApplyResults(data);
+                phase2Step.classList.add('completed');
+
+            } catch (err) {
+                document.getElementById('apply-error-box').style.display = 'block';
+                document.getElementById('apply-error-box').innerHTML = `
+                    <strong>Error:</strong> ${err.message}
+                `;
+                applyResults.classList.add('active');
+            } finally {
+                spinner.classList.remove('active');
+            }
+        });
+
+        function showFindingsReview(data) {
+            document.getElementById('doc-title').textContent = data.doc_title || 'Untitled';
+            document.getElementById('doc-words').textContent = `~${data.word_count?.toLocaleString() || 0}`;
+            document.getElementById('total-findings').textContent = data.total_findings || 0;
+
+            // Group findings by check
+            const byCheck = {};
+            (data.findings || []).forEach(f => {
+                const checkName = f.check_name || 'unknown';
+                if (!byCheck[checkName]) byCheck[checkName] = [];
+                byCheck[checkName].push(f);
+            });
+
+            // Build findings list
+            const findingsList = document.getElementById('findings-list');
+            findingsList.innerHTML = '';
+
+            Object.entries(byCheck).sort().forEach(([checkName, findings]) => {
+                const group = document.createElement('div');
+                group.className = 'finding-group';
+
+                const autoCount = findings.filter(f => f.auto_applicable).length;
+                const infoCount = findings.filter(f => !f.has_proposed_text).length;
+
+                group.innerHTML = `
+                    <div class="finding-group-header">
+                        <span><strong>${checkName}</strong> (${findings.length} findings)</span>
+                        <span style="font-size: 12px; color: #a0a0a0;">
+                            ${autoCount > 0 ? `${autoCount} auto` : ''}
+                            ${infoCount > 0 ? ` | ${infoCount} info-only` : ''}
+                        </span>
+                    </div>
+                    <div class="finding-group-items">
+                        ${findings.map(f => renderFindingItem(f)).join('')}
+                    </div>
+                `;
+
+                findingsList.appendChild(group);
+            });
+
+            // Add change listeners
+            document.querySelectorAll('.finding-checkbox').forEach(cb => {
+                cb.addEventListener('change', updateSelectedCount);
+            });
+
+            updateSelectedCount();
+            findingsReview.classList.add('active');
+        }
+
+        function renderFindingItem(f) {
+            const severityClass = f.severity === 'error' ? 'error' : (f.severity === 'warning' ? 'warning' : 'info');
+            const isDisabled = !f.has_proposed_text;
+            const isChecked = f.has_proposed_text && f.auto_applicable;
+
+            let tagHtml = '';
+            if (f.auto_applicable) {
+                tagHtml = '<span class="finding-tag auto">auto-applicable</span>';
+            } else if (!f.has_proposed_text) {
+                tagHtml = '<span class="finding-tag info-only">info-only</span>';
+            }
+
+            return `
+                <div class="finding-item">
+                    <input type="checkbox" class="finding-checkbox" value="${f.finding_id}"
+                           data-auto="${f.auto_applicable}"
+                           ${isChecked ? 'checked' : ''}
+                           ${isDisabled ? 'disabled' : ''}>
+                    <div class="finding-content">
+                        <span class="finding-severity ${severityClass}">${f.severity}</span>
+                        ${tagHtml}
+                        <div class="finding-message">${escapeHtml(f.reasoning || '')}</div>
+                        ${f.original_text ? `<div class="finding-text">Original: "${escapeHtml(f.original_text)}"</div>` : ''}
+                        ${f.proposed_text ? `<div class="finding-proposed">Suggested: "${escapeHtml(f.proposed_text)}"</div>` : ''}
+                        <div class="finding-text" style="color: #666;">${f.location?.section_title || `Paragraph ${f.location?.paragraph_index}`}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateSelectedCount() {
+            const count = document.querySelectorAll('.finding-checkbox:checked').length;
+            document.getElementById('selected-count').textContent = count;
+        }
+
+        function showApplyResults(data) {
+            if (data.status === 'error') {
+                document.getElementById('apply-error-box').style.display = 'block';
+                document.getElementById('apply-error-box').innerHTML = `
+                    <strong>Error:</strong> ${data.error}<br>
+                    <span style="color: #a0a0a0; font-size: 12px;">Type: ${data.error_type}</span>
+                `;
+                document.getElementById('apply-success-box').style.display = 'none';
+            } else {
+                document.getElementById('apply-error-box').style.display = 'none';
+                document.getElementById('apply-success-box').style.display = 'block';
+
+                document.getElementById('apply-success-message').textContent =
+                    `Applied ${data.applied_count} fix${data.applied_count !== 1 ? 'es' : ''}!`;
+
+                document.getElementById('corrected-link').innerHTML = `
+                    <a href="${data.corrected_url}" target="_blank">Open Corrected Document</a>
+                `;
+
+                // Show skipped
+                if (data.skipped && data.skipped.length > 0) {
+                    document.getElementById('skipped-section').style.display = 'block';
+                    document.getElementById('skipped-list').innerHTML = data.skipped.map(s => `
+                        <div class="skip-item">
+                            <strong>${escapeHtml(s.check_name)}</strong>
+                            <div style="font-size: 13px; margin-top: 4px;">${escapeHtml(s.detail)}</div>
+                            ${s.original_text ? `<div style="font-size: 12px; color: #a0a0a0; margin-top: 4px;">Expected: "${escapeHtml(s.original_text)}"</div>` : ''}
+                            ${s.actual_text ? `<div style="font-size: 12px; color: #ff6b6b; margin-top: 2px;">Found: "${escapeHtml(s.actual_text)}"</div>` : ''}
+                        </div>
+                    `).join('');
+                } else {
+                    document.getElementById('skipped-section').style.display = 'none';
+                }
+
+                // Show downgraded
+                if (data.downgraded && data.downgraded.length > 0) {
+                    document.getElementById('downgraded-section').style.display = 'block';
+                    document.getElementById('downgraded-list').innerHTML = data.downgraded.map(d => `
+                        <div class="downgrade-item">
+                            <strong>${escapeHtml(d.check_name)}</strong>
+                            <div style="font-size: 13px; margin-top: 4px;">${escapeHtml(d.detail)}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    document.getElementById('downgraded-section').style.display = 'none';
+                }
+            }
+
+            applyResults.classList.add('active');
+        }
+
+        function showDocxResults(data) {
+            const errorBox = document.getElementById('error-box');
+            const successBox = document.getElementById('success-box');
+
+            if (data.status === 'error') {
+                errorBox.style.display = 'block';
+                errorBox.innerHTML = `
+                    <strong>Error:</strong> ${data.error}<br>
+                    <span style="color: #a0a0a0; font-size: 12px;">Type: ${data.error_type}</span>
+                `;
+                successBox.style.display = 'none';
+            } else {
+                errorBox.style.display = 'none';
+                successBox.style.display = 'block';
+
+                const findings = data.findings || {};
+                const stats = findings.stats || {};
+
+                document.getElementById('summary-content').innerHTML = `
+                    <table class="summary-table">
+                        <tr><td>Total findings</td><td><strong>${stats.total_findings || 0}</strong></td></tr>
+                        <tr><td>Auto-applied</td><td><strong>${stats.auto_applied || 0}</strong></td></tr>
+                        <tr><td>Proposals</td><td><strong>${stats.proposals || 0}</strong></td></tr>
+                    </table>
+                `;
+
+                document.getElementById('download-links').innerHTML = `
+                    <a href="/download/${encodeURIComponent(data.corrected_path)}">Download Corrected .docx</a>
+                    <a href="/download/${encodeURIComponent(data.comments_path)}">Download Comments.md</a>
+                    <a href="/download/${encodeURIComponent(data.summary_path)}">Download Summary.md</a>
+                    ${data.findings_path ? `<a href="/download/${encodeURIComponent(data.findings_path)}">Download Findings.json</a>` : ''}
+                `;
+
+                // Findings by check
+                const findingsList = findings.findings || [];
+                const byCheck = {};
+                findingsList.forEach(f => {
+                    const checkName = f.check_name || 'unknown';
+                    if (!byCheck[checkName]) byCheck[checkName] = { auto: 0, proposals: 0 };
+                    if (f.auto_applicable) byCheck[checkName].auto++;
+                    else byCheck[checkName].proposals++;
+                });
+
+                const tbody = document.getElementById('findings-tbody');
+                tbody.innerHTML = '';
+                Object.entries(byCheck).sort().forEach(([checkName, counts]) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="check-name">${checkName}</td>
+                        <td>${counts.auto}</td>
+                        <td>${counts.proposals}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+                if (Object.keys(byCheck).length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" style="color: #a0a0a0;">No findings</td></tr>';
+                }
+            }
+
+            docxResults.classList.add('active');
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+    </script>
+</body>
+</html>

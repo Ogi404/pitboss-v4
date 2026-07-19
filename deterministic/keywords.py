@@ -109,12 +109,21 @@ def find_keyword_occurrences(
     text: str,
     keyword: str,
     already_matched: Optional[set[tuple[int, int]]] = None,
+    exact_match: bool = False,
 ) -> list[tuple[int, int]]:
     """
     Find all occurrences of a keyword in text.
 
     Returns list of (start, end) positions.
     Avoids double-counting overlapping matches if already_matched is provided.
+
+    Args:
+        text: The text to search in
+        keyword: The keyword to search for
+        already_matched: Optional set of already-matched spans to avoid
+        exact_match: If True, match keyword exactly (no singular/plural variants).
+                     Use this for TRUE INDEPENDENT COUNTS where each keyword
+                     should report its exact frequency without overlap.
     """
     if already_matched is None:
         already_matched = set()
@@ -122,8 +131,11 @@ def find_keyword_occurrences(
     occurrences = []
     text_lower = text.lower()
 
-    # Get all variants to match
-    variants = get_keyword_variants(keyword)
+    # Get variants to match - use exact match for independent counting
+    if exact_match:
+        variants = {normalize_keyword(keyword)}
+    else:
+        variants = get_keyword_variants(keyword)
 
     for variant in variants:
         if not variant:
@@ -301,84 +313,98 @@ class KeywordsCheck(DeterministicCheck):
 
         # Track all keyword occurrences for density calculation
         all_keyword_occurrences: dict[str, list[tuple[int, int]]] = defaultdict(list)
-        already_matched: set[tuple[int, int]] = set()
 
-        # Get main keywords from brief, sorted by length (longest first)
-        # This ensures longer phrases like "Koifortune Australia" are matched
-        # before shorter ones like "Koifortune", preventing overlap collisions
-        main_keywords: list[BriefKeyword] = sorted(
-            brief.keywords.main,
-            key=lambda kw: len(kw.keyword),
-            reverse=True
-        )
+        # Get main keywords from brief (no need to sort - each counted independently)
+        main_keywords: list[BriefKeyword] = list(brief.keywords.main)
 
         # Sub-check 1 & 2: Missing keywords and quantity
+        # BUG FIX: Count each keyword INDEPENDENTLY (no shared already_matched).
+        # This ensures 'HellSpin' reports its true count (e.g., 29), not 0 because
+        # longer variants like 'HellSpin casino' consumed overlapping positions.
         for kw_obj in main_keywords:
             keyword = kw_obj.keyword
             min_qty = kw_obj.min_quantity
             max_qty = kw_obj.max_quantity
 
-            # Find occurrences
+            # Find occurrences - each keyword gets its own matching (no shared exclusion)
+            # Use exact_match=True for TRUE INDEPENDENT COUNTS - each keyword
+            # matches exactly what it says without singular/plural variants
+            # overlapping with other keywords (e.g., "HellSpins" won't match "HellSpin")
             occurrences = find_keyword_occurrences(
-                full_text, keyword, already_matched
+                full_text, keyword, None, exact_match=True
             )
             all_keyword_occurrences[keyword] = occurrences
             actual_count = len(occurrences)
 
             # Check if missing
             if actual_count == 0:
-                # Build requirement string
-                if min_qty is not None and max_qty is not None:
-                    if min_qty == max_qty:
-                        req_str = f"required exactly {min_qty} time(s)"
+                # Before flagging as missing, check if VARIANTS exist (e.g., "slots" for "slot")
+                # This allows flexible matching for singular/plural while still keeping
+                # exact counts when the exact form is present
+                variant_occurrences = find_keyword_occurrences(
+                    full_text, keyword, None, exact_match=False  # Allow variants
+                )
+                if variant_occurrences:
+                    # Variants found - count as present, use variant count
+                    all_keyword_occurrences[keyword] = variant_occurrences
+                    actual_count = len(variant_occurrences)
+                    # Don't flag as missing - proceed to quantity checks
+                    # (actual_count is now > 0, so quantity checks will apply)
+
+                if actual_count == 0:
+                    # No variants either - flag as missing
+                    # Build requirement string
+                    if min_qty is not None and max_qty is not None:
+                        if min_qty == max_qty:
+                            req_str = f"required exactly {min_qty} time(s)"
+                        else:
+                            req_str = f"required {min_qty}-{max_qty} time(s)"
+                    elif min_qty is not None:
+                        req_str = f"required at least {min_qty} time(s)"
+                    elif max_qty is not None:
+                        req_str = f"required at most {max_qty} time(s)"
                     else:
-                        req_str = f"required {min_qty}-{max_qty} time(s)"
-                elif min_qty is not None:
-                    req_str = f"required at least {min_qty} time(s)"
-                elif max_qty is not None:
-                    req_str = f"required at most {max_qty} time(s)"
-                else:
-                    req_str = "required in article"
+                        req_str = "required in article"
 
-                # Check if words appear nearby but not as exact phrase
-                nearby_sample = find_words_nearby(full_text, keyword)
+                    # Check if words appear nearby but not as exact phrase
+                    nearby_sample = find_words_nearby(full_text, keyword)
 
-                if nearby_sample:
-                    # Words present but wrong construction
-                    missing_type = "wrong_construction"
-                    reasoning = (
-                        f"Required keyword '{keyword}' not found. "
-                        f"Note: article contains '{nearby_sample}' — the words are present "
-                        f"but not as the exact keyword phrase. The writer may need to adjust "
-                        f"wording to use the keyword as specified. Brief specifies: {req_str}."
-                    )
-                else:
-                    # Truly absent - concept not in article
-                    missing_type = "truly_absent"
-                    reasoning = (
-                        f"Main keyword '{keyword}' is missing from the article. "
-                        f"Brief specifies: {req_str}."
-                    )
+                    if nearby_sample:
+                        # Words present but wrong construction
+                        missing_type = "wrong_construction"
+                        reasoning = (
+                            f"Required keyword '{keyword}' not found. "
+                            f"Note: article contains '{nearby_sample}' — the words are present "
+                            f"but not as the exact keyword phrase. The writer may need to adjust "
+                            f"wording to use the keyword as specified. Brief specifies: {req_str}."
+                        )
+                    else:
+                        # Truly absent - concept not in article
+                        missing_type = "truly_absent"
+                        reasoning = (
+                            f"Main keyword '{keyword}' is missing from the article. "
+                            f"Brief specifies: {req_str}."
+                        )
 
-                findings.append(FindingFactory.create(
-                    check_name="keywords.missing",
-                    category="keywords",
-                    severity="warning",
-                    confidence=0.95,
-                    location=Location(paragraph_index=0, start_offset=0, end_offset=0),
-                    original_text="",
-                    reasoning=reasoning,
-                    auto_applicable=False,
-                    proposed_text=None,
-                    metadata={
-                        "keyword": keyword,
-                        "actual_count": 0,
-                        "min_qty": min_qty,
-                        "max_qty": max_qty,
-                        "missing_type": missing_type,
-                    },
-                ))
-                continue
+                    findings.append(FindingFactory.create(
+                        check_name="keywords.missing",
+                        category="keywords",
+                        severity="warning",
+                        confidence=0.95,
+                        location=Location(paragraph_index=0, start_offset=0, end_offset=0),
+                        original_text="",
+                        reasoning=reasoning,
+                        auto_applicable=False,
+                        proposed_text=None,
+                        metadata={
+                            "keyword": keyword,
+                            "actual_count": 0,
+                            "min_qty": min_qty,
+                            "max_qty": max_qty,
+                            "missing_type": missing_type,
+                        },
+                    ))
+                    continue
 
             # Check quantity (if min/max specified)
             if min_qty is not None and actual_count < min_qty:
@@ -424,9 +450,25 @@ class KeywordsCheck(DeterministicCheck):
                 ))
 
         # Sub-check 3: Keyword density (only for documents with enough words)
-        total_keyword_occurrences = sum(
-            len(occs) for occs in all_keyword_occurrences.values()
-        )
+        # Merge overlapping spans to avoid inflating density when keywords overlap
+        # (e.g., 'casino bonus' and 'bonus' overlap - count as one occurrence, not two)
+        all_spans = []
+        for occs in all_keyword_occurrences.values():
+            all_spans.extend(occs)
+
+        # Sort spans by start position
+        all_spans.sort(key=lambda x: (x[0], -x[1]))  # Start asc, end desc for same start
+
+        # Merge overlapping spans
+        merged_spans = []
+        for start, end in all_spans:
+            if merged_spans and start < merged_spans[-1][1]:
+                # Overlaps with previous span - extend it
+                merged_spans[-1] = (merged_spans[-1][0], max(merged_spans[-1][1], end))
+            else:
+                merged_spans.append((start, end))
+
+        total_keyword_occurrences = len(merged_spans)
         density = (total_keyword_occurrences / word_count) * 100
 
         if density > MAX_DENSITY_PERCENT and word_count >= MIN_WORDS_FOR_DENSITY:
