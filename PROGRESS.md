@@ -1232,4 +1232,53 @@ Validated against real HellSpin brief + article:
 **914 tests passing.** Editorial expansion (Phases 1-6) begins next.
 
 ---
-*Last updated: Pre-expansion baseline — Flask web UI, keyword check fixes (independent counting, phantom-section fix, brand-name fix), verified on real HellSpin brief. 914 tests. Editorial expansion begins next.*
+
+## Editorial Expansion Phase 1: Grammar & Spelling (2026-07-20)
+
+**Commit:** `ce111d0` — Grammar/spelling check via LanguageTool
+
+### Dependencies
+- **Java 8+** required (LanguageTool runs on JVM)
+- `language-tool-python` package (downloads ~200MB LanguageTool JAR on first run)
+- Runs **locally/offline** — no data leaves the machine
+
+### Implementation
+
+**Files:**
+- `deterministic/grammar.py` — Main check, LanguageTool integration
+- `deterministic/domain_dictionary.py` — Corpus-grounded term extraction
+- `deterministic/domain_terms.json` — Cached dictionary (1,653 terms)
+- `tests/test_grammar.py` — 27 tests
+
+**Approach:**
+1. **LanguageTool (local)** for grammar/spelling/punctuation
+2. **Locale-aware** — reads `standards.spelling_region` (en-AU, en-GB, en-US, en-CA, en-NZ)
+3. **Category filter** — TYPOS/GRAMMAR/PUNCTUATION/CASING in, STYLE/REDUNDANCY out
+4. **Corpus-grounded domain dictionary** suppresses MORFOLOGIK jargon false positives:
+   - Extracts terms appearing in 2+ approved corpus articles
+   - **Exact-token matching** (HellSpin ≠ HellSpins)
+   - Spelling-only suppression — grammar rules still apply to domain terms
+
+### Validation
+
+| Metric | Before | After |
+|--------|--------|-------|
+| HellSpin test findings | 40 | **7** |
+| False positives suppressed | — | 33 |
+| Clean corpus article | — | ~0 |
+
+**All 5 target errors caught:**
+- `lisensed` → `licensed`
+- `sizable` → `sizeable`
+- `want.The` → `want. The`
+- double space → single space
+- `try include` → `try to include`
+
+### Known Phase 4 Target
+
+**"Casinos Gaming on iOS"** is a consistency error (vs "Casino Gaming on Android"), not a grammar error. Logged for Phase 4 (contradiction detection).
+
+**941 tests passing.**
+
+---
+*Last updated: Editorial Expansion Phase 1 complete — Grammar/spelling check (LanguageTool, local, locale-aware), corpus-grounded domain dictionary (1,653 terms). HellSpin 40→7 findings. 941 tests.*
