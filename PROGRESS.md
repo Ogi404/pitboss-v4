@@ -1281,4 +1281,70 @@ Validated against real HellSpin brief + article:
 **941 tests passing.**
 
 ---
-*Last updated: Editorial Expansion Phase 1 complete — Grammar/spelling check (LanguageTool, local, locale-aware), corpus-grounded domain dictionary (1,653 terms). HellSpin 40→7 findings. 941 tests.*
+
+## Editorial Expansion Phase 2: Readability Metrics + Meta Detection (2026-07-20)
+
+**Commit:** `e1101b2` — Readability metrics + word counts + meta detection
+
+### Implementation
+
+**Files:**
+- `deterministic/readability.py` — Metrics, long-sentence/dense-paragraph flags
+- `deterministic/meta.py` — Meta tag detection (explicit labels + fallback)
+- `tests/test_readability.py` — 24 tests
+- `tests/test_meta.py` — 19 tests
+- `templates/index.html` — Added Readability Metrics + Meta Tags checkboxes
+
+### Readability Check
+
+**Word Count Definition (Documented):**
+- **INCLUDES:** Paragraphs (prose), Headings, List items
+- **EXCLUDES:** Tables (info boxes, brand data)
+
+This matches "article content" for brief word-count target comparison.
+
+**Metrics:**
+| Metric | HellSpin Result |
+|--------|-----------------|
+| Word count | 1,930 (tables excluded) |
+| Sentences | 78 |
+| Avg sentence length | 24.7 words |
+
+**Outlier Flags (PROSE ONLY):**
+- **Long sentences** (>40 words): Run on prose paragraphs only. Tables and lists excluded.
+- **Dense paragraphs** (>150 words): Prose paragraphs only.
+
+**Key Fix vs v3:** v3 miscounted table/list content as "sentences" (flagged 6 "long sentences" that were actually table rows and bullet lists). v4 runs on prose only — more accurate.
+
+### Meta Check
+
+**Detection Strategy:**
+1. Explicit labels: "Title Tag:", "Meta Description:", "SEO Title:", etc.
+2. Table format: Label/value pairs in tables
+3. Fallback: H1 as title, first substantial paragraph as description
+
+**Clear Source Indication:**
+- When explicit label found: `Title Tag: "..."`
+- When fallback used: `Title Tag: NO EXPLICIT LABEL FOUND; using H1: "..."`
+
+This avoids v3's "false missing" bug — clearly marks inferred vs explicit.
+
+### Validation (HellSpin NZ)
+
+```
+Word count: 1,930 (tables excluded)
+  Breakdown: paragraphs=1349, headings=114, lists=467
+
+Long sentences (PROSE ONLY): 0
+  Note: v3 reported 6, but miscounted table/list content
+
+Dense paragraphs: 0
+
+Meta: Title Tag via H1 fallback (no explicit label in this file)
+      Meta Description: missing (no explicit label, no fallback qualified)
+```
+
+**980 tests passing.**
+
+---
+*Last updated: Editorial Expansion Phase 2 complete — Readability metrics (word count 1,930, tables excluded), long-sentence/dense-paragraph flags (prose only, more accurate than v3), meta detection (explicit labels + clearly-marked fallback). 980 tests.*
