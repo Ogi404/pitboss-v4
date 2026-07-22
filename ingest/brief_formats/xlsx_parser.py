@@ -51,10 +51,15 @@ KEYWORD_COLUMN_HINTS = [
 ]
 
 # Section/structure table headers
+# More specific patterns to avoid false positives like "Text Structure:" (keyword table label)
 SECTION_TABLE_HEADERS = [
-    (re.compile(r"section|heading|structure", re.IGNORECASE), re.compile(r"word\s*count|words?|length", re.IGNORECASE)),
-    (re.compile(r"outline|content", re.IGNORECASE), re.compile(r"word\s*count|words?|length", re.IGNORECASE)),
+    (re.compile(r"^(section|heading|article\s*structure)s?$", re.IGNORECASE), re.compile(r"word\s*count|words?|length", re.IGNORECASE)),
+    (re.compile(r"^(outline|content\s*outline)$", re.IGNORECASE), re.compile(r"word\s*count|words?|length", re.IGNORECASE)),
 ]
+
+# Inline section pattern: "H2 Section Name" or "h3 Sub-section"
+# Captures heading level and section title
+INLINE_SECTION_PATTERN = re.compile(r"^[Hh]([1-6])\s+(.+)$")
 
 # Meta field patterns
 META_PATTERNS = {
@@ -472,6 +477,7 @@ class XlsxBriefParser(BriefParser):
         sections = []
         confidence = 0.0
 
+        # First, try standard table-based section extraction
         for row_idx, row in enumerate(ws.iter_rows(min_row=1, max_row=100, max_col=10), start=1):
             for col_idx, cell in enumerate(row, start=1):
                 val = _cell_value(cell)
@@ -515,7 +521,54 @@ class XlsxBriefParser(BriefParser):
                         if sections:
                             return sections, confidence
 
+        # Fallback: Look for inline "H2 Section Name" / "h3 Sub-section" format
+        # This format is common in briefs without a dedicated section table
+        inline_sections = self._find_inline_sections(ws)
+        if inline_sections:
+            return inline_sections, 0.85
+
         return sections, confidence
+
+    def _find_inline_sections(self, ws: Worksheet) -> list[RawSection]:
+        """
+        Find sections in inline "H2 Section Name" format.
+
+        Common brief format:
+            H2 Registration Process
+            h3 How to Create the account?
+            h3 Account verification
+            H2 Promotions
+            ...
+        """
+        sections = []
+
+        for row in ws.iter_rows(min_row=1, max_row=100, max_col=3, values_only=True):
+            # Check first cell (column A)
+            val = row[0] if row else None
+            if not val or not isinstance(val, str):
+                continue
+
+            val = val.strip()
+
+            # Match "H2 Section Name" or "h3 Sub-section" pattern
+            match = INLINE_SECTION_PATTERN.match(val)
+            if match:
+                level = int(match.group(1))
+                heading = match.group(2).strip()
+
+                # Skip if heading looks like instructions/examples
+                if any(skip in heading.lower() for skip in
+                       ["example", "(no text)", "(optional)"]):
+                    continue
+
+                sections.append(RawSection(
+                    heading=heading,
+                    word_count=None,
+                    confidence=0.85,
+                    level=level,  # Store heading level
+                ))
+
+        return sections
 
     def _extract_meta(self, wb) -> dict[str, Any]:
         """Extract meta fields (brand, locale, word count, etc.)."""

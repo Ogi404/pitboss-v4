@@ -242,6 +242,7 @@ class RawSection:
     heading: str
     word_count: Optional[int] = None
     confidence: float = 1.0
+    level: Optional[int] = None  # Heading level (1=H1, 2=H2, etc.)
 
 
 @dataclass

@@ -22,6 +22,7 @@ from deterministic.structure import (
     MIN_OUTRO_WORDS,
     FUZZY_MATCH_THRESHOLD,
 )
+from deterministic.semantic_match import SEMANTIC_AVAILABLE
 
 
 # =============================================================================
@@ -810,3 +811,187 @@ class TestConstants:
     def test_fuzzy_match_threshold(self):
         """Fuzzy match threshold should be 50%."""
         assert FUZZY_MATCH_THRESHOLD == 0.5
+
+
+# =============================================================================
+# COVERAGE SUMMARY TESTS
+# =============================================================================
+
+class TestCoverageSummary:
+    """Tests for section coverage summary finding."""
+
+    def test_coverage_summary_emitted(self):
+        """Coverage summary finding should be emitted when brief has sections."""
+        elements = [
+            make_paragraph("Intro paragraph here.", 0),
+            make_heading("Bonuses", 2, 30),
+            make_paragraph("Content about bonuses.", 45),
+        ]
+        doc = make_document(elements=elements)
+        brief = MockBriefModel(
+            sections=(MockBriefSection(heading="Bonuses"),)
+        )
+        check = StructureCheck()
+        findings = check.run(doc, MockStandards(), brief=brief)
+
+        coverage = [f for f in findings if f.check_name == "structure.coverage"]
+        assert len(coverage) == 1
+        assert coverage[0].severity == "info"  # All matched = info
+
+    def test_coverage_summary_counts(self):
+        """Coverage summary should have correct matched/missing counts."""
+        elements = [
+            make_paragraph("Intro.", 0),
+            make_heading("Bonuses", 2, 10),
+            make_paragraph("Bonus content.", 25),
+        ]
+        doc = make_document(elements=elements)
+        brief = MockBriefModel(
+            sections=(
+                MockBriefSection(heading="Bonuses"),      # Present
+                MockBriefSection(heading="Payments"),     # Missing
+            )
+        )
+        check = StructureCheck()
+        findings = check.run(doc, MockStandards(), brief=brief)
+
+        coverage = [f for f in findings if f.check_name == "structure.coverage"]
+        assert len(coverage) == 1
+
+        metadata = coverage[0].metadata_dict
+        assert metadata["matched_count"] == 1
+        assert metadata["missing_count"] == 1
+        assert metadata["total_required"] == 2
+        assert metadata["coverage_percent"] == 50.0
+
+    def test_coverage_details_included(self):
+        """Coverage details should include per-section match info."""
+        elements = [
+            make_paragraph("Intro.", 0),
+            make_heading("Welcome Bonuses", 2, 10),
+            make_paragraph("Content.", 30),
+        ]
+        doc = make_document(elements=elements)
+        brief = MockBriefModel(
+            sections=(MockBriefSection(heading="Bonuses"),)
+        )
+        check = StructureCheck()
+        findings = check.run(doc, MockStandards(), brief=brief)
+
+        coverage = [f for f in findings if f.check_name == "structure.coverage"]
+        metadata = coverage[0].metadata_dict
+        assert "coverage_details" in metadata
+        assert len(metadata["coverage_details"]) == 1
+
+        detail = metadata["coverage_details"][0]
+        assert detail["brief_section"] == "Bonuses"
+        assert detail["status"] == "present"
+        assert "similarity_score" in detail
+        assert "match_method" in detail
+
+    def test_coverage_severity_based_on_percent(self):
+        """Coverage severity should reflect coverage percentage."""
+        # 100% coverage = info
+        elements = [
+            make_paragraph("Intro.", 0),
+            make_heading("Bonuses", 2, 10),
+            make_paragraph("Content.", 25),
+        ]
+        doc = make_document(elements=elements)
+        brief = MockBriefModel(
+            sections=(MockBriefSection(heading="Bonuses"),)
+        )
+        check = StructureCheck()
+        findings = check.run(doc, MockStandards(), brief=brief)
+
+        coverage = [f for f in findings if f.check_name == "structure.coverage"]
+        assert coverage[0].severity == "info"
+
+        # Less than 100% but >= 80% = suggestion
+        brief2 = MockBriefModel(
+            sections=(
+                MockBriefSection(heading="Bonuses"),
+                MockBriefSection(heading="FAQ"),
+                MockBriefSection(heading="Support"),
+                MockBriefSection(heading="Payments"),
+                MockBriefSection(heading="Games"),
+            )
+        )
+        findings2 = check.run(doc, MockStandards(), brief=brief2)
+        coverage2 = [f for f in findings2 if f.check_name == "structure.coverage"]
+        # Only 1/5 matched = 20% = warning
+        assert coverage2[0].severity == "warning"
+
+    def test_match_method_in_summary(self):
+        """Coverage summary should indicate match method used."""
+        elements = [
+            make_paragraph("Intro.", 0),
+            make_heading("Bonuses", 2, 10),
+            make_paragraph("Content.", 25),
+        ]
+        doc = make_document(elements=elements)
+        brief = MockBriefModel(
+            sections=(MockBriefSection(heading="Bonuses"),)
+        )
+        check = StructureCheck()
+        findings = check.run(doc, MockStandards(), brief=brief)
+
+        coverage = [f for f in findings if f.check_name == "structure.coverage"]
+        metadata = coverage[0].metadata_dict
+        assert "match_method" in metadata
+        expected_method = "semantic" if SEMANTIC_AVAILABLE else "fuzzy"
+        assert metadata["match_method"] == expected_method
+
+
+# =============================================================================
+# SEMANTIC MATCHING TESTS (Structure Integration)
+# =============================================================================
+
+class TestSemanticMatchingIntegration:
+    """Tests for semantic matching integration in structure check."""
+
+    def test_missing_section_includes_similarity_score(self):
+        """Missing section finding should include similarity info."""
+        elements = [
+            make_paragraph("Intro.", 0),
+            make_heading("Welcome Bonuses", 2, 10),
+            make_paragraph("Content.", 30),
+        ]
+        doc = make_document(elements=elements)
+        brief = MockBriefModel(
+            sections=(MockBriefSection(heading="Payment Methods"),)
+        )
+        check = StructureCheck()
+        findings = check.run(doc, MockStandards(), brief=brief)
+
+        missing = [f for f in findings if f.check_name == "structure.missing_section"]
+        assert len(missing) == 1
+
+        metadata = missing[0].metadata_dict
+        assert "similarity_score" in metadata
+        assert "best_match" in metadata
+        assert "match_method" in metadata
+        assert "similarity" in missing[0].reasoning  # Should mention similarity %
+
+    def test_article_headings_included_in_metadata(self):
+        """Missing section metadata should include article headings for context."""
+        elements = [
+            make_paragraph("Intro.", 0),
+            make_heading("Welcome Bonuses", 2, 10),
+            make_heading("Customer Support", 2, 30),
+            make_paragraph("Content.", 55),
+        ]
+        doc = make_document(elements=elements)
+        # Use a completely unrelated section name (no word overlap)
+        brief = MockBriefModel(
+            sections=(MockBriefSection(heading="Payment Methods"),)
+        )
+        check = StructureCheck()
+        findings = check.run(doc, MockStandards(), brief=brief)
+
+        missing = [f for f in findings if f.check_name == "structure.missing_section"]
+        assert len(missing) == 1, f"Expected 1 missing section, got {len(missing)}"
+        metadata = missing[0].metadata_dict
+        assert "article_headings" in metadata
+        assert "Welcome Bonuses" in metadata["article_headings"]
+        assert "Customer Support" in metadata["article_headings"]

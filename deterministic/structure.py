@@ -18,6 +18,7 @@ from core.check_base import DeterministicCheck, register_check
 from core.document import Document, Location, Heading, Paragraph
 from core.finding import Finding, FindingFactory, Category
 from ingest.brief_base import is_metadata_label
+from deterministic.semantic_match import heading_matches, SEMANTIC_AVAILABLE
 
 
 # =============================================================================
@@ -83,6 +84,27 @@ def fuzzy_section_match(required: str, actual: str) -> bool:
 def count_words(text: str) -> int:
     """Count words in text."""
     return len(re.findall(r'\b\w+\b', text))
+
+
+def _is_conditional_section(heading: str) -> bool:
+    """
+    Detect if a brief section is conditional (optional).
+
+    Conditional markers include:
+    - "if not exist"
+    - "if applicable"
+    - "optional"
+    - "(general info if not exist)"
+    """
+    lower = heading.lower()
+    conditional_markers = [
+        "if not exist",
+        "if applicable",
+        "optional",
+        "if available",
+        "if present",
+    ]
+    return any(marker in lower for marker in conditional_markers)
 
 
 # =============================================================================
@@ -190,7 +212,17 @@ class StructureCheck(DeterministicCheck):
         """
         Check if required sections from brief are present in article.
 
-        Uses fuzzy matching - "Bonuses" matches "Welcome Bonuses and Promotions".
+        Uses semantic matching (sentence-transformers) if available,
+        falls back to fuzzy word overlap matching.
+
+        Semantic matching handles cases like:
+        - "Registration Process" ↔ "Register to Get Started"
+        - "Payment Methods" ↔ "How to Deposit"
+
+        Categorizes unmatched sections:
+        - MISSING: Brief requires it, article lacks it → warning (actionable)
+        - CONDITIONAL: Brief says "if not exist" → info (lower priority)
+        - DUPLICATE: Same section appears twice in brief → suppressed
         """
         findings: list[Finding] = []
 
@@ -198,6 +230,15 @@ class StructureCheck(DeterministicCheck):
             return findings
 
         article_headings = [h.text for h in headings]
+
+        # Track coverage for summary finding
+        coverage_results = []
+        matched_count = 0
+        missing_count = 0
+        conditional_count = 0
+
+        # Track seen sections to detect duplicates
+        seen_sections: set[str] = set()
 
         for section in brief.sections:
             required = section.heading
@@ -207,13 +248,82 @@ class StructureCheck(DeterministicCheck):
             if is_metadata_label(required):
                 continue
 
-            # Check if any article heading matches (fuzzy)
-            matched = any(
-                fuzzy_section_match(required, actual)
-                for actual in article_headings
-            )
+            # Normalize for duplicate detection
+            normalized = required.lower().strip()
 
-            if not matched:
+            # Skip duplicates (same section listed twice in brief)
+            if normalized in seen_sections:
+                continue
+            seen_sections.add(normalized)
+
+            # Detect conditional sections (brief says "if not exist" or similar)
+            is_conditional = _is_conditional_section(required)
+
+            # Find best matching heading using semantic matching
+            best_match = None
+            best_score = 0.0
+            match_method = "none"
+
+            for actual in article_headings:
+                is_match, score, method = heading_matches(required, actual)
+                if score > best_score:
+                    best_score = score
+                    best_match = actual
+                    match_method = method
+                    # Don't break early - always find the BEST match
+
+            # Determine if matched
+            is_matched, _, _ = heading_matches(required, best_match) if best_match else (False, 0.0, "none")
+
+            # Determine status
+            if is_matched:
+                status = "present"
+            elif is_conditional:
+                status = "conditional"
+            else:
+                status = "missing"
+
+            # Record coverage result
+            coverage_result = {
+                "brief_section": required,
+                "matched_heading": best_match if is_matched else None,
+                "similarity_score": round(best_score, 3),
+                "match_method": match_method,
+                "status": status,
+            }
+            coverage_results.append(coverage_result)
+
+            if is_matched:
+                matched_count += 1
+            elif is_conditional:
+                conditional_count += 1
+                # Conditional sections get info severity (lower priority)
+                findings.append(FindingFactory.create(
+                    check_name="structure.conditional_section",
+                    category="structure",
+                    severity="info",
+                    confidence=0.70,
+                    location=Location(paragraph_index=0, start_offset=0, end_offset=0),
+                    original_text="",
+                    reasoning=(
+                        f"Brief mentions '{required}' as conditional. "
+                        f"No matching heading found (best match: '{best_match}' "
+                        f"at {round(best_score * 100, 1)}% similarity). "
+                        f"This section may be optional per brief instructions."
+                    ),
+                    auto_applicable=False,
+                    proposed_text=None,
+                    metadata={
+                        "required_section": required,
+                        "best_match": best_match,
+                        "similarity_score": round(best_score, 3),
+                        "match_method": match_method,
+                        "section_type": "conditional",
+                    },
+                ))
+            else:
+                missing_count += 1
+                # Missing required sections get warning severity (actionable)
                 findings.append(FindingFactory.create(
                     check_name="structure.missing_section",
                     category="structure",
@@ -222,18 +332,83 @@ class StructureCheck(DeterministicCheck):
                     location=Location(paragraph_index=0, start_offset=0, end_offset=0),
                     original_text="",
                     reasoning=(
-                        f"Brief requires a '{required}' section, but no matching "
-                        f"heading found in article. The writer may need to add this section."
+                        f"MISSING SECTION: Brief requires '{required}', but no matching "
+                        f"heading found in article (best match: '{best_match}' "
+                        f"at {round(best_score * 100, 1)}% similarity). "
+                        f"The writer should add this section."
                     ),
                     auto_applicable=False,
                     proposed_text=None,
                     metadata={
                         "required_section": required,
+                        "best_match": best_match,
+                        "similarity_score": round(best_score, 3),
+                        "match_method": match_method,
                         "article_headings": article_headings[:10],
+                        "section_type": "required",
                     },
                 ))
 
+        # Add coverage summary finding
+        if coverage_results:
+            findings.append(self._create_coverage_summary(
+                coverage_results, matched_count, missing_count, conditional_count, article_headings
+            ))
+
         return findings
+
+    def _create_coverage_summary(
+        self,
+        coverage_results: list[dict],
+        matched_count: int,
+        missing_count: int,
+        conditional_count: int,
+        article_headings: list[str],
+    ) -> Finding:
+        """Create coverage summary finding."""
+        # Total excludes conditional (they're optional)
+        total_required = matched_count + missing_count
+        coverage_percent = round(matched_count / total_required * 100, 1) if total_required > 0 else 0
+
+        # Determine severity based on MISSING count (not conditional)
+        if missing_count == 0:
+            severity = "info"
+        elif coverage_percent >= 80:
+            severity = "suggestion"
+        else:
+            severity = "warning"
+
+        # Build reasoning string
+        parts = [f"Section coverage: {matched_count}/{total_required} required sections matched ({coverage_percent}%)."]
+        if missing_count > 0:
+            parts.append(f"{missing_count} section(s) MISSING (actionable).")
+        if conditional_count > 0:
+            parts.append(f"{conditional_count} conditional section(s) not found (optional).")
+        if missing_count == 0 and conditional_count == 0:
+            parts.append("All required sections found.")
+        parts.append(f"Match method: {'semantic' if SEMANTIC_AVAILABLE else 'fuzzy'}.")
+
+        return FindingFactory.create(
+            check_name="structure.coverage",
+            category="structure",
+            severity=severity,
+            confidence=1.0,
+            location=Location(paragraph_index=0, start_offset=0, end_offset=0),
+            original_text="",
+            reasoning=" ".join(parts),
+            auto_applicable=False,
+            proposed_text=None,
+            metadata={
+                "matched_count": matched_count,
+                "missing_count": missing_count,
+                "conditional_count": conditional_count,
+                "total_required": total_required,
+                "coverage_percent": coverage_percent,
+                "match_method": "semantic" if SEMANTIC_AVAILABLE else "fuzzy",
+                "coverage_details": coverage_results,
+                "article_headings": article_headings,
+            },
+        )
 
     def _check_hierarchy(self, headings: list[Heading]) -> list[Finding]:
         """

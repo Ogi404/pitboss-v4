@@ -5,6 +5,9 @@ pyyaml>=6.0
 python-docx>=0.8.11
 wordfreq>=3.0.0  # Dictionary lookup for proper noun detection
 
+# Semantic matching (Phase 3 - structure matching)
+sentence-transformers>=2.2.0  # Optional: falls back to fuzzy matching if unavailable
+
 # Google API (Phase 4b - Google Docs integration)
 google-auth>=2.0.0
 google-auth-oauthlib>=1.0.0
