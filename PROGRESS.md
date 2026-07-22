@@ -140,7 +140,7 @@ The 937 UNCLEAR count in the corpus confirms this middle path matters — silent
 ## Test Status
 
 ```
-914 tests passing (3 skipped)
+1022 tests passing (3 skipped)
 ├── 148 tests (Phase 0 - core contracts)
 ├── 51 tests (Phase 1 - voice model)
 ├── 78 tests (Phase 1 - person reference classifier)
@@ -152,7 +152,8 @@ The 937 UNCLEAR count in the corpus confirms this middle path matters — silent
 ├── 78 tests (Phase 2 - locale spelling check)
 ├── 33 tests (Phase 2 - brand names check)
 ├── 40 tests (Phase 2 - keywords check)
-├── 54 tests (Phase 2 - structure check)
+├── 61 tests (Phase 2 - structure check)
+├── 28 tests (Phase 2 - semantic match)
 ├── 67 tests (Phase 3 - brief agent)
 ├── 17 tests (Phase 4a - orchestrator)
 ├── 42 tests (Phase 4a - apply layer)
@@ -532,21 +533,24 @@ For `wrong_construction` findings, reasoning includes nearby-text hint showing w
 
 **All 14 missing findings are legitimate** — verified by manual inspection that exact phrases are genuinely absent.
 
-### Structure Check (Complete)
+### Structure Check (Complete — Enhanced with Semantic Matching 2026-07-22)
 
 **Files:**
-- `deterministic/structure.py` - Article structure validation (~490 lines)
-- `tests/test_structure_check.py` - 52 comprehensive tests
+- `deterministic/structure.py` - Article structure validation (~550 lines)
+- `deterministic/semantic_match.py` - Semantic heading matching with sentence-transformers (~220 lines)
+- `tests/test_structure_check.py` - 61 comprehensive tests
+- `tests/test_semantic_match.py` - 28 tests for semantic matching
 - `validate_structure_check.py` - Real article+brief validation script
 
 **Section 10 Compliance:**
 Compares article structure against brief requirements and General Writing Requirements §10.
 
-**Five Sub-Checks:**
+**Six Sub-Checks:**
 
 | Sub-check | Detection | auto_applicable |
 |-----------|-----------|-----------------|
-| `structure.missing_section` | Required section from brief not found | False (always) |
+| `structure.missing_section` | Required section not found (actionable) | False (always) |
+| `structure.conditional_section` | Conditional section not found (optional) | False (always) |
 | `structure.hierarchy` | Multiple H1 or skipped heading levels | False (always) |
 | `structure.missing_intro` | No paragraph before first heading | False (always) |
 | `structure.missing_outro` | Ends with heading or <20 word paragraph | False (always) |
@@ -554,13 +558,54 @@ Compares article structure against brief requirements and General Writing Requir
 
 **ALL findings auto_applicable=False** — structure fixes require editorial judgment, never auto-applied.
 
-**Key Feature: Fuzzy Section Matching**
+**Key Feature: Semantic Section Matching (sentence-transformers)**
 
-Unlike keywords (exact-phrase per §8), section matching uses fuzzy logic:
-- Substring match: "Bonuses" matches "Welcome Bonuses and Promotions"
-- Word overlap: "Payment Methods" matches "Methods of Payment" (≥50% word overlap)
+v3's fuzzy matching failed on reworded headings:
+- Brief: "Registration Process" vs Article: "Register to Get Started" → 0% word overlap → FALSE MISSING
 
-This is intentional — sections represent concepts, not SEO phrases.
+v4 uses semantic embeddings (all-MiniLM-L6-v2, ~23MB model):
+
+| Matching Method | Priority | Use Case |
+|-----------------|----------|----------|
+| Synonym table | 1st | Domain slang the model can't know (slots↔pokies, live↔real-time, withdrawal↔payout) |
+| Semantic | 2nd | Reworded headings with same meaning (0.45 threshold) |
+| Fuzzy word overlap | Fallback | When sentence-transformers unavailable |
+
+**Synonym Table (Domain-Specific Only):**
+
+3 minimal entries for equivalences below ANY viable threshold:
+- `slots↔pokies` — Regional slang (AU/NZ), model scores 0.199
+- `live↔real-time` — Casino domain ("Live Section" ↔ "Real-Time Action"), model scores 0.337
+- `withdrawal↔payout` — Domain synonym, model scores 0.319
+
+Lowering threshold to 0.40 would introduce wrong pairings (e.g., "Slots→More Rewards" at 0.367).
+
+**Finding Categorization:**
+
+| Category | Detection | Severity |
+|----------|-----------|----------|
+| MISSING | Brief requires it, article lacks it | warning (actionable) |
+| CONDITIONAL | Brief says "if not exist" or similar | info (optional) |
+| DUPLICATE | Same section listed twice in brief | suppressed |
+
+**Real Validation (HellSpin Ireland brief + article):**
+
+| Metric | Result |
+|--------|--------|
+| Brief sections | 40 |
+| Matched | 31 (including 4 via synonym table) |
+| Missing (actionable) | 6 |
+| Conditional | 2 |
+| Duplicates suppressed | 2 |
+| **Wrong pairings** | **0** |
+
+**Threshold Calibration (Empirical):**
+
+| Threshold | Correct Matches | Wrong Matches | Verdict |
+|-----------|-----------------|---------------|---------|
+| 0.60 | 19/23 | 0 | Too strict |
+| 0.45 | 20/23 | 0 | **Selected** |
+| 0.40 | 20/23 | 1+ (Slots→More Rewards) | Introduces wrong matches |
 
 **Metadata Label Filter:**
 
@@ -575,7 +620,7 @@ Labels like "Main keywords", "Support keywords", "LSI keywords", "Word Count", "
 | Intro/outro issues | 0 | Proper intro and conclusion |
 | Word count deviation | 0 | 2091 vs 2000 target (4.5% over, within 20% threshold) |
 
-**Zero false positives** — fuzzy matching correctly identifies present sections without false-flagging.
+**Zero false positives** — semantic matching correctly identifies present sections without false-flagging.
 
 ### KEY LESSON: Corpus Validation is Essential
 
@@ -629,6 +674,8 @@ This principle ensures the deterministic layer's value: 100% consistency for aut
 **Metadata labels in brief sections:** Keyword-group labels ("Main keywords", "Support keywords", etc.) are currently stored as brief sections by the xlsx parser and filtered per-check via `is_metadata_label()`. Cleaner long-term fix: brief parser should not put them in sections at all. Not urgent — filtering works correctly.
 
 **Heading capitalization coverage:** 15 of 17 brands have no `headings.capitalization` standard set, so heading-case is unchecked for them (check skips gracefully). This is the safe default — guessing wrong corrupts headings, as the Koifortune `sentence_case` bug showed. If heading-case enforcement is wanted for more brands, derive each brand's standard from its corpus (the 89.5%/83.5% counting method) rather than assuming.
+
+**Brief parser "for casino" artifact:** HellSpin Ireland brief extracts "for casino" as a section name — this is an incomplete/truncated extraction artifact from inline "H3 for casino" format. Not critical (structure check handles gracefully), but brief parser should eventually strip the heading-level prefix more robustly.
 
 ### Known Edge Cases (Documented Behavior)
 
@@ -1347,4 +1394,4 @@ Meta: Title Tag via H1 fallback (no explicit label in this file)
 **980 tests passing.**
 
 ---
-*Last updated: Editorial Expansion Phase 2 complete — Readability metrics (word count 1,930, tables excluded), long-sentence/dense-paragraph flags (prose only, more accurate than v3), meta detection (explicit labels + clearly-marked fallback). 980 tests.*
+*Last updated: Structure check enhanced with semantic matching (sentence-transformers, 0.45 threshold, 3-entry synonym table). Validated on HellSpin brief+article: 31/40 matched, zero wrong pairings. 1022 tests.*
